@@ -13,12 +13,7 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
-from diskcleaner.core import (
-    CleanupReport,
-    InteractiveCleanupUI,
-    ProcessManager,
-    SmartCleanupEngine,
-)
+from diskcleaner.core import CleanupReport, InteractiveCleanupUI, ProcessManager, SmartCleanupEngine
 from diskcleaner.core.scanner import FileInfo
 
 

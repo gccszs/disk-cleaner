@@ -254,9 +254,7 @@ class SmartCleanupEngine:
                 if type_files:
                     total_size = sum(f.size for f in type_files)
                     size_str = self._format_size(total_size)
-                    lines.append("  {}: {} 文件, {}".format(
-                        file_type, len(type_files), size_str
-                    ))
+                    lines.append("  {}: {} 文件, {}".format(file_type, len(type_files), size_str))
 
         # Add duplicate info if found
         if report.duplicates:

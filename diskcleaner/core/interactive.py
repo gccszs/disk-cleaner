@@ -621,9 +621,7 @@ class InteractiveCleanupUI:
         print("=" * 60)
         print("将删除 {} 个文件".format(len(files)))
         print("释放空间: {}".format(self._format_size(total_size)))
-        print("模式: {}".format(
-            "预览 (不会实际删除)" if dry_run else "执行删除"
-        ))
+        print("模式: {}".format("预览 (不会实际删除)" if dry_run else "执行删除"))
         print("=" * 60)
 
         # Show first 20 files
