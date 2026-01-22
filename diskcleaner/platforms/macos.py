@@ -5,7 +5,6 @@ Provides macOS-specific temporary files, caches, and system cleanup locations.
 """
 
 import os
-from pathlib import Path
 from typing import Dict, List
 
 
