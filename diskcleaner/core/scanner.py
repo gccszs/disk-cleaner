@@ -10,7 +10,7 @@ import stat
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, Set
+from typing import Generator, List, Optional, Set, Tuple
 
 from diskcleaner.core.cache import CacheManager, FileSnapshot, ScanSnapshot
 from diskcleaner.config import Config
@@ -65,7 +65,7 @@ class DirectoryScanner:
             cache_enabled: Enable incremental scanning with cache.
         """
         self.target_path = Path(target_path).expanduser().resolve()
-        self.config = config or Config()
+        self.config = config or Config.load()
         self.cache_enabled = cache_enabled
 
         # Initialize cache manager
@@ -92,15 +92,15 @@ class DirectoryScanner:
 
         return files
 
-    def scan_incremental(self) -> tuple[List[FileInfo], List[str], List[str]]:
+    def scan_incremental(self) -> Tuple[List[FileInfo], List[str], List[str]]:
         """
         Perform incremental scan using cache.
 
         Returns:
             Tuple of (all_files, new_files, changed_files):
             - all_files: All files in directory (including unchanged)
-            - new_files: Files added since last scan
-            - changed_files: Files modified since last scan
+            - new_files: Paths of files added since last scan
+            - changed_files: Paths of files modified since last scan
 
         """
         start_time = time.time()

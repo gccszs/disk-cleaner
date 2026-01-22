@@ -10,7 +10,7 @@ Loads configuration from multiple sources with priority:
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from diskcleaner.config.defaults import get_default_config
 

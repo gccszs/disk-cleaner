@@ -12,7 +12,7 @@ import subprocess
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from diskcleaner.config import Config
 from diskcleaner.core.scanner import FileInfo
@@ -46,7 +46,7 @@ class SafetyChecker:
         Args:
             config: Configuration object.
         """
-        self.config = config or Config()
+        self.config = config or Config.load()
         self.platform = platform.system()
 
         # Load settings
@@ -62,7 +62,7 @@ class SafetyChecker:
         # Backup directory
         self.backup_dir = Path.home() / ".disk-cleaner" / "backup"
 
-    def verify_all(self, files: List[FileInfo]) -> List[tuple[FileInfo, FileStatus]]:
+    def verify_all(self, files: List[FileInfo]) -> List[Tuple[FileInfo, FileStatus]]:
         """
         Verify all files are safe to delete.
 
@@ -244,7 +244,7 @@ class SafetyChecker:
         """
         return os.access(path, os.W_OK)
 
-    def get_locking_process(self, path: str) -> Optional[Dict[str, any]]:
+    def get_locking_process(self, path: str) -> Optional[Dict[str, Any]]:
         """
         Get information about process locking the file.
 
@@ -261,7 +261,7 @@ class SafetyChecker:
 
         return None
 
-    def _get_locking_process_windows(self, path: str) -> Optional[Dict[str, any]]:
+    def _get_locking_process_windows(self, path: str) -> Optional[Dict[str, Any]]:
         """
         Get process info on Windows.
 
@@ -305,7 +305,7 @@ class SafetyChecker:
             "type": "File",
         }
 
-    def _get_locking_process_unix(self, path: str) -> Optional[Dict[str, any]]:
+    def _get_locking_process_unix(self, path: str) -> Optional[Dict[str, Any]]:
         """
         Get process info on Unix/Linux/macOS.
 
@@ -374,7 +374,7 @@ class SafetyChecker:
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
             return False
 
-    def show_process_details(self, process: Dict[str, any]) -> str:
+    def show_process_details(self, process: Dict[str, Any]) -> str:
         """
         Get detailed information about a process.
 
@@ -468,7 +468,7 @@ class SafetyChecker:
         log_entry = f"{timestamp} | {original} -> {backup}\n"
 
         try:
-            with open(log_file, "a", encoding="utf-8") as f:
+            with open(str(log_file), "a", encoding="utf-8") as f:
                 f.write(log_entry)
         except (OSError, IOError):
             pass

@@ -202,5 +202,5 @@ class CacheManager:
 
         return {
             "total_files": len(cache_files),
-            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "total_size_mb": int(round(total_size / (1024 * 1024), 2)),
         }
