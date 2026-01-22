@@ -40,7 +40,7 @@ class FileClassifier:
         Args:
             config: Configuration object.
         """
-        self.config = config or Config()
+        self.config = config or Config.load()
 
         # Load protected patterns and extensions
         self.protected_patterns = self.config.protected_patterns
