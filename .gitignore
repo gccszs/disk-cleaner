@@ -59,9 +59,6 @@ venv.bak/
 # Project specific
 .worktrees/
 
-# Skill packages (built, not source)
-*.skill
-
 # Cache
 *.log
 .DS_Store
