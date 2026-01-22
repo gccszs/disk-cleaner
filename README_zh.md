@@ -9,6 +9,37 @@
 
 一个全面的跨平台磁盘空间监控、分析和智能清理工具包。具备先进的3D文件分类、重复文件检测、自动化调度和平台特定优化功能。
 
+## ⚡ 快速安装
+
+### 方式1：作为 Claude Code 技能安装（推荐）
+
+直接从 GitHub 安装：
+
+```bash
+npx add-skill gccszs/disk-cleaner
+```
+
+这将安装包含所有必要文件的技能。`.skill` 包仅包含核心组件：
+- ✅ 核心模块 (`diskcleaner/`)
+- ✅ 可执行脚本 (`scripts/`)
+- ✅ 技能定义 (`SKILL.md`)
+- ✅ 参考文档 (`references/`)
+
+**注意：** 技能包已排除测试文件、CI/CD 配置和开发文件，确保干净、最小化的安装。
+
+### 方式2：克隆仓库
+
+用于开发或独立使用：
+
+```bash
+git clone https://github.com/gccszs/disk-cleaner.git
+cd disk-cleaner
+```
+
+参见 [使用示例](#使用示例) 部分了解如何运行脚本。
+
+---
+
 ## ✨ v2.0 新特性
 
 - **🤖 智能3D分类** - 按类型、风险等级和文件年龄对文件进行分类
@@ -44,21 +75,6 @@
 ### 前置要求
 
 Python 3.6 或更高版本（无需外部依赖 - 仅使用标准库）。
-
-### 安装
-
-#### 方式1：作为技能安装（推荐）
-
-```bash
-npx add-skill gccszs/disk-cleaner
-```
-
-#### 方式2：克隆仓库
-
-```bash
-git clone https://github.com/gccszs/disk-cleaner.git
-cd disk-cleaner
-```
 
 ### 基本使用
 

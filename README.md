@@ -9,6 +9,37 @@
 
 A comprehensive cross-platform disk space monitoring, analysis, and intelligent cleaning toolkit. Features advanced 3D file classification, duplicate detection, automated scheduling, and platform-specific optimization.
 
+## ⚡ Quick Install
+
+### Option 1: Install as Claude Code Skill (Recommended)
+
+Install directly from GitHub:
+
+```bash
+npx add-skill gccszs/disk-cleaner
+```
+
+This will install the skill with all necessary files. The `.skill` package contains only the essential components:
+- ✅ Core modules (`diskcleaner/`)
+- ✅ Executable scripts (`scripts/`)
+- ✅ Skill definition (`SKILL.md`)
+- ✅ Reference documentation (`references/`)
+
+**Note:** The skill package excludes tests, CI/CD configs, and development files for a clean, minimal installation.
+
+### Option 2: Clone Repository
+
+For development or standalone use:
+
+```bash
+git clone https://github.com/gccszs/disk-cleaner.git
+cd disk-cleaner
+```
+
+See [Usage](#usage-examples) section for how to run the scripts.
+
+---
+
 ## ✨ v2.0 New Features
 
 - **🤖 Intelligent 3D Classification** - Files categorized by type, risk level, and age
@@ -44,21 +75,6 @@ A comprehensive cross-platform disk space monitoring, analysis, and intelligent 
 ### Prerequisites
 
 Python 3.6 or higher (no external dependencies required - uses only standard library).
-
-### Installation
-
-#### Option 1: Install as Skill (Recommended)
-
-```bash
-npx add-skill gccszs/disk-cleaner
-```
-
-#### Option 2: Clone Repository
-
-```bash
-git clone https://github.com/gccszs/disk-cleaner.git
-cd disk-cleaner
-```
 
 ### Basic Usage
 
