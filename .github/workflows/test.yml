@@ -25,13 +25,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+        shell: bash
 
       - name: Run tests
-        run: |
-          pytest tests/ -v --cov=diskcleaner --cov-report=xml --cov-report=term
+        run: pytest tests/ -v --cov=diskcleaner --cov-report=xml --cov-report=term
+        shell: bash
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8' && success()
