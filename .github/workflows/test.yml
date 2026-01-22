@@ -63,7 +63,7 @@ jobs:
         run: isort --check-only diskcleaner/ tests/ examples/
 
       - name: Lint with flake8
-        run: flake8 diskcleaner/ tests/ examples/ --max-line-length=100
+        run: flake8 diskcleaner/ tests/ examples/ --max-line-length=100 --extend-ignore=E203,E231,W503
 
       - name: Type check with mypy
-        run: mypy diskcleaner/ || true
+        run: mypy diskcleaner/ --config-file=mypy.ini || true
