@@ -12,14 +12,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from diskcleaner.config import Config
-from diskcleaner.core import (
-    DirectoryScanner,
-    DuplicateFinder,
-    DuplicateGroup,
-    FileClassifier,
-    SafetyChecker,
-)
-from diskcleaner.core.scanner import FileInfo
+from diskcleaner.core.classifier import FileClassifier
+from diskcleaner.core.duplicate_finder import DuplicateFinder, DuplicateGroup
+from diskcleaner.core.safety import SafetyChecker
+from diskcleaner.core.scanner import DirectoryScanner, FileInfo
 
 
 @dataclass
