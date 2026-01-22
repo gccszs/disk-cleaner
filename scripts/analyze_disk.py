@@ -228,6 +228,15 @@ def print_report(report: Dict):
 
 
 def main():
+    # Fix Windows console encoding for emoji support
+    import sys
+
+    if sys.platform == "win32":
+        import codecs
+
+        sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+        sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
+
     import argparse
 
     parser = argparse.ArgumentParser(description="Analyze disk space usage")
