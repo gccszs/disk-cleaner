@@ -34,11 +34,12 @@ jobs:
           pytest tests/ -v --cov=diskcleaner --cov-report=xml --cov-report=term
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8' && success()
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+          verbose: true
 
   lint:
     runs-on: ubuntu-latest
