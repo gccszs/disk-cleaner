@@ -1,6 +1,6 @@
 ---
 name: disk-cleaner
-description: Cross-platform disk space monitoring, analysis, and cleaning toolkit. Use when Claude needs to: (1) Analyze disk space usage and identify large files/directories consuming space, (2) Clean temporary files, caches, logs, and other junk files safely, (3) Monitor disk usage with configurable warning/critical thresholds, (4) Generate detailed reports on disk health and cleanup recommendations. Specializes in Windows C drive cleanup while maintaining full compatibility with Linux and macOS. Provides interactive CLI, automated scripts, and detailed reporting modes. All operations prioritize safety with built-in protection for system files.
+description: "Cross-platform disk space monitoring, analysis, and cleaning toolkit. Use when Claude needs to: (1) Analyze disk space usage and identify large files/directories consuming space, (2) Clean temporary files, caches, logs, and other junk files safely, (3) Monitor disk usage with configurable warning/critical thresholds, (4) Generate detailed reports on disk health and cleanup recommendations. Specializes in Windows C drive cleanup while maintaining full compatibility with Linux and macOS. Provides interactive CLI, automated scripts, and detailed reporting modes. All operations prioritize safety with built-in protection for system files."
 ---
 
 # Disk Cleaner Skill
