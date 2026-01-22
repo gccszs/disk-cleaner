@@ -2,12 +2,11 @@
 Basic integration tests for Phase 1 core modules.
 """
 
-import os
 import tempfile
 from pathlib import Path
 
-from diskcleaner.core import DirectoryScanner, FileClassifier, SafetyChecker
 from diskcleaner.config import Config
+from diskcleaner.core import DirectoryScanner, FileClassifier, SafetyChecker
 
 
 def test_config_loading():

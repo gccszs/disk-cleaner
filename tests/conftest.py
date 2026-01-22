@@ -2,11 +2,12 @@
 pytest configuration and fixtures
 """
 
-import pytest
 import shutil
 import tempfile
 from pathlib import Path
 from typing import Generator
+
+import pytest
 
 
 @pytest.fixture

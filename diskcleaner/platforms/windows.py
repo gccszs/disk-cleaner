@@ -2,7 +2,7 @@ r"""
 Windows-specific platform functionality.
 """
 
-from typing import Dict, List
+from typing import List
 
 
 class WindowsPlatform:

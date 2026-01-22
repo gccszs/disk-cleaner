@@ -16,6 +16,7 @@ from typing import Dict, List, Optional
 @dataclass
 class FileSnapshot:
     """Snapshot of a single file's metadata."""
+
     path: str
     size: int
     mtime: float
@@ -30,7 +31,6 @@ class FileSnapshot:
         """Create from dictionary."""
         return cls(**data)
 
-
     def __hash__(self) -> int:
         """Make FileSnapshot hashable for caching."""
         return hash((self.path, self.size, self.mtime, self.inode))
@@ -39,6 +39,7 @@ class FileSnapshot:
 @dataclass
 class ScanSnapshot:
     """Snapshot of an entire directory scan."""
+
     path: str
     timestamp: float
     files: List[FileSnapshot] = field(default_factory=list)
@@ -142,7 +143,7 @@ class CacheManager:
         try:
             with open(cache_file, "w", encoding="utf-8") as f:
                 json.dump(snapshot.to_dict(), f, indent=2)
-        except (OSError, IOError) as e:
+        except (OSError, IOError):
             # Silently fail if we can't write cache
             # This shouldn't break the scan, just disable caching
             pass

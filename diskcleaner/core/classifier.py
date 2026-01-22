@@ -6,7 +6,6 @@ cleanup recommendations.
 """
 
 import fnmatch
-import os
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -18,6 +17,7 @@ from diskcleaner.core.scanner import FileInfo
 
 class RiskLevel(Enum):
     """Risk level for file deletion."""
+
     SAFE = "safe"
     CONFIRM_NEEDED = "confirm_needed"
     PROTECTED = "protected"

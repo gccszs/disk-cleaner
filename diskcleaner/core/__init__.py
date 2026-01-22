@@ -2,10 +2,10 @@
 Core functionality modules
 """
 
-from diskcleaner.core.scanner import DirectoryScanner
+from diskcleaner.core.cache import CacheManager
 from diskcleaner.core.classifier import FileClassifier
 from diskcleaner.core.safety import SafetyChecker
-from diskcleaner.core.cache import CacheManager
+from diskcleaner.core.scanner import DirectoryScanner
 
 __all__ = [
     "DirectoryScanner",

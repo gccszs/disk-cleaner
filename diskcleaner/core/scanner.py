@@ -5,15 +5,13 @@ Scans directories to collect file information with support for
 incremental updates using cached metadata.
 """
 
-import os
-import stat
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, List, Optional, Set, Tuple
 
-from diskcleaner.core.cache import CacheManager, FileSnapshot, ScanSnapshot
 from diskcleaner.config import Config
+from diskcleaner.core.cache import CacheManager, FileSnapshot, ScanSnapshot
 
 
 @dataclass
@@ -69,9 +67,9 @@ class DirectoryScanner:
         self.cache_enabled = cache_enabled
 
         # Initialize cache manager
-        self.cache_manager = CacheManager(
-            cache_dir=self.config.cache_dir
-        ) if cache_enabled else None
+        self.cache_manager = (
+            CacheManager(cache_dir=self.config.cache_dir) if cache_enabled else None
+        )
 
         # Scan settings
         self.follow_symlinks = self.config.get("scan.follow_symlinks", False)
@@ -103,8 +101,6 @@ class DirectoryScanner:
             - changed_files: Paths of files modified since last scan
 
         """
-        start_time = time.time()
-
         # Try to load cached scan
         cached_snapshot = None
         if self.cache_enabled and self.cache_manager:
@@ -116,7 +112,6 @@ class DirectoryScanner:
         # If no cache, do full scan
         if cached_snapshot is None:
             files = self.scan()
-            elapsed = time.time() - start_time
 
             # Save to cache
             if self.cache_enabled and self.cache_manager:
@@ -145,10 +140,7 @@ class DirectoryScanner:
             if cached is None:
                 # New file
                 new_files.append(file_info.path)
-            elif self.cache_manager.is_file_changed(
-                file_info.to_snapshot(),
-                cached
-            ):
+            elif self.cache_manager.is_file_changed(file_info.to_snapshot(), cached):
                 # Changed file
                 changed_files.append(file_info.path)
 
@@ -160,7 +152,6 @@ class DirectoryScanner:
                 deleted_files.append(cached_path)
 
         # Update cache
-        elapsed = time.time() - start_time
         if self.cache_enabled and self.cache_manager:
             snapshot = ScanSnapshot(
                 path=str(self.target_path),
@@ -262,7 +253,7 @@ class DirectoryScanner:
                 if is_dir and not is_link:
                     yield from self._scan_directory(entry, depth + 1, visited)
 
-            except (PermissionError, OSError) as e:
+            except (PermissionError, OSError):
                 # Skip files we can't access
                 continue
 

@@ -8,8 +8,8 @@ safely across Windows, Linux, and macOS.
 __version__ = "2.0.0-dev"
 __author__ = "Disk Cleaner Contributors"
 
-from diskcleaner.core import DirectoryScanner, FileClassifier, SafetyChecker
 from diskcleaner.config import Config
+from diskcleaner.core import DirectoryScanner, FileClassifier, SafetyChecker
 
 __all__ = [
     "DirectoryScanner",

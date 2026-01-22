@@ -20,6 +20,7 @@ from diskcleaner.core.scanner import FileInfo
 
 class FileStatus(Enum):
     """Status of a file for deletion."""
+
     SAFE = "safe"
     LOCKED = "locked"
     NO_PERMISSION = "no_permission"
@@ -397,7 +398,7 @@ class SafetyChecker:
                 details += f"\n{result.stdout}"
             else:
                 result = subprocess.run(
-                    ["ps", "-p", str(process['pid']), "-o", "etime,%cpu,rss,cmd"],
+                    ["ps", "-p", str(process["pid"]), "-o", "etime,%cpu,rss,cmd"],
                     capture_output=True,
                     timeout=5,
                     text=True,
@@ -447,7 +448,7 @@ class SafetyChecker:
 
             return str(backup_path)
 
-        except (OSError, IOError) as e:
+        except (OSError, IOError):
             # Log error but don't fail
             return None
 

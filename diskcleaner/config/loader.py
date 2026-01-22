@@ -8,7 +8,6 @@ Loads configuration from multiple sources with priority:
 4. Default config (lowest)
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -190,11 +189,11 @@ class Config:
                 elif value.startswith("[") and value.endswith("]"):
                     # List value
                     list_str = value[1:-1]
-                    current[key] = [item.strip().strip('"\'') for item in list_str.split(",")]
+                    current[key] = [item.strip().strip("\"'") for item in list_str.split(",")]
                 else:
                     # Simple value
                     # Try to parse as Python literal
-                    value = value.strip('"\'')
+                    value = value.strip("\"'")
                     if value.lower() == "true":
                         value = True
                     elif value.lower() == "false":
@@ -215,9 +214,7 @@ class Config:
         return config
 
     @staticmethod
-    def _merge_configs(
-        base: Dict[str, Any], override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _merge_configs(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         """
         Deep merge two config dictionaries.
 
@@ -241,9 +238,7 @@ class Config:
         return result
 
     @staticmethod
-    def _apply_cli_args(
-        config: Dict[str, Any], cli_args: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _apply_cli_args(config: Dict[str, Any], cli_args: Dict[str, Any]) -> Dict[str, Any]:
         """
         Apply command-line arguments to config.
 
