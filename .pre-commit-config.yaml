@@ -22,7 +22,6 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        language_version: python3.8
 
   # Import sorting
   - repo: https://github.com/PyCQA/isort
@@ -43,8 +42,6 @@ repos:
     rev: v1.3.0
     hooks:
       - id: mypy
-        additional_dependencies:
-          - types-all
         args: [--config-file=mypy.ini]
 
 # CI configuration
