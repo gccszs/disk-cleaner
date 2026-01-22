@@ -4,6 +4,7 @@ Cross-platform tests for platform-specific functionality.
 
 import os
 import platform
+
 import pytest
 
 from diskcleaner.platforms import LinuxPlatform, MacOSPlatform, WindowsPlatform
