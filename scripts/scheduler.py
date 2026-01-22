@@ -93,7 +93,6 @@ class CleanupScheduler:
         """Execute a single cleanup task."""
         path = task["path"]
         cleanup_type = task["cleanup_type"]
-        options = task.get("options", {})
 
         print(f"\n{'='*60}")
         print(f"Running task: {task['name']}")

@@ -82,9 +82,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Package disk-cleaner skill")
-    parser.add_argument(
-        "--output", "-o", help="Output path for .skill file", default=None
-    )
+    parser.add_argument("--output", "-o", help="Output path for .skill file", default=None)
 
     args = parser.parse_args()
     create_skill_package(args.output)
