@@ -4,14 +4,13 @@ Disk Space Analyzer - Cross-platform disk space analysis tool
 Analyzes disk usage and identifies large files and directories
 """
 
-import os
-import sys
-import platform
 import json
-from pathlib import Path
-from collections import defaultdict
+import os
+import platform
+import sys
 from datetime import datetime
-from typing import Dict, List, Tuple
+from pathlib import Path
+from typing import Dict, List
 
 
 class DiskAnalyzer:
@@ -33,7 +32,7 @@ class DiskAnalyzer:
 
     def get_disk_usage(self) -> Dict:
         """Get overall disk usage statistics"""
-        usage = os.statvfs(self.path) if hasattr(os, 'statvfs') else None
+        usage = os.statvfs(self.path) if hasattr(os, "statvfs") else None
 
         if usage:
             total = usage.f_frsize * usage.f_blocks
@@ -42,13 +41,14 @@ class DiskAnalyzer:
         else:
             # Windows fallback
             import ctypes
+
             total_bytes = ctypes.c_ulonglong(0)
             free_bytes = ctypes.c_ulonglong(0)
             ctypes.windll.kernel32.GetDiskFreeSpaceExW(
                 ctypes.c_wchar_p(self.path),
                 None,
                 ctypes.byref(total_bytes),
-                ctypes.byref(free_bytes)
+                ctypes.byref(free_bytes),
             )
             total = total_bytes.value
             free = free_bytes.value
@@ -59,7 +59,7 @@ class DiskAnalyzer:
             "total_gb": round(total / (1024**3), 2),
             "used_gb": round(used / (1024**3), 2),
             "free_gb": round(free / (1024**3), 2),
-            "usage_percent": round((used / total) * 100, 2) if total > 0 else 0
+            "usage_percent": round((used / total) * 100, 2) if total > 0 else 0,
         }
 
     def scan_directory(self, path: str = None, max_depth: int = 3) -> List[Dict]:
@@ -74,12 +74,14 @@ class DiskAnalyzer:
                     try:
                         size = self._get_dir_size(item, max_depth=1)
                         if size > 0:
-                            results["directories"].append({
-                                "path": str(item),
-                                "name": item.name,
-                                "size_gb": round(size / (1024**3), 2),
-                                "size_mb": round(size / (1024**2), 2)
-                            })
+                            results["directories"].append(
+                                {
+                                    "path": str(item),
+                                    "name": item.name,
+                                    "size_gb": round(size / (1024**3), 2),
+                                    "size_mb": round(size / (1024**2), 2),
+                                }
+                            )
                     except (PermissionError, OSError):
                         pass
 
@@ -87,12 +89,14 @@ class DiskAnalyzer:
                     try:
                         size = item.stat().st_size
                         if size > 10 * 1024 * 1024:  # Only files > 10MB
-                            results["files"].append({
-                                "path": str(item),
-                                "name": item.name,
-                                "size_gb": round(size / (1024**3), 2),
-                                "size_mb": round(size / (1024**2), 2)
-                            })
+                            results["files"].append(
+                                {
+                                    "path": str(item),
+                                    "name": item.name,
+                                    "size_gb": round(size / (1024**3), 2),
+                                    "size_mb": round(size / (1024**2), 2),
+                                }
+                            )
                     except (PermissionError, OSError):
                         pass
 
@@ -104,8 +108,8 @@ class DiskAnalyzer:
         results["files"].sort(key=lambda x: x["size_gb"], reverse=True)
 
         # Keep only top N
-        results["directories"] = results["directories"][:self.top_n]
-        results["files"] = results["files"][:self.top_n]
+        results["directories"] = results["directories"][: self.top_n]
+        results["files"] = results["files"][: self.top_n]
 
         return results
 
@@ -113,7 +117,7 @@ class DiskAnalyzer:
         """Calculate directory size"""
         total_size = 0
         try:
-            for item in path.rglob('*') if max_depth > 0 else path.iterdir():
+            for item in path.rglob("*") if max_depth > 0 else path.iterdir():
                 if item.is_file() and not item.is_symlink():
                     try:
                         total_size += item.stat().st_size
@@ -158,11 +162,13 @@ class DiskAnalyzer:
 
         for temp_dir in temp_dirs:
             size = self._get_dir_size(Path(temp_dir), max_depth=2)
-            results.append({
-                "path": temp_dir,
-                "size_gb": round(size / (1024**3), 2),
-                "size_mb": round(size / (1024**2), 2)
-            })
+            results.append(
+                {
+                    "path": temp_dir,
+                    "size_gb": round(size / (1024**3), 2),
+                    "size_mb": round(size / (1024**2), 2),
+                }
+            )
 
         return {"temp_directories": results}
 
@@ -183,9 +189,9 @@ class DiskAnalyzer:
 
 def print_report(report: Dict):
     """Print formatted report to console"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(f"DISK SPACE ANALYSIS REPORT - {report['timestamp']}")
-    print("="*60)
+    print("=" * 60)
 
     # Disk usage
     usage = report["disk_usage"]
@@ -195,30 +201,30 @@ def print_report(report: Dict):
     print(f"  Free:  {usage['free_gb']} GB")
 
     # Alert if low on space
-    if usage['usage_percent'] > 90:
+    if usage["usage_percent"] > 90:
         print("  ⚠️  WARNING: Disk critically full!")
-    elif usage['usage_percent'] > 80:
+    elif usage["usage_percent"] > 80:
         print("  ⚠️  WARNING: Disk running low on space")
 
     # Temp directories
-    print(f"\n🗑️  Temporary Directories:")
+    print("\n🗑️  Temporary Directories:")
     for temp in report["temp_analysis"]["temp_directories"]:
-        size_str = f"{temp['size_gb']} GB" if temp['size_gb'] > 0 else f"{temp['size_mb']} MB"
+        size_str = f"{temp['size_gb']} GB" if temp["size_gb"] > 0 else f"{temp['size_mb']} MB"
         print(f"  {temp['path']}: {size_str}")
 
     # Large directories
     if "scan_results" in report:
-        print(f"\n📁 Largest Directories:")
+        print("\n📁 Largest Directories:")
         for i, d in enumerate(report["scan_results"]["directories"][:10], 1):
-            size_str = f"{d['size_gb']} GB" if d['size_gb'] > 0 else f"{d['size_mb']} MB"
+            size_str = f"{d['size_gb']} GB" if d["size_gb"] > 0 else f"{d['size_mb']} MB"
             print(f"  {i}. {d['name']}: {size_str}")
 
-        print(f"\n📄 Largest Files:")
+        print("\n📄 Largest Files:")
         for i, f in enumerate(report["scan_results"]["files"][:10], 1):
-            size_str = f"{f['size_gb']} GB" if f['size_gb'] > 0 else f"{f['size_mb']} MB"
+            size_str = f"{f['size_gb']} GB" if f["size_gb"] > 0 else f"{f['size_mb']} MB"
             print(f"  {i}. {f['name']}: {size_str}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
 
 
 def main():
@@ -241,7 +247,7 @@ def main():
         print_report(report)
 
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(report, f, indent=2)
         print(f"\n✅ Report saved to {args.output}")
 

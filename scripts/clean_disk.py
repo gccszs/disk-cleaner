@@ -4,15 +4,13 @@ Disk Cleaner - Cross-platform junk file cleaner
 Safely removes temporary files, caches, logs, and other junk files
 """
 
+import json
 import os
-import sys
 import platform
 import shutil
-import json
-import time
-from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Set, Tuple
+from pathlib import Path
+from typing import Dict, List, Set
 
 
 class DiskCleaner:
@@ -29,9 +27,25 @@ class DiskCleaner:
 
         # Safety: file extensions to never delete
         self.protected_extensions = {
-            '.exe', '.dll', '.sys', '.drv', '.bat', '.cmd', '.ps1',
-            '.sh', '.bash', '.zsh', '.app', '.dmg', '.pkg', '.deb',
-            '.rpm', '.msi', '.iso', '.vhd', '.vhdx'
+            ".exe",
+            ".dll",
+            ".sys",
+            ".drv",
+            ".bat",
+            ".cmd",
+            ".ps1",
+            ".sh",
+            ".bash",
+            ".zsh",
+            ".app",
+            ".dmg",
+            ".pkg",
+            ".deb",
+            ".rpm",
+            ".msi",
+            ".iso",
+            ".vhd",
+            ".vhdx",
         }
 
     def _get_protected_paths(self) -> Set[str]:
@@ -39,32 +53,46 @@ class DiskCleaner:
         protected = set()
 
         if self.system == "windows":
-            protected.update([
-                "C:\\Windows",
-                "C:\\Program Files",
-                "C:\\Program Files (x86)",
-                "C:\\ProgramData",
-            ])
+            protected.update(
+                [
+                    "C:\\Windows",
+                    "C:\\Program Files",
+                    "C:\\Program Files (x86)",
+                    "C:\\ProgramData",
+                ]
+            )
             # User profiles
             if "USERPROFILE" in os.environ:
                 protected.add(os.environ["USERPROFILE"])
 
         elif self.system == "darwin":
-            protected.update([
-                "/System",
-                "/Library",
-                "/Applications",
-                "/usr",
-                "/bin",
-                "/sbin",
-            ])
+            protected.update(
+                [
+                    "/System",
+                    "/Library",
+                    "/Applications",
+                    "/usr",
+                    "/bin",
+                    "/sbin",
+                ]
+            )
             protected.add(os.path.expanduser("~"))
 
         else:  # Linux
-            protected.update([
-                "/usr", "/bin", "/sbin", "/lib", "/lib64",
-                "/etc", "/boot", "/sys", "/proc", "/dev"
-            ])
+            protected.update(
+                [
+                    "/usr",
+                    "/bin",
+                    "/sbin",
+                    "/lib",
+                    "/lib64",
+                    "/etc",
+                    "/boot",
+                    "/sys",
+                    "/proc",
+                    "/dev",
+                ]
+            )
             protected.add(os.path.expanduser("~"))
 
         return protected
@@ -76,7 +104,7 @@ class DiskCleaner:
             try:
                 if str(path).startswith(protected):
                     return False
-            except:
+            except (OSError, ValueError):
                 continue
 
         # Check file extension
@@ -87,13 +115,7 @@ class DiskCleaner:
 
     def get_cleanable_locations(self) -> Dict[str, List[str]]:
         """Get platform-specific locations that can be cleaned"""
-        locations = {
-            "temp": [],
-            "cache": [],
-            "logs": [],
-            "recycle": [],
-            "downloads_old": []
-        }
+        locations = {"temp": [], "cache": [], "logs": [], "recycle": [], "downloads_old": []}
 
         if self.system == "windows":
             # Temp directories
@@ -106,18 +128,40 @@ class DiskCleaner:
 
             # Cache directories
             cache_dirs = [
-                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "INetCache"),
-                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "User Data", "Default", "Cache"),
+                os.path.join(
+                    os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "INetCache"
+                ),
+                os.path.join(
+                    os.environ.get("LOCALAPPDATA", ""),
+                    "Google",
+                    "Chrome",
+                    "User Data",
+                    "Default",
+                    "Cache",
+                ),
                 os.path.join(os.environ.get("APPDATA", ""), "Mozilla", "Firefox", "Profiles"),
-                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Edge", "User Data", "Default", "Cache"),
+                os.path.join(
+                    os.environ.get("LOCALAPPDATA", ""),
+                    "Microsoft",
+                    "Edge",
+                    "User Data",
+                    "Default",
+                    "Cache",
+                ),
             ]
             locations["cache"].extend([d for d in cache_dirs if d and os.path.exists(d)])
 
             # Windows specific
-            locations["logs"].extend([
-                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "History"),
-                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "WebCache"),
-            ])
+            locations["logs"].extend(
+                [
+                    os.path.join(
+                        os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "History"
+                    ),
+                    os.path.join(
+                        os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "WebCache"
+                    ),
+                ]
+            )
 
             # Recycle Bin
             recycle_path = os.path.join(os.environ.get("SYSTEMDRIVE", "C:"), "$Recycle.Bin")
@@ -130,19 +174,25 @@ class DiskCleaner:
                 locations["temp"].append(prefetch)
 
             # Windows Update cache
-            update_cache = os.path.join(os.environ.get("WINDIR", ""), "SoftwareDistribution", "Download")
+            update_cache = os.path.join(
+                os.environ.get("WINDIR", ""), "SoftwareDistribution", "Download"
+            )
             if os.path.exists(update_cache):
                 locations["temp"].append(update_cache)
 
         elif self.system == "darwin":
             # macOS temp and cache
-            locations["temp"].extend([
-                "/tmp",
-                "/private/tmp",
-            ])
-            locations["cache"].extend([
-                os.path.expanduser("~/Library/Caches"),
-            ])
+            locations["temp"].extend(
+                [
+                    "/tmp",
+                    "/private/tmp",
+                ]
+            )
+            locations["cache"].extend(
+                [
+                    os.path.expanduser("~/Library/Caches"),
+                ]
+            )
 
             # User logs
             locations["logs"].append(os.path.expanduser("~/Library/Logs"))
@@ -154,13 +204,17 @@ class DiskCleaner:
 
         else:  # Linux
             # System temp and cache
-            locations["temp"].extend([
-                "/tmp",
-                "/var/tmp",
-            ])
-            locations["cache"].extend([
-                "/var/cache",
-            ])
+            locations["temp"].extend(
+                [
+                    "/tmp",
+                    "/var/tmp",
+                ]
+            )
+            locations["cache"].extend(
+                [
+                    "/var/cache",
+                ]
+            )
 
             # User cache
             user_cache = os.path.expanduser("~/.cache")
@@ -169,15 +223,11 @@ class DiskCleaner:
 
         return locations
 
-    def clean_directory(self, path: str, older_than_days: int = 0,
-                       max_size_mb: int = None, pattern: str = "*") -> Dict:
+    def clean_directory(
+        self, path: str, older_than_days: int = 0, max_size_mb: int = None, pattern: str = "*"
+    ) -> Dict:
         """Clean a directory with safety checks"""
-        result = {
-            "path": path,
-            "files_deleted": 0,
-            "space_freed_mb": 0,
-            "errors": []
-        }
+        result = {"path": path, "files_deleted": 0, "space_freed_mb": 0, "errors": []}
 
         dir_path = Path(path)
         if not dir_path.exists():
@@ -294,7 +344,7 @@ class DiskCleaner:
             "timestamp": datetime.now().isoformat(),
             "platform": self.platform,
             "dry_run": self.dry_run,
-            "categories": []
+            "categories": [],
         }
 
         # Clean temp files
@@ -326,7 +376,7 @@ class DiskCleaner:
             "total_files_deleted": total_files,
             "total_space_freed_mb": round(total_space_mb, 2),
             "total_space_freed_gb": round(total_space_mb / 1024, 2),
-            "total_errors": len(self.errors)
+            "total_errors": len(self.errors),
         }
 
         return results
@@ -336,9 +386,9 @@ def print_report(results: Dict):
     """Print formatted cleaning report"""
     mode = "DRY RUN" if results["dry_run"] else "CLEAN"
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(f"DISK CLEANING REPORT ({mode}) - {results['timestamp']}")
-    print("="*60)
+    print("=" * 60)
 
     for category in results["categories"]:
         print(f"\n🗑️  {category['category'].upper().replace('_', ' ')}:")
@@ -353,7 +403,7 @@ def print_report(results: Dict):
                 print(f"  ⚠️  {location['path']}: {len(location['errors'])} errors")
 
     summary = results["summary"]
-    print(f"\n📊 SUMMARY:")
+    print("\n📊 SUMMARY:")
     print(f"  Total files: {summary['total_files_deleted']}")
     print(f"  Space freed: {summary['total_space_freed_gb']:.2f} GB")
 
@@ -364,23 +414,29 @@ def print_report(results: Dict):
         print("\n💡 This was a DRY RUN. No files were actually deleted.")
         print("   Run without --dry-run to perform actual cleaning.")
 
-    print("="*60)
+    print("=" * 60)
 
 
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Clean disk junk files")
-    parser.add_argument("--dry-run", action="store_true", default=True,
-                       help="Simulate cleaning without deleting (default: True)")
-    parser.add_argument("--force", action="store_true",
-                       help="Actually delete files (disables dry-run)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=True,
+        help="Simulate cleaning without deleting (default: True)",
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="Actually delete files (disables dry-run)"
+    )
     parser.add_argument("--temp", action="store_true", help="Clean only temp files")
     parser.add_argument("--cache", action="store_true", help="Clean only cache")
     parser.add_argument("--logs", action="store_true", help="Clean only logs")
     parser.add_argument("--recycle", action="store_true", help="Clean only recycle bin")
-    parser.add_argument("--downloads", type=int, metavar="DAYS",
-                       help="Clean downloads older than N days")
+    parser.add_argument(
+        "--downloads", type=int, metavar="DAYS", help="Clean downloads older than N days"
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
 
@@ -391,20 +447,35 @@ def main():
 
     # Run specific or all cleaning
     if args.temp:
-        results = {"timestamp": datetime.now().isoformat(), "dry_run": dry_run,
-                   "categories": [cleaner.clean_temp_files()]}
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [cleaner.clean_temp_files()],
+        }
     elif args.cache:
-        results = {"timestamp": datetime.now().isoformat(), "dry_run": dry_run,
-                   "categories": [cleaner.clean_cache_files()]}
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [cleaner.clean_cache_files()],
+        }
     elif args.logs:
-        results = {"timestamp": datetime.now().isoformat(), "dry_run": dry_run,
-                   "categories": [cleaner.clean_log_files()]}
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [cleaner.clean_log_files()],
+        }
     elif args.recycle:
-        results = {"timestamp": datetime.now().isoformat(), "dry_run": dry_run,
-                   "categories": [cleaner.clean_recycle_bin()]}
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [cleaner.clean_recycle_bin()],
+        }
     elif args.downloads:
-        results = {"timestamp": datetime.now().isoformat(), "dry_run": dry_run,
-                   "categories": [cleaner.clean_old_downloads(args.downloads)]}
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [cleaner.clean_old_downloads(args.downloads)],
+        }
     else:
         results = cleaner.clean_all()
 
@@ -416,7 +487,7 @@ def main():
             "total_files_deleted": total_files,
             "total_space_freed_mb": round(total_space, 2),
             "total_space_freed_gb": round(total_space / 1024, 2),
-            "total_errors": 0
+            "total_errors": 0,
         }
 
     if args.json:
@@ -425,7 +496,7 @@ def main():
         print_report(results)
 
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(results, f, indent=2)
         print(f"\n✅ Report saved to {args.output}")
 

@@ -1,20 +1,74 @@
-# Disk Cleaner - Cross-Platform Disk Management Toolkit
+# Disk Cleaner v2.0 - Intelligent Cross-Platform Disk Management
+
+**[English](README.md)** | **[中文文档](README_zh.md)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/gccszs/disk-cleaner)
 [![Skill](https://img.shields.io/badge/skill-add--skill-blue)](https://github.com/gccszs/disk-cleaner)
 
-A comprehensive cross-platform disk space monitoring, analysis, and cleaning toolkit. Specializes in Windows C drive cleanup while maintaining full compatibility with Linux and macOS.
+A comprehensive cross-platform disk space monitoring, analysis, and intelligent cleaning toolkit. Features advanced 3D file classification, duplicate detection, automated scheduling, and platform-specific optimization.
+
+## ⚡ Quick Install
+
+### Option 1: Install as Claude Code Skill (Recommended)
+
+Install directly from GitHub:
+
+```bash
+npx add-skill gccszs/disk-cleaner
+```
+
+This will install the skill with all necessary files. The `.skill` package contains only the essential components:
+- ✅ Core modules (`diskcleaner/`)
+- ✅ Executable scripts (`scripts/`)
+- ✅ Skill definition (`SKILL.md`)
+- ✅ Reference documentation (`references/`)
+
+**Note:** The skill package excludes tests, CI/CD configs, and development files for a clean, minimal installation.
+
+### Option 2: Clone Repository
+
+For development or standalone use:
+
+```bash
+git clone https://github.com/gccszs/disk-cleaner.git
+cd disk-cleaner
+```
+
+See [Usage](#usage-examples) section for how to run the scripts.
+
+---
+
+## ✨ v2.0 New Features
+
+- **🤖 Intelligent 3D Classification** - Files categorized by type, risk level, and age
+- **🔍 Adaptive Duplicate Detection** - Fast/accurate strategies with automatic optimization
+- **⚡ Incremental Scanning** - Cache-based performance optimization for repeated scans
+- **🔒 Process-Aware Safety** - File lock detection and process termination
+- **💻 Platform-Specific Optimization** - Windows Update, APT, Homebrew cache detection
+- **⏰ Automated Scheduling** - Timer-based cleanup tasks
+- **🎯 Interactive Cleanup UI** - 5 view modes with visual feedback
+- **🛡️ Enhanced Safety** - Protected paths, 'YES' confirmation, backup & logging
 
 ## Features
 
+### Core Capabilities
 - **Disk Space Analysis**: Identify large files and directories consuming disk space
+- **Smart Cleanup**: AI-powered suggestions based on file patterns and usage
+- **Duplicate Detection**: Find and remove duplicate files to reclaim space
 - **Safe Junk Cleaning**: Remove temporary files, caches, logs with built-in safety mechanisms
 - **Disk Monitoring**: Real-time monitoring with configurable alert thresholds
-- **Cross-Platform**: Works on Windows, Linux, and macOS
-- **Multiple Modes**: Interactive CLI, automated scripts, and detailed reporting
-- **Safety First**: Protected paths and extensions, dry-run mode by default
+- **Cross-Platform**: Full support for Windows, Linux, and macOS
+- **Zero Dependencies**: Pure Python standard library implementation
+
+### Advanced Features
+- **3D File Classification**: Type × Risk × Age matrix for smart decisions
+- **Incremental Scanning**: Only scan changed files for 10x faster subsequent scans
+- **File Lock Detection**: Prevents deletion of locked files on all platforms
+- **Platform-Specific Cleanup**: Windows Update, Linux package caches, macOS Xcode derived data
+- **Automated Scheduling**: Set up recurring cleanup tasks with custom intervals
+- **Interactive Selection**: Choose exactly what to clean with detailed previews
 
 ## Quick Start
 
@@ -28,6 +82,9 @@ Python 3.6 or higher (no external dependencies required - uses only standard lib
 # Analyze disk space
 python scripts/analyze_disk.py
 
+# Smart cleanup with duplicate detection (NEW v2.0)
+python -c "from diskcleaner.core import SmartCleanupEngine; engine = SmartCleanupEngine('.'); print(engine.get_summary(engine.analyze()))"
+
 # Preview cleanup (dry-run mode)
 python scripts/clean_disk.py --dry-run
 
@@ -36,6 +93,78 @@ python scripts/monitor_disk.py
 
 # Continuous monitoring
 python scripts/monitor_disk.py --watch
+```
+
+### v2.0 Advanced Usage
+
+```bash
+# Schedule automated cleanup (NEW v2.0)
+python scripts/scheduler.py add "Daily Cleanup" /tmp 24h --type smart
+python scripts/scheduler.py run  # Run due tasks
+
+# Platform-specific cleanup suggestions
+python -c "from diskcleaner.platforms import WindowsPlatform; import pprint; pprint.pprint(WindowsPlatform.get_system_maintenance_items())"
+```
+
+## Usage Examples
+
+### Example 1: Smart Cleanup with Duplicate Detection
+
+```python
+from diskcleaner.core import SmartCleanupEngine
+
+# Initialize engine
+engine = SmartCleanupEngine("/path/to/clean", cache_enabled=True)
+
+# Analyze directory
+report = engine.analyze(
+    include_duplicates=True,
+    safety_check=True
+)
+
+# Get summary
+print(engine.get_summary(report))
+
+# Interactive cleanup (if you want)
+from diskcleaner.core import InteractiveCleanupUI
+ui = InteractiveCleanupUI(report)
+ui.display_menu()  # Shows 5 view options
+```
+
+### Example 2: Automated Scheduling
+
+```bash
+# Add daily cleanup task
+python scripts/scheduler.py add "Daily Temp Cleanup" /tmp 24h --type temp
+
+# List all scheduled tasks
+python scripts/scheduler.py list
+
+# Run due tasks (dry-run by default)
+python scripts/scheduler.py run
+
+# Run with actual deletion
+python scripts/scheduler.py run --force
+```
+
+### Example 3: Platform-Specific Cleanup
+
+```python
+from diskcleaner.platforms import WindowsPlatform, LinuxPlatform, MacOSPlatform
+import platform
+
+if platform.system() == "Windows":
+    platform_impl = WindowsPlatform()
+elif platform.system() == "Linux":
+    platform_impl = LinuxPlatform()
+else:
+    platform_impl = MacOSPlatform()
+
+# Get platform-specific cleanup suggestions
+items = platform_impl.get_system_maintenance_items()
+for key, item in items.items():
+    print(f"{item['name']}: {item['description']}")
+    print(f"  Risk: {item['risk']}, Size: {item['size_hint']}")
 ```
 
 ## Installation
