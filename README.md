@@ -2,7 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/yourusername/disk-cleaner)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/gccszs/disk-cleaner)
+[![Skill](https://img.shields.io/badge/skill-add--skill-blue)](https://github.com/gccszs/disk-cleaner)
 
 A comprehensive cross-platform disk space monitoring, analysis, and cleaning toolkit. Specializes in Windows C drive cleanup while maintaining full compatibility with Linux and macOS.
 
@@ -39,9 +40,19 @@ python scripts/monitor_disk.py --watch
 
 ## Installation
 
-### As a Claude Code Skill
+### Quick Install (Recommended)
 
-1. Download `disk-cleaner.skill`
+Install directly from GitHub using Vercel's add-skill CLI:
+
+```bash
+npx add-skill gccszs/disk-cleaner -g
+```
+
+Replace `gccszs` with your actual GitHub username.
+
+### As a Claude Code Skill (Manual)
+
+1. Download `disk-cleaner.skill` from the [Releases](https://github.com/gccszs/disk-cleaner/releases) page
 2. Install via Claude Code:
    ```
    /skill install path/to/disk-cleaner.skill
@@ -51,7 +62,7 @@ python scripts/monitor_disk.py --watch
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/disk-cleaner.git
+git clone https://github.com/gccszs/disk-cleaner.git
 cd disk-cleaner
 
 # Scripts are ready to use (no dependencies needed)
@@ -271,4 +282,5 @@ The authors are not responsible for any data loss or system issues.
 ## Acknowledgments
 
 - Built as a [Claude Code Skill](https://claude.com/claude-code)
+- Installable via [Vercel's add-skill CLI](https://github.com/vercel/vercel/tree/main/packages/add-skill)
 - Cross-platform compatibility tested on Windows 10/11, Ubuntu 20.04+, macOS 12+
