@@ -63,3 +63,9 @@ venv.bak/
 *.log
 .DS_Store
 Thumbs.db
+
+# Sensitive - Local test results and reports
+benchmark_results/*.json
+docs/LARGE_SCALE_TEST_REPORT.md
+docs/PERFORMANCE_REPORT.md
+tests/benchmarks/scan_*.py
