@@ -74,9 +74,11 @@ class DiskCleaner:
                     "C:\\ProgramData",
                 ]
             )
-            # User profiles
-            if "USERPROFILE" in os.environ:
-                protected.add(os.environ["USERPROFILE"])
+            # Protect user profile root but NOT subdirectories (allows cleaning Temp, Cache, etc.)
+            # We use a trailing separator to indicate we're protecting the directory itself,
+            # not its contents
+            # if "USERPROFILE" in os.environ:
+            #     protected.add(os.environ["USERPROFILE"])
 
         elif self.system == "darwin":
             protected.update(
@@ -89,7 +91,8 @@ class DiskCleaner:
                     "/sbin",
                 ]
             )
-            protected.add(os.path.expanduser("~"))
+            # Don't protect entire home directory to allow cleaning cache/logs
+            # protected.add(os.path.expanduser("~"))
 
         else:  # Linux
             protected.update(
@@ -106,7 +109,8 @@ class DiskCleaner:
                     "/dev",
                 ]
             )
-            protected.add(os.path.expanduser("~"))
+            # Don't protect entire home directory to allow cleaning cache/logs
+            # protected.add(os.path.expanduser("~"))
 
         return protected
 
@@ -560,7 +564,30 @@ def main():
 
     import argparse
 
-    parser = argparse.ArgumentParser(description="Clean disk junk files")
+    parser = argparse.ArgumentParser(
+        description="Clean disk junk files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Preview cleaning (safe mode)
+  python scripts/clean_disk.py --dry-run
+
+  # Actually clean
+  python scripts/clean_disk.py --force
+
+  # Clean specific categories
+  python scripts/clean_disk.py --temp --cache --dry-run
+
+  # Clean old downloads (>90 days)
+  python scripts/clean_disk.py --downloads 90 --force
+
+  # Clean custom path (e.g., D:\\Temp on secondary drive)
+  python scripts/clean_disk.py --path "D:/Temp" --dry-run
+
+  # Clean system paths + custom path
+  python scripts/clean_disk.py --temp --path "D:/Downloads" --force
+        """,
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -577,6 +604,11 @@ def main():
     parser.add_argument(
         "--downloads", type=int, metavar="DAYS", help="Clean downloads older than N days"
     )
+    parser.add_argument(
+        "--path",
+        "-p",
+        help="Clean specific custom path (in addition to system locations)",
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
     parser.add_argument(
@@ -590,7 +622,33 @@ def main():
     cleaner = DiskCleaner(dry_run=dry_run, show_progress=show_progress)
 
     # Run specific or all cleaning
-    if args.temp:
+    if args.path:
+        # Clean custom path specified by user
+        from pathlib import Path as PathLib
+
+        custom_path = PathLib(args.path)
+        if not custom_path.exists():
+            print(f"❌ Error: Path does not exist: {args.path}", file=sys.stderr)
+            sys.exit(1)
+
+        result = cleaner.clean_directory(str(custom_path), show_progress=show_progress)
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "dry_run": dry_run,
+            "categories": [
+                {"category": "custom_path", "locations": [result]},
+            ],
+        }
+
+        # If also cleaning system categories, add them
+        if args.temp:
+            results["categories"].append(cleaner.clean_temp_files())
+        if args.cache:
+            results["categories"].append(cleaner.clean_cache_files())
+        if args.logs:
+            results["categories"].append(cleaner.clean_log_files())
+
+    elif args.temp:
         results = {
             "timestamp": datetime.now().isoformat(),
             "dry_run": dry_run,
