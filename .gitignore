@@ -69,3 +69,12 @@ benchmark_results/*.json
 docs/LARGE_SCALE_TEST_REPORT.md
 docs/PERFORMANCE_REPORT.md
 tests/benchmarks/scan_*.py
+
+# Sensitive - Task and execution plans
+task_plan.md
+docs/plans/
+performance_progress_improvement.md
+
+# Claude Code temporary files
+C:/Users/*/AppData/Local/Temp/claude/
+/tmp/claude/
