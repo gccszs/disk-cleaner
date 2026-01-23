@@ -70,9 +70,9 @@ def scan_real_directory(path: Path, name: str) -> dict:
         "error_count": result.error_count,
         "estimated_count": profile.file_count,
         "estimated_time": profile.estimated_time,
-        "estimation_accuracy": profile.file_count / result.total_count
-        if result.total_count > 0
-        else 0,
+        "estimation_accuracy": (
+            profile.file_count / result.total_count if result.total_count > 0 else 0
+        ),
     }
 
 

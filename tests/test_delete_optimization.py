@@ -10,7 +10,6 @@ Tests:
 
 from pathlib import Path
 
-
 from diskcleaner.optimization.delete import (
     AsyncDeleter,
     BatchDeleter,

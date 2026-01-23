@@ -5,10 +5,9 @@ Tests the zero-dependency progress bar implementation.
 """
 
 import sys
-
-import pytest
 import time
 
+import pytest
 
 from diskcleaner.core.progress import IndeterminateProgress, ProgressBar, progress_iterator
 
@@ -71,7 +70,7 @@ class TestProgressBar:
         # Extract bar between [ and ]
         start = progress_str.index("[")
         end = progress_str.index("]")
-        bar = progress_str[start + 1:end]
+        bar = progress_str[start + 1 : end]
 
         # Should be 30 characters (15 filled, 15 empty at 50%)
         assert len(bar) == 30

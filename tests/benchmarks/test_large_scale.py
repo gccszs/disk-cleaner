@@ -179,19 +179,9 @@ class LargeScalePerformanceTest:
             selected.extend(small[: min(2, len(small))])
 
         self.terminal.print(f"\nSelected {len(selected)} directories for testing:")
-        large_count = len(
-            [d for d in selected if d.get("estimated_files", 0) >= 10000]
-        )
-        medium_count = len(
-            [
-                d
-                for d in selected
-                if 1000 <= d.get("estimated_files", 0) < 10000
-            ]
-        )
-        small_count = len(
-            [d for d in selected if d.get("estimated_files", 0) < 1000]
-        )
+        large_count = len([d for d in selected if d.get("estimated_files", 0) >= 10000])
+        medium_count = len([d for d in selected if 1000 <= d.get("estimated_files", 0) < 10000])
+        small_count = len([d for d in selected if d.get("estimated_files", 0) < 1000])
         self.terminal.print(f"  Large dirs (≥10K): {large_count}")
         self.terminal.print(f"  Medium dirs (1K-10K): {medium_count}")
         self.terminal.print(f"  Small dirs (<1K): {small_count}")
@@ -291,9 +281,11 @@ class LargeScalePerformanceTest:
                 "error_count": result.error_count,
                 "target_met": target_met,
                 "estimated_files": dir_info.get("estimated_files", 0),
-                "estimation_accuracy": dir_info.get("estimated_files", 0) / result.total_count
-                if result.total_count > 0
-                else 0,
+                "estimation_accuracy": (
+                    dir_info.get("estimated_files", 0) / result.total_count
+                    if result.total_count > 0
+                    else 0
+                ),
             }
 
         except Exception as e:

@@ -10,14 +10,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Dict, Optional
 
-from diskcleaner.optimization.hash import (
-    AdaptiveHasher,
-    DuplicateFinder,
-)
-from diskcleaner.optimization.scan import (
-    ConcurrentScanner,
-    FileInfo,
-)
+from diskcleaner.optimization.hash import AdaptiveHasher, DuplicateFinder
+from diskcleaner.optimization.scan import ConcurrentScanner, FileInfo
 
 
 class PerformanceBenchmark:

@@ -177,7 +177,7 @@ class QuickProfiler:
                                 pass
 
                         # Calculate depth
-                        depth = root[len(str(path)):].count(os.sep)
+                        depth = root[len(str(path)) :].count(os.sep)
                         profile_data["max_depth"] = max(profile_data["max_depth"], depth)
 
             except Exception:

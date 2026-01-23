@@ -9,7 +9,6 @@ Tests:
 
 import time
 
-
 from diskcleaner.optimization.concurrency import ConcurrencyManager
 from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus
 from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport

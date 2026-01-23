@@ -141,7 +141,7 @@ class BatchDeleter:
             if cancelled:
                 break
 
-            batch = files[i:i + batch_size]
+            batch = files[i : i + batch_size]
             batch_success, batch_failed, batch_size_freed = self._delete_batch(batch)
 
             success.extend(batch_success)
@@ -262,7 +262,7 @@ class AsyncDeleter:
 
         # Split into batches
         batch_size = 100
-        batches = [files[i:i + batch_size] for i in range(0, len(files), batch_size)]
+        batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
 
         # Submit all batches
         futures = {}
