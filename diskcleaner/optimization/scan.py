@@ -19,6 +19,11 @@ from typing import Any, Dict, List, Optional
 
 from diskcleaner.optimization.memory import MemoryMonitor
 
+# Re-export for convenience
+Empty = queue.Empty
+Queue = queue.Queue
+Full = queue.Full
+
 
 @dataclass
 class ScanProfile:

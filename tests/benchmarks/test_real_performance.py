@@ -5,7 +5,6 @@ Tests actual performance on real directories with thousands of files.
 """
 
 import json
-import time
 from datetime import datetime
 from pathlib import Path
 

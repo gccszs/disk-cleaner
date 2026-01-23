@@ -5,8 +5,6 @@ Compares performance before and after optimizations.
 """
 
 import json
-import os
-import shutil
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from diskcleaner.optimization.profiler import PerformanceProfiler
-from diskcleaner.optimization.scan import ConcurrentScanner, FileInfo, QuickProfiler
+from diskcleaner.optimization.scan import ConcurrentScanner, QuickProfiler
 
 
 class SafeTerminal:
