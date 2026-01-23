@@ -34,13 +34,41 @@ class DiskAnalyzer:
         max_files: int = None,
         max_seconds: int = None,
     ):
-        self.path = path or self._get_default_path()
+        self.path = self._normalize_path(path or self._get_default_path())
         self.top_n = top_n
         self.platform = platform.system()
         self.system = platform.system().lower()
         self.show_progress = show_progress and PROGRESS_AVAILABLE and sys.stdout.isatty()
         self.max_files = max_files
         self.max_seconds = max_seconds
+
+    def _normalize_path(self, path: str) -> str:
+        """
+        Normalize path for cross-platform compatibility.
+
+        Converts backslashes to forward slashes and expands user directory.
+        This ensures paths work regardless of whether the user provides:
+        - "C:/Projects" (forward slash - recommended)
+        - "C:\\Projects" (backslash - Windows style)
+        - "~/Documents" (tilde - home directory)
+
+        Args:
+            path: Path string to normalize
+
+        Returns:
+            Normalized path string with forward slashes
+        """
+        if not path:
+            return path
+
+        # Expand ~ to home directory
+        expanded = os.path.expanduser(path)
+
+        # Convert backslashes to forward slashes for cross-platform compatibility
+        # This is safe because Python's pathlib handles forward slashes on Windows
+        normalized = expanded.replace("\\", "/")
+
+        return normalized
 
     def _get_default_path(self) -> str:
         """Get default path based on platform"""

@@ -61,6 +61,34 @@ class DiskCleaner:
             ".vhdx",
         }
 
+    def _normalize_path(self, path: str) -> str:
+        """
+        Normalize path for cross-platform compatibility.
+
+        Converts backslashes to forward slashes and expands user directory.
+        This ensures paths work regardless of whether the user provides:
+        - "C:/Projects" (forward slash - recommended)
+        - "C:\\Projects" (backslash - Windows style)
+        - "~/Documents" (tilde - home directory)
+
+        Args:
+            path: Path string to normalize
+
+        Returns:
+            Normalized path string with forward slashes
+        """
+        if not path:
+            return path
+
+        # Expand ~ to home directory
+        expanded = os.path.expanduser(path)
+
+        # Convert backslashes to forward slashes for cross-platform compatibility
+        # This is safe because Python's pathlib handles forward slashes on Windows
+        normalized = expanded.replace("\\", "/")
+
+        return normalized
+
     def _get_protected_paths(self) -> Set[str]:
         """Get paths that should never be deleted"""
         protected = set()
@@ -626,7 +654,9 @@ Examples:
         # Clean custom path specified by user
         from pathlib import Path as PathLib
 
-        custom_path = PathLib(args.path)
+        # Normalize path for cross-platform compatibility
+        normalized_path = cleaner._normalize_path(args.path)
+        custom_path = PathLib(normalized_path)
         if not custom_path.exists():
             print(f"❌ Error: Path does not exist: {args.path}", file=sys.stderr)
             sys.exit(1)
