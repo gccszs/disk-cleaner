@@ -23,13 +23,24 @@ from diskcleaner.optimization.scan import (
     ScanSnapshot,
     FileInfo,
 )
+from diskcleaner.optimization.delete import (
+    BatchDeleter,
+    AsyncDeleter,
+    SmartDeleter,
+    DeletionManager,
+    DeleteStrategy,
+    DeleteResult,
+    ProgressUpdate,
+)
 
 __all__ = [
+    # Infrastructure
     'PerformanceProfiler',
     'PerformanceReport',
     'ConcurrencyManager',
     'MemoryMonitor',
     'MemoryStatus',
+    # Scanning
     'QuickProfiler',
     'ConcurrentScanner',
     'IncrementalCache',
@@ -38,4 +49,12 @@ __all__ = [
     'ScanResult',
     'ScanSnapshot',
     'FileInfo',
+    # Deletion
+    'BatchDeleter',
+    'AsyncDeleter',
+    'SmartDeleter',
+    'DeletionManager',
+    'DeleteStrategy',
+    'DeleteResult',
+    'ProgressUpdate',
 ]
