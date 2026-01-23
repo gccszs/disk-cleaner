@@ -2,25 +2,37 @@
 """
 Disk Cleaner - Cross-platform junk file cleaner
 Safely removes temporary files, caches, logs, and other junk files
+
+Enhanced with progress bars for better user feedback.
 """
 
 import json
 import os
 import platform
 import shutil
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Set
 
+# Import progress bar from diskcleaner core
+try:
+    from diskcleaner.core.progress import ProgressBar, IndeterminateProgress
+    PROGRESS_AVAILABLE = True
+except ImportError:
+    # Fallback if diskcleaner is not installed
+    PROGRESS_AVAILABLE = False
+
 
 class DiskCleaner:
-    def __init__(self, dry_run: bool = True):
+    def __init__(self, dry_run: bool = True, show_progress: bool = True):
         self.dry_run = dry_run
         self.platform = platform.system()
         self.system = platform.system().lower()
         self.cleaned_files = []
         self.freed_space = 0
         self.errors = []
+        self.show_progress = show_progress and PROGRESS_AVAILABLE and sys.stdout.isatty()
 
         # Safety: paths to never delete
         self.protected_paths = self._get_protected_paths()
@@ -224,9 +236,21 @@ class DiskCleaner:
         return locations
 
     def clean_directory(
-        self, path: str, older_than_days: int = 0, max_size_mb: int = None, pattern: str = "*"
+        self, path: str, older_than_days: int = 0, max_size_mb: int = None, pattern: str = "*", show_progress: bool = True
     ) -> Dict:
-        """Clean a directory with safety checks"""
+        """
+        Clean a directory with safety checks and optional progress bar.
+
+        Args:
+            path: Directory path to clean
+            older_than_days: Only delete files older than this many days
+            max_size_mb: Only delete files smaller than this size (MB)
+            pattern: Glob pattern to match files
+            show_progress: Show progress bar for this operation
+
+        Returns:
+            Dictionary with cleaning results
+        """
         result = {"path": path, "files_deleted": 0, "space_freed_mb": 0, "errors": []}
 
         dir_path = Path(path)
@@ -236,7 +260,15 @@ class DiskCleaner:
         cutoff_date = datetime.now() - timedelta(days=older_than_days)
 
         try:
-            for item in dir_path.glob(pattern):
+            # Collect all items first for progress bar
+            items = list(dir_path.glob(pattern))
+
+            if self.show_progress and show_progress and len(items) > 0:
+                progress = ProgressBar(len(items), prefix=f"Cleaning {Path(path).name}")
+            else:
+                progress = None
+
+            for item in items:
                 if not item.exists():
                     continue
 
@@ -273,9 +305,16 @@ class DiskCleaner:
                         result["files_deleted"] += 1
                         result["space_freed_mb"] += size / (1024 * 1024)
 
+                    # Update progress
+                    if progress:
+                        progress.update(1, item.name)
+
                 except (PermissionError, OSError) as e:
                     result["errors"].append(str(e))
                     self.errors.append(f"{item}: {e}")
+
+            if progress:
+                progress.close()
 
         except (PermissionError, OSError) as e:
             result["errors"].append(str(e))
@@ -283,63 +322,115 @@ class DiskCleaner:
         result["space_freed_mb"] = round(result["space_freed_mb"], 2)
         return result
 
-    def clean_temp_files(self) -> Dict:
-        """Clean temporary files"""
+    def clean_temp_files(self, show_progress: bool = True) -> Dict:
+        """Clean temporary files with progress bar"""
         locations = self.get_cleanable_locations()
         results = {"category": "temp_files", "locations": []}
 
-        for temp_dir in locations.get("temp", []):
-            result = self.clean_directory(temp_dir, older_than_days=0)
+        temp_dirs = locations.get("temp", [])
+
+        if self.show_progress and show_progress and len(temp_dirs) > 0:
+            progress = ProgressBar(len(temp_dirs), prefix="Cleaning temp")
+        else:
+            progress = None
+
+        for temp_dir in temp_dirs:
+            result = self.clean_directory(temp_dir, older_than_days=0, show_progress=False)
             results["locations"].append(result)
+
+            if progress:
+                progress.update(1, Path(temp_dir).name)
+
+        if progress:
+            progress.close()
 
         return results
 
-    def clean_cache_files(self) -> Dict:
-        """Clean cache files"""
+    def clean_cache_files(self, show_progress: bool = True) -> Dict:
+        """Clean cache files with progress bar"""
         locations = self.get_cleanable_locations()
         results = {"category": "cache", "locations": []}
 
-        for cache_dir in locations.get("cache", []):
-            result = self.clean_directory(cache_dir, older_than_days=30)
+        cache_dirs = locations.get("cache", [])
+
+        if self.show_progress and show_progress and len(cache_dirs) > 0:
+            progress = ProgressBar(len(cache_dirs), prefix="Cleaning cache")
+        else:
+            progress = None
+
+        for cache_dir in cache_dirs:
+            result = self.clean_directory(cache_dir, older_than_days=30, show_progress=False)
             results["locations"].append(result)
+
+            if progress:
+                progress.update(1, Path(cache_dir).name)
+
+        if progress:
+            progress.close()
 
         return results
 
-    def clean_log_files(self) -> Dict:
-        """Clean log files"""
+    def clean_log_files(self, show_progress: bool = True) -> Dict:
+        """Clean log files with progress bar"""
         locations = self.get_cleanable_locations()
         results = {"category": "logs", "locations": []}
 
-        for log_dir in locations.get("logs", []):
-            result = self.clean_directory(log_dir, older_than_days=30, pattern="*.log")
+        log_dirs = locations.get("logs", [])
+
+        if self.show_progress and show_progress and len(log_dirs) > 0:
+            progress = ProgressBar(len(log_dirs), prefix="Cleaning logs")
+        else:
+            progress = None
+
+        for log_dir in log_dirs:
+            result = self.clean_directory(log_dir, older_than_days=30, pattern="*.log", show_progress=False)
             results["locations"].append(result)
+
+            if progress:
+                progress.update(1, Path(log_dir).name)
+
+        if progress:
+            progress.close()
 
         return results
 
-    def clean_recycle_bin(self) -> Dict:
-        """Clean recycle bin/trash"""
+    def clean_recycle_bin(self, show_progress: bool = True) -> Dict:
+        """Clean recycle bin/trash with progress bar"""
         locations = self.get_cleanable_locations()
         results = {"category": "recycle_bin", "locations": []}
 
-        for recycle_dir in locations.get("recycle", []):
-            result = self.clean_directory(recycle_dir, older_than_days=30)
+        recycle_dirs = locations.get("recycle", [])
+
+        if self.show_progress and show_progress and len(recycle_dirs) > 0:
+            progress = ProgressBar(len(recycle_dirs), prefix="Emptying recycle")
+        else:
+            progress = None
+
+        for recycle_dir in recycle_dirs:
+            result = self.clean_directory(recycle_dir, older_than_days=30, show_progress=False)
             results["locations"].append(result)
+
+            if progress:
+                progress.update(1, Path(recycle_dir).name)
+
+        if progress:
+            progress.close()
 
         return results
 
-    def clean_old_downloads(self, days: int = 90) -> Dict:
-        """Clean old download files"""
+    def clean_old_downloads(self, days: int = 90, show_progress: bool = True) -> Dict:
+        """Clean old download files with progress bar"""
         downloads_path = os.path.expanduser("~/Downloads")
         results = {"category": "old_downloads", "locations": []}
 
         if os.path.exists(downloads_path):
-            result = self.clean_directory(downloads_path, older_than_days=days)
+            result = self.clean_directory(downloads_path, older_than_days=days, show_progress=show_progress)
             results["locations"].append(result)
 
         return results
 
-    def clean_all(self) -> Dict:
-        """Run all cleaning operations"""
+    def clean_all(self, show_progress: bool = True) -> Dict:
+        """Run all cleaning operations with progress bars"""
         results = {
             "timestamp": datetime.now().isoformat(),
             "platform": self.platform,
@@ -348,19 +439,19 @@ class DiskCleaner:
         }
 
         # Clean temp files
-        temp_result = self.clean_temp_files()
+        temp_result = self.clean_temp_files(show_progress=show_progress)
         results["categories"].append(temp_result)
 
         # Clean cache
-        cache_result = self.clean_cache_files()
+        cache_result = self.clean_cache_files(show_progress=show_progress)
         results["categories"].append(cache_result)
 
         # Clean logs
-        log_result = self.clean_log_files()
+        log_result = self.clean_log_files(show_progress=show_progress)
         results["categories"].append(log_result)
 
         # Clean recycle bin
-        recycle_result = self.clean_recycle_bin()
+        recycle_result = self.clean_recycle_bin(show_progress=show_progress)
         results["categories"].append(recycle_result)
 
         # Calculate totals
@@ -448,11 +539,14 @@ def main():
     )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
+    parser.add_argument("--no-progress", action="store_true",
+                       help="Disable progress bars (useful for scripting)")
 
     args = parser.parse_args()
 
     dry_run = args.dry_run and not args.force
-    cleaner = DiskCleaner(dry_run=dry_run)
+    show_progress = not args.no_progress and not args.json
+    cleaner = DiskCleaner(dry_run=dry_run, show_progress=show_progress)
 
     # Run specific or all cleaning
     if args.temp:

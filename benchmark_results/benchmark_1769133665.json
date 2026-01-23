@@ -1,0 +1,77 @@
+{
+  "small": {
+    "scan": {
+      "test_name": "small_scan",
+      "operation": "scan",
+      "total_count": 134,
+      "total_size": 5346304,
+      "elapsed_time": 0.10721373558044434,
+      "throughput": 1249.839857500884
+    },
+    "hash": {
+      "test_name": "small_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.03530240058898926,
+      "avg_time_per_file": 0.0007060480117797852
+    },
+    "duplicate": {
+      "test_name": "small_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 3,
+      "elapsed_time": 0.01657891273498535,
+      "duplicates_found": 20
+    }
+  },
+  "medium": {
+    "scan": {
+      "test_name": "medium_scan",
+      "operation": "scan",
+      "total_count": 588,
+      "total_size": 16147760,
+      "elapsed_time": 0.11588811874389648,
+      "throughput": 5073.8592219227685
+    },
+    "hash": {
+      "test_name": "medium_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.04173159599304199,
+      "avg_time_per_file": 0.0008346319198608398
+    },
+    "duplicate": {
+      "test_name": "medium_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 2,
+      "elapsed_time": 0.03056049346923828,
+      "duplicates_found": 20
+    }
+  },
+  "large": {
+    "scan": {
+      "test_name": "large_scan",
+      "operation": "scan",
+      "total_count": 1154,
+      "total_size": 32267520,
+      "elapsed_time": 0.12063336372375488,
+      "throughput": 9566.176092400186
+    },
+    "hash": {
+      "test_name": "large_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.04856252670288086,
+      "avg_time_per_file": 0.0009712505340576171
+    },
+    "duplicate": {
+      "test_name": "large_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 2,
+      "elapsed_time": 0.024198055267333984,
+      "duplicates_found": 20
+    }
+  }
+}

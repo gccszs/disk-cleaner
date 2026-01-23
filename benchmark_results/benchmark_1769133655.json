@@ -1,0 +1,77 @@
+{
+  "small": {
+    "scan": {
+      "test_name": "small_scan",
+      "operation": "scan",
+      "total_count": 134,
+      "total_size": 5346304,
+      "elapsed_time": 0.12770414352416992,
+      "throughput": 1049.3003304519912
+    },
+    "hash": {
+      "test_name": "small_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.02909088134765625,
+      "avg_time_per_file": 0.000581817626953125
+    },
+    "duplicate": {
+      "test_name": "small_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 3,
+      "elapsed_time": 0.021484375,
+      "duplicates_found": 20
+    }
+  },
+  "medium": {
+    "scan": {
+      "test_name": "medium_scan",
+      "operation": "scan",
+      "total_count": 588,
+      "total_size": 16147760,
+      "elapsed_time": 0.11515378952026367,
+      "throughput": 5106.214936127042
+    },
+    "hash": {
+      "test_name": "medium_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.04012322425842285,
+      "avg_time_per_file": 0.0008024644851684571
+    },
+    "duplicate": {
+      "test_name": "medium_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 2,
+      "elapsed_time": 0.020627737045288086,
+      "duplicates_found": 20
+    }
+  },
+  "large": {
+    "scan": {
+      "test_name": "large_scan",
+      "operation": "scan",
+      "total_count": 1154,
+      "total_size": 32267520,
+      "elapsed_time": 0.11204004287719727,
+      "throughput": 10299.888953673952
+    },
+    "hash": {
+      "test_name": "large_hash",
+      "operation": "hash_adaptive",
+      "files_hashed": 50,
+      "elapsed_time": 0.04823112487792969,
+      "avg_time_per_file": 0.0009646224975585938
+    },
+    "duplicate": {
+      "test_name": "large_dup",
+      "operation": "duplicate_detection",
+      "files_scanned": 20,
+      "duplicate_groups": 2,
+      "elapsed_time": 0.028783321380615234,
+      "duplicates_found": 20
+    }
+  }
+}
