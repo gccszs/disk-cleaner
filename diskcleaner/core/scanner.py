@@ -43,8 +43,7 @@ PLATFORM_EXCLUDES = {
         "/.Spotlight-V100",
         "/.fseventsd",
         "/.vol",
-        "/private/var/vm",
-        "/private/var/folders",
+        "/private/var/vm",  # VM swap files
         "/Volumes/MobileBackups",
         "/dev",
         "/etc",
