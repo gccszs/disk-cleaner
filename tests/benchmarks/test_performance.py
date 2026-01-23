@@ -4,18 +4,23 @@ Performance benchmark suite for disk-cleaner optimization.
 Compares performance before and after optimizations.
 """
 
+import json
 import os
-import time
 import shutil
+import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Callable, Optional
-import json
+from typing import Callable, Dict, List, Optional
 
-from diskcleaner.optimization.scan import ConcurrentScanner, IncrementalCache
 from diskcleaner.optimization.delete import BatchDeleter
-from diskcleaner.optimization.hash import AdaptiveHasher, ParallelHasher, FastFilter, HashCache, DuplicateFinder
-from diskcleaner.optimization.scan import FileInfo
+from diskcleaner.optimization.hash import (
+    AdaptiveHasher,
+    DuplicateFinder,
+    FastFilter,
+    HashCache,
+    ParallelHasher,
+)
+from diskcleaner.optimization.scan import ConcurrentScanner, FileInfo, IncrementalCache
 
 
 class PerformanceBenchmark:
@@ -32,11 +37,14 @@ class PerformanceBenchmark:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.results: Dict[str, Dict] = {}
 
-    def create_test_environment(self, base_dir: Path,
-                               small_files: int = 100,
-                               medium_files: int = 50,
-                               large_files: int = 10,
-                               nested_dirs: int = 5) -> Path:
+    def create_test_environment(
+        self,
+        base_dir: Path,
+        small_files: int = 100,
+        medium_files: int = 50,
+        large_files: int = 10,
+        nested_dirs: int = 5,
+    ) -> Path:
         """
         Create test directory structure.
 
@@ -99,12 +107,12 @@ class PerformanceBenchmark:
         elapsed = time.time() - start
 
         stats = {
-            'test_name': name,
-            'operation': 'scan',
-            'total_count': result.total_count,
-            'total_size': result.total_size,
-            'elapsed_time': elapsed,
-            'throughput': result.total_count / elapsed if elapsed > 0 else 0,
+            "test_name": name,
+            "operation": "scan",
+            "total_count": result.total_count,
+            "total_size": result.total_size,
+            "elapsed_time": elapsed,
+            "throughput": result.total_count / elapsed if elapsed > 0 else 0,
         }
 
         print(f"Files scanned: {stats['total_count']}")
@@ -133,15 +141,17 @@ class PerformanceBenchmark:
         files = []
         for file in test_dir.rglob("*"):
             if file.is_file():
-                files.append(FileInfo(
-                    path=str(file),
-                    name=file.name,
-                    size=file.stat().st_size,
-                    mtime=file.stat().st_mtime,
-                ))
+                files.append(
+                    FileInfo(
+                        path=str(file),
+                        name=file.name,
+                        size=file.stat().st_size,
+                        mtime=file.stat().st_mtime,
+                    )
+                )
 
         if not files:
-            return {'test_name': name, 'operation': 'hash', 'error': 'No files found'}
+            return {"test_name": name, "operation": "hash", "error": "No files found"}
 
         # Adaptive hash
         hasher = AdaptiveHasher()
@@ -154,11 +164,11 @@ class PerformanceBenchmark:
         elapsed = time.time() - start
 
         stats = {
-            'test_name': name,
-            'operation': 'hash_adaptive',
-            'files_hashed': hash_count,
-            'elapsed_time': elapsed,
-            'avg_time_per_file': elapsed / hash_count if hash_count > 0 else 0,
+            "test_name": name,
+            "operation": "hash_adaptive",
+            "files_hashed": hash_count,
+            "elapsed_time": elapsed,
+            "avg_time_per_file": elapsed / hash_count if hash_count > 0 else 0,
         }
 
         print(f"Files hashed: {stats['files_hashed']}")
@@ -186,15 +196,17 @@ class PerformanceBenchmark:
         files = []
         for file in test_dir.rglob("*"):
             if file.is_file():
-                files.append(FileInfo(
-                    path=str(file),
-                    name=file.name,
-                    size=file.stat().st_size,
-                    mtime=file.stat().st_mtime,
-                ))
+                files.append(
+                    FileInfo(
+                        path=str(file),
+                        name=file.name,
+                        size=file.stat().st_size,
+                        mtime=file.stat().st_mtime,
+                    )
+                )
 
         if len(files) < 2:
-            return {'test_name': name, 'operation': 'duplicate', 'error': 'Not enough files'}
+            return {"test_name": name, "operation": "duplicate", "error": "Not enough files"}
 
         finder = DuplicateFinder(use_parallel=False, use_cache=True)
         start = time.time()
@@ -202,12 +214,12 @@ class PerformanceBenchmark:
         elapsed = time.time() - start
 
         stats = {
-            'test_name': name,
-            'operation': 'duplicate_detection',
-            'files_scanned': len(files[:20]),
-            'duplicate_groups': len(duplicates),
-            'elapsed_time': elapsed,
-            'duplicates_found': sum(g.count for g in duplicates),
+            "test_name": name,
+            "operation": "duplicate_detection",
+            "files_scanned": len(files[:20]),
+            "duplicate_groups": len(duplicates),
+            "elapsed_time": elapsed,
+            "duplicates_found": sum(g.count for g in duplicates),
         }
 
         print(f"Files scanned: {stats['files_scanned']}")
@@ -223,18 +235,18 @@ class PerformanceBenchmark:
         Returns:
             All benchmark results
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("PERFORMANCE BENCHMARK SUITE")
-        print("="*60)
+        print("=" * 60)
 
         with TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
 
             # Test scenarios
             scenarios = [
-                ('small', 100, 10, 2, 2),
-                ('medium', 500, 50, 5, 3),
-                ('large', 1000, 100, 10, 4),
+                ("small", 100, 10, 2, 2),
+                ("medium", 500, 50, 5, 3),
+                ("large", 1000, 100, 10, 4),
             ]
 
             all_results = {}
@@ -251,7 +263,7 @@ class PerformanceBenchmark:
                     small_files=small,
                     medium_files=medium,
                     large_files=large,
-                    nested_dirs=nested
+                    nested_dirs=nested,
                 )
 
                 # Run benchmarks
@@ -259,15 +271,15 @@ class PerformanceBenchmark:
 
                 # Scan benchmark
                 scan_result = self.benchmark_scan(test_dir, f"{name}_scan")
-                scenario_results['scan'] = scan_result
+                scenario_results["scan"] = scan_result
 
                 # Hash benchmark
                 hash_result = self.benchmark_hash(test_dir, f"{name}_hash")
-                scenario_results['hash'] = hash_result
+                scenario_results["hash"] = hash_result
 
                 # Duplicate detection benchmark
                 dup_result = self.benchmark_duplicate_detection(test_dir, f"{name}_dup")
-                scenario_results['duplicate'] = dup_result
+                scenario_results["duplicate"] = dup_result
 
                 all_results[name] = scenario_results
 
@@ -285,7 +297,7 @@ class PerformanceBenchmark:
         """
         output_file = self.output_dir / f"benchmark_{int(time.time())}.json"
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(results, f, indent=2)
 
         print(f"\n\nResults saved to: {output_file}")
@@ -297,28 +309,30 @@ class PerformanceBenchmark:
         Args:
             results: Benchmark results
         """
-        print("\n\n" + "="*60)
+        print("\n\n" + "=" * 60)
         print("BENCHMARK SUMMARY")
-        print("="*60)
+        print("=" * 60)
 
         for scenario_name, scenario in results.items():
             print(f"\n{scenario_name.upper()}:")
 
-            if 'scan' in scenario:
-                scan = scenario['scan']
+            if "scan" in scenario:
+                scan = scenario["scan"]
                 print(f"  Scan: {scan['throughput']:.0f} files/sec")
 
-            if 'hash' in scenario:
-                hash_result = scenario['hash']
-                if 'avg_time_per_file' in hash_result:
+            if "hash" in scenario:
+                hash_result = scenario["hash"]
+                if "avg_time_per_file" in hash_result:
                     print(f"  Hash: {hash_result['avg_time_per_file']*1000:.2f} ms/file")
 
-            if 'duplicate' in scenario:
-                dup = scenario['duplicate']
-                if 'elapsed_time' in dup:
-                    print(f"  Duplicate: {dup['elapsed_time']:.3f}s for {dup.get('files_scanned', 0)} files")
+            if "duplicate" in scenario:
+                dup = scenario["duplicate"]
+                if "elapsed_time" in dup:
+                    print(
+                        f"  Duplicate: {dup['elapsed_time']:.3f}s for {dup.get('files_scanned', 0)} files"
+                    )
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
 
 
 def main():

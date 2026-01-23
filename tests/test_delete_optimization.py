@@ -8,19 +8,20 @@ Tests:
 - DeletionManager
 """
 
-import pytest
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest
+
 from diskcleaner.optimization.delete import (
-    BatchDeleter,
     AsyncDeleter,
-    SmartDeleter,
-    DeletionManager,
-    DeleteStrategy,
+    BatchDeleter,
     DeleteResult,
+    DeleteStrategy,
+    DeletionManager,
     ProgressUpdate,
+    SmartDeleter,
 )
 
 
@@ -256,10 +257,7 @@ class TestSmartDeleter:
         test_file = tmp_path / "large.txt"
         test_file.write_bytes(b"x" * (60 * 1024 * 1024))  # 60MB
 
-        deleter = SmartDeleter(
-            use_recycle_bin=False,
-            large_file_threshold=50 * 1024 * 1024
-        )
+        deleter = SmartDeleter(use_recycle_bin=False, large_file_threshold=50 * 1024 * 1024)
 
         # Should delete directly (recycle bin disabled)
         result = deleter.delete_file(test_file)
@@ -390,11 +388,11 @@ class TestDeleteResult:
         )
 
         data = result.to_dict()
-        assert data['total_deleted'] == 1
-        assert data['total_size_freed'] == 100
-        assert isinstance(data['success'], list)
+        assert data["total_deleted"] == 1
+        assert data["total_size_freed"] == 100
+        assert isinstance(data["success"], list)
         # Path will be converted to string, platform-dependent
-        assert "file1.txt" in data['success'][0]
+        assert "file1.txt" in data["success"][0]
 
 
 class TestProgressUpdate:
@@ -427,9 +425,9 @@ class TestProgressUpdate:
         )
 
         data = update.to_dict()
-        assert data['current'] == 10
-        assert data['percent'] == 10.0
-        assert data['total_batches'] == 10
+        assert data["current"] == 10
+        assert data["percent"] == 10.0
+        assert data["total_batches"] == 10
 
 
 class TestDeleteStrategy:

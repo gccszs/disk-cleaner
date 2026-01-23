@@ -8,12 +8,13 @@ Tests:
 """
 
 import time
-import pytest
 from pathlib import Path
 
-from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport
+import pytest
+
 from diskcleaner.optimization.concurrency import ConcurrencyManager
 from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus
+from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport
 
 
 class TestPerformanceProfiler:
@@ -29,22 +30,22 @@ class TestPerformanceProfiler:
         """Test profiling with context manager."""
         profiler = PerformanceProfiler()
 
-        with profiler.profile('test_operation'):
+        with profiler.profile("test_operation"):
             time.sleep(0.1)  # Simulate work
 
         # Check metrics were recorded
-        assert 'test_operation_time' in profiler.metrics
-        assert len(profiler.metrics['test_operation_time']) == 1
-        assert profiler.metrics['test_operation_time'][0] >= 0.1
+        assert "test_operation_time" in profiler.metrics
+        assert len(profiler.metrics["test_operation_time"]) == 1
+        assert profiler.metrics["test_operation_time"][0] >= 0.1
 
     def test_get_operation_time(self):
         """Test getting operation time."""
         profiler = PerformanceProfiler()
 
-        with profiler.profile('scan'):
+        with profiler.profile("scan"):
             time.sleep(0.05)
 
-        scan_time = profiler.get_operation_time('scan')
+        scan_time = profiler.get_operation_time("scan")
         assert scan_time is not None
         assert scan_time >= 0.05
 
@@ -54,10 +55,10 @@ class TestPerformanceProfiler:
 
         # Run same operation multiple times
         for _ in range(3):
-            with profiler.profile('repeat'):
+            with profiler.profile("repeat"):
                 time.sleep(0.01)
 
-        avg_time = profiler.get_average_time('repeat')
+        avg_time = profiler.get_average_time("repeat")
         assert avg_time >= 0.01
         assert avg_time < 0.1  # Should be reasonable
 
@@ -65,13 +66,13 @@ class TestPerformanceProfiler:
         """Test generating performance report."""
         profiler = PerformanceProfiler()
 
-        with profiler.profile('scan'):
+        with profiler.profile("scan"):
             time.sleep(0.05)
 
-        report = profiler.generate_report('scan', item_count=1000)
+        report = profiler.generate_report("scan", item_count=1000)
 
         assert isinstance(report, PerformanceReport)
-        assert report.operation == 'scan'
+        assert report.operation == "scan"
         assert report.item_count == 1000
         assert report.total_time >= 0.05
         assert report.throughput > 0
@@ -81,23 +82,23 @@ class TestPerformanceProfiler:
         profiler = PerformanceProfiler()
 
         # Simulate multiple operations
-        with profiler.profile('fast'):
+        with profiler.profile("fast"):
             time.sleep(0.01)
 
-        with profiler.profile('slow'):
+        with profiler.profile("slow"):
             time.sleep(0.05)
 
-        with profiler.profile('medium'):
+        with profiler.profile("medium"):
             time.sleep(0.02)
 
         bottleneck = profiler.identify_bottleneck()
-        assert bottleneck == 'slow'
+        assert bottleneck == "slow"
 
     def test_reset(self):
         """Test resetting profiler."""
         profiler = PerformanceProfiler()
 
-        with profiler.profile('test'):
+        with profiler.profile("test"):
             pass
 
         assert len(profiler.metrics) > 0
@@ -109,23 +110,23 @@ class TestPerformanceProfiler:
         """Test generating summary."""
         profiler = PerformanceProfiler()
 
-        with profiler.profile('scan'):
+        with profiler.profile("scan"):
             time.sleep(0.01)
 
         summary = profiler.summary()
-        assert 'Performance Summary' in summary
-        assert 'scan' in summary.lower()
+        assert "Performance Summary" in summary
+        assert "scan" in summary.lower()
 
     def test_manual_record(self):
         """Test manual metric recording."""
         profiler = PerformanceProfiler()
 
-        profiler.record('custom', 1.5, 'time')
-        profiler.record('custom', 100, 'throughput')
+        profiler.record("custom", 1.5, "time")
+        profiler.record("custom", 100, "throughput")
 
-        assert 'custom_time' in profiler.metrics
-        assert profiler.metrics['custom_time'] == [1.5]
-        assert profiler.metrics['custom_throughput'] == [100]
+        assert "custom_time" in profiler.metrics
+        assert profiler.metrics["custom_time"] == [1.5]
+        assert profiler.metrics["custom_throughput"] == [100]
 
 
 class TestConcurrencyManager:
@@ -141,21 +142,21 @@ class TestConcurrencyManager:
         """Test getting thread pool."""
         manager = ConcurrencyManager()
 
-        pool = manager.get_thread_pool('io_scan')
+        pool = manager.get_thread_pool("io_scan")
         assert pool is not None
         assert manager.is_initialized()
 
         # Same pool should be returned
-        pool2 = manager.get_thread_pool('io_scan')
+        pool2 = manager.get_thread_pool("io_scan")
         assert pool is pool2
 
     def test_multiple_pools(self):
         """Test creating multiple pools."""
         manager = ConcurrencyManager()
 
-        pool1 = manager.get_thread_pool('io_scan')
-        pool2 = manager.get_thread_pool('io_delete')
-        pool3 = manager.get_thread_pool('ui_update')
+        pool1 = manager.get_thread_pool("io_scan")
+        pool2 = manager.get_thread_pool("io_delete")
+        pool3 = manager.get_thread_pool("ui_update")
 
         assert pool1 is not pool2
         assert pool2 is not pool3
@@ -166,20 +167,20 @@ class TestConcurrencyManager:
         manager = ConcurrencyManager()
 
         # I/O bound should get more threads
-        io_workers = manager._optimal_threads('io_scan')
+        io_workers = manager._optimal_threads("io_scan")
         assert io_workers >= 1
         assert io_workers <= 32  # Capped at 32
 
         # UI updates should get minimal threads
-        ui_workers = manager._optimal_threads('ui_update')
+        ui_workers = manager._optimal_threads("ui_update")
         assert ui_workers == 2
 
     def test_shutdown_pool(self):
         """Test shutting down specific pool."""
         manager = ConcurrencyManager()
 
-        pool = manager.get_thread_pool('test')
-        manager.shutdown_pool('test')
+        pool = manager.get_thread_pool("test")
+        manager.shutdown_pool("test")
 
         # Pool should be removed
         assert manager.get_pool_count() == 0
@@ -188,9 +189,9 @@ class TestConcurrencyManager:
         """Test shutting down all pools."""
         manager = ConcurrencyManager()
 
-        manager.get_thread_pool('io_scan')
-        manager.get_thread_pool('io_delete')
-        manager.get_process_pool('hash_compute')
+        manager.get_thread_pool("io_scan")
+        manager.get_thread_pool("io_delete")
+        manager.get_process_pool("hash_compute")
 
         assert manager.get_pool_count() == 3
 
@@ -201,7 +202,7 @@ class TestConcurrencyManager:
     def test_context_manager(self):
         """Test using as context manager."""
         with ConcurrencyManager() as manager:
-            manager.get_thread_pool('test')
+            manager.get_thread_pool("test")
             assert manager.is_initialized()
 
         # Pools should be shutdown after exit
@@ -241,7 +242,7 @@ class TestMemoryMonitor:
         assert info.current_mb > 0
         assert info.threshold_mb == 1000
         assert 0 <= info.percent_used <= 100
-        assert info.suggestion in ['CONTINUE', 'REDUCE_CONCURRENCY', 'STOP_AND_GC']
+        assert info.suggestion in ["CONTINUE", "REDUCE_CONCURRENCY", "STOP_AND_GC"]
 
     def test_should_pause(self):
         """Test pause decision."""
@@ -281,21 +282,21 @@ class TestMemoryMonitor:
 
         # Test MB format
         result = monitor.format_memory(100 * 1024 * 1024)
-        assert 'MB' in result
-        assert '100.0' in result
+        assert "MB" in result
+        assert "100.0" in result
 
         # Test GB format
         result = monitor.format_memory(2 * 1024 * 1024 * 1024)
-        assert 'GB' in result
+        assert "GB" in result
 
     def test_summary(self):
         """Test generating summary."""
         monitor = MemoryMonitor(threshold_mb=1000)
 
         summary = monitor.summary()
-        assert 'Memory Status' in summary
-        assert 'Usage' in summary
-        assert 'Suggestion' in summary
+        assert "Memory Status" in summary
+        assert "Usage" in summary
+        assert "Suggestion" in summary
 
     def test_set_threshold(self):
         """Test updating threshold."""
@@ -314,13 +315,14 @@ class TestIntegration:
         profiler = PerformanceProfiler()
         manager = ConcurrencyManager()
 
-        with profiler.profile('concurrent_test'):
-            pool = manager.get_thread_pool('test')
+        with profiler.profile("concurrent_test"):
+            pool = manager.get_thread_pool("test")
             # Simulate some work
             import time
+
             time.sleep(0.05)
 
-        report = profiler.generate_report('concurrent_test', 100)
+        report = profiler.generate_report("concurrent_test", 100)
         assert report.total_time >= 0.05
 
         manager.shutdown_all()
@@ -331,7 +333,7 @@ class TestIntegration:
         profiler = PerformanceProfiler()
 
         for i in range(5):
-            with profiler.profile(f'iteration_{i}'):
+            with profiler.profile(f"iteration_{i}"):
                 # Simulate work
                 time.sleep(0.01)
 

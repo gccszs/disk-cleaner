@@ -17,7 +17,8 @@ from typing import Dict, List, Set
 
 # Import progress bar from diskcleaner core
 try:
-    from diskcleaner.core.progress import ProgressBar, IndeterminateProgress
+    from diskcleaner.core.progress import ProgressBar
+
     PROGRESS_AVAILABLE = True
 except ImportError:
     # Fallback if diskcleaner is not installed
@@ -236,7 +237,12 @@ class DiskCleaner:
         return locations
 
     def clean_directory(
-        self, path: str, older_than_days: int = 0, max_size_mb: int = None, pattern: str = "*", show_progress: bool = True
+        self,
+        path: str,
+        older_than_days: int = 0,
+        max_size_mb: int = None,
+        pattern: str = "*",
+        show_progress: bool = True,
     ) -> Dict:
         """
         Clean a directory with safety checks and optional progress bar.
@@ -383,7 +389,9 @@ class DiskCleaner:
             progress = None
 
         for log_dir in log_dirs:
-            result = self.clean_directory(log_dir, older_than_days=30, pattern="*.log", show_progress=False)
+            result = self.clean_directory(
+                log_dir, older_than_days=30, pattern="*.log", show_progress=False
+            )
             results["locations"].append(result)
 
             if progress:
@@ -424,7 +432,9 @@ class DiskCleaner:
         results = {"category": "old_downloads", "locations": []}
 
         if os.path.exists(downloads_path):
-            result = self.clean_directory(downloads_path, older_than_days=days, show_progress=show_progress)
+            result = self.clean_directory(
+                downloads_path, older_than_days=days, show_progress=show_progress
+            )
             results["locations"].append(result)
 
         return results
@@ -539,8 +549,9 @@ def main():
     )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
-    parser.add_argument("--no-progress", action="store_true",
-                       help="Disable progress bars (useful for scripting)")
+    parser.add_argument(
+        "--no-progress", action="store_true", help="Disable progress bars (useful for scripting)"
+    )
 
     args = parser.parse_args()
 

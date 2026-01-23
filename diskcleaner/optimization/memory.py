@@ -4,15 +4,15 @@ Memory monitoring and management.
 Monitors memory usage and provides suggestions to prevent OOM.
 """
 
-import os
 import gc
-from enum import Enum
+import os
 from dataclasses import dataclass
-from typing import Optional
+from enum import Enum
 
 
 class MemoryStatus(Enum):
     """Memory usage status."""
+
     OK = "OK"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
@@ -21,6 +21,7 @@ class MemoryStatus(Enum):
 @dataclass
 class MemoryInfo:
     """Current memory information."""
+
     status: MemoryStatus
     current_mb: float
     threshold_mb: float
@@ -59,11 +60,13 @@ class MemoryMonitor:
         """
         try:
             import psutil
+
             process = psutil.Process(os.getpid())
             return process.memory_info().rss
         except ImportError:
             # Fallback: use tracemalloc
             import tracemalloc
+
             if not tracemalloc.is_tracing():
                 tracemalloc.start()
             current, _ = tracemalloc.get_traced_memory()
@@ -199,7 +202,10 @@ class MemoryMonitor:
         info = self.get_memory_info()
         lines = [
             f"Memory Status: {info.status.value}",
-            f"Usage: {info.current_mb:.1f} MB / {info.threshold_mb:.0f} MB ({info.percent_used:.1f}%)",
+            (
+                f"Usage: {info.current_mb:.1f} MB / "
+                f"{info.threshold_mb:.0f} MB ({info.percent_used:.1f}%)"
+            ),
             f"Suggestion: {info.suggestion}",
         ]
         return "\n".join(lines)

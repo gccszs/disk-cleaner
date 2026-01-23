@@ -8,29 +8,28 @@ Provides:
 """
 
 import os
-import time
 import shutil
 import threading
-from pathlib import Path
-from dataclasses import dataclass, field
-from typing import List, Tuple, Optional, Dict, Any, Iterator
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from queue import Queue, Empty
+from dataclasses import dataclass
 from enum import Enum
-
-from diskcleaner.optimization.memory import MemoryMonitor
+from pathlib import Path
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 
 class DeleteStrategy(Enum):
     """Deletion strategy types."""
-    DELETE_DIRECT = "direct"      # Direct delete (fastest)
-    DELETE_RECYCLE = "recycle"    # Move to recycle bin
-    DELETE_SMART = "smart"        # Smart selection
+
+    DELETE_DIRECT = "direct"  # Direct delete (fastest)
+    DELETE_RECYCLE = "recycle"  # Move to recycle bin
+    DELETE_SMART = "smart"  # Smart selection
 
 
 @dataclass
 class DeleteResult:
     """Result of a delete operation."""
+
     success: List[Path]
     failed: List[Path]
     total_deleted: int
@@ -42,19 +41,20 @@ class DeleteResult:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'success': [str(p) for p in self.success],
-            'failed': [str(p) for p in self.failed],
-            'total_deleted': self.total_deleted,
-            'total_failed': self.total_failed,
-            'total_size_freed': self.total_size_freed,
-            'elapsed_time': self.elapsed_time,
-            'cancelled': self.cancelled,
+            "success": [str(p) for p in self.success],
+            "failed": [str(p) for p in self.failed],
+            "total_deleted": self.total_deleted,
+            "total_failed": self.total_failed,
+            "total_size_freed": self.total_size_freed,
+            "elapsed_time": self.elapsed_time,
+            "cancelled": self.cancelled,
         }
 
 
 @dataclass
 class ProgressUpdate:
     """Progress update for deletion operations."""
+
     current: int
     total: int
     percent: float
@@ -66,13 +66,13 @@ class ProgressUpdate:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'current': self.current,
-            'total': self.total,
-            'percent': self.percent,
-            'batch': self.batch,
-            'total_batches': self.total_batches,
-            'current_file': self.current_file,
-            'speed': self.speed,
+            "current": self.current,
+            "total": self.total,
+            "percent": self.percent,
+            "batch": self.batch,
+            "total_batches": self.total_batches,
+            "current_file": self.current_file,
+            "speed": self.speed,
         }
 
 
@@ -91,9 +91,9 @@ class BatchDeleter:
             progress_callback: Optional callback for progress updates
         """
         self.batch_config = {
-            'small': {'count': 1000, 'interval': 0.1},
-            'medium': {'count': 5000, 'interval': 0.5},
-            'large': {'count': 10000, 'interval': 1.0},
+            "small": {"count": 1000, "interval": 0.1},
+            "medium": {"count": 5000, "interval": 0.5},
+            "large": {"count": 10000, "interval": 1.0},
         }
         self.progress_callback = progress_callback
 
@@ -122,14 +122,14 @@ class BatchDeleter:
         # Select batch strategy
         file_count = len(files)
         if file_count < 5000:
-            config = self.batch_config['small']
+            config = self.batch_config["small"]
         elif file_count < 20000:
-            config = self.batch_config['medium']
+            config = self.batch_config["medium"]
         else:
-            config = self.batch_config['large']
+            config = self.batch_config["large"]
 
-        batch_size = config['count']
-        interval = config['interval']
+        batch_size = config["count"]
+        interval = config["interval"]
 
         success = []
         failed = []
@@ -141,7 +141,7 @@ class BatchDeleter:
             if cancelled:
                 break
 
-            batch = files[i:i + batch_size]
+            batch = files[i : i + batch_size]
             batch_success, batch_failed, batch_size_freed = self._delete_batch(batch)
 
             success.extend(batch_success)
@@ -262,7 +262,7 @@ class AsyncDeleter:
 
         # Split into batches
         batch_size = 100
-        batches = [files[i:i + batch_size] for i in range(0, len(files), batch_size)]
+        batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
 
         # Submit all batches
         futures = {}
@@ -284,9 +284,9 @@ class AsyncDeleter:
 
             try:
                 result = future.result(timeout=30.0)
-                total_deleted += result['deleted']
-                total_failed += result['failed']
-                total_size += result['size_freed']
+                total_deleted += result["deleted"]
+                total_failed += result["failed"]
+                total_size += result["size_freed"]
 
                 # Yield progress update
                 elapsed = time.time() - start_time
@@ -356,10 +356,10 @@ class AsyncDeleter:
                 failed += 1
 
         return {
-            'batch_id': batch_id,
-            'deleted': deleted,
-            'failed': failed,
-            'size_freed': size_freed,
+            "batch_id": batch_id,
+            "deleted": deleted,
+            "failed": failed,
+            "size_freed": size_freed,
         }
 
     def cancel(self):
@@ -381,9 +381,7 @@ class SmartDeleter:
     Automatically chooses optimal deletion strategy based on file characteristics.
     """
 
-    def __init__(self,
-                 use_recycle_bin: bool = False,
-                 large_file_threshold: int = 50 * 1024 * 1024):
+    def __init__(self, use_recycle_bin: bool = False, large_file_threshold: int = 50 * 1024 * 1024):
         """
         Initialize smart deleter.
 
@@ -438,12 +436,12 @@ class SmartDeleter:
 
         # System paths go to recycle bin
         path_str = str(file).lower()
-        system_indicators = ['windows', 'program files', 'system', 'library']
+        system_indicators = ["windows", "program files", "system", "library"]
         if any(indicator in path_str for indicator in system_indicators):
             return True
 
         # User data goes to recycle bin
-        user_indicators = ['users', 'home', 'documents', 'desktop']
+        user_indicators = ["users", "home", "documents", "desktop"]
         if any(indicator in path_str for indicator in user_indicators):
             return True
 
@@ -462,14 +460,16 @@ class SmartDeleter:
         """
         try:
             # Platform-specific implementation
-            if os.name == 'nt':  # Windows
+            if os.name == "nt":  # Windows
                 import send2trash
+
                 send2trash.send2trash(str(file))
                 return True
             else:  # macOS/Linux
                 # Try send2trash if available
                 try:
                     import send2trash
+
                     send2trash.send2trash(str(file))
                     return True
                 except ImportError:
@@ -499,9 +499,9 @@ class DeletionManager:
     Provides unified interface for all deletion strategies.
     """
 
-    def __init__(self,
-                 strategy: DeleteStrategy = DeleteStrategy.DELETE_SMART,
-                 progress_callback=None):
+    def __init__(
+        self, strategy: DeleteStrategy = DeleteStrategy.DELETE_SMART, progress_callback=None
+    ):
         """
         Initialize deletion manager.
 

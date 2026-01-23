@@ -31,11 +31,7 @@ class ProgressBar:
     """
 
     def __init__(
-        self,
-        total: int,
-        prefix: str = "",
-        width: int = 40,
-        enable: Optional[bool] = None
+        self, total: int, prefix: str = "", width: int = 40, enable: Optional[bool] = None
     ):
         """
         Initialize progress bar.
@@ -143,7 +139,7 @@ class ProgressBar:
             f"[{bar}]",
             f"{percent_str}",
             f"({self.current}/{self.total})",
-            f"ETA: {eta_str}"
+            f"ETA: {eta_str}",
         ]
 
         # Add current item if provided
@@ -151,7 +147,7 @@ class ProgressBar:
             # Truncate long item names
             max_item_length = 50
             if len(item) > max_item_length:
-                item = "..." + item[-(max_item_length - 3):]
+                item = "..." + item[-(max_item_length - 3) :]
             parts.append(f"| {item}")
 
         return " ".join(parts)
@@ -260,17 +256,12 @@ class IndeterminateProgress:
         elapsed_str = self._format_time(elapsed)
 
         # Build display
-        parts = [
-            self.prefix,
-            f"{frame}",
-            f"({self.item_count} items)",
-            f"elapsed: {elapsed_str}"
-        ]
+        parts = [self.prefix, f"{frame}", f"({self.item_count} items)", f"elapsed: {elapsed_str}"]
 
         if item:
             max_item_length = 50
             if len(item) > max_item_length:
-                item = "..." + item[-(max_item_length - 3):]
+                item = "..." + item[-(max_item_length - 3) :]
             parts.append(f"| {item}")
 
         display_str = " ".join(parts)
@@ -305,7 +296,9 @@ class IndeterminateProgress:
             elapsed_str = self._format_time(elapsed)
 
             # Show completion message
-            sys.stdout.write(f"\r{self.prefix} ✓ Completed ({self.item_count} items in {elapsed_str})\n")
+            sys.stdout.write(
+                f"\r{self.prefix} ✓ Completed ({self.item_count} items in {elapsed_str})\n"
+            )
             sys.stdout.flush()
 
         self.closed = True

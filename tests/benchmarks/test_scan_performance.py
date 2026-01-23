@@ -6,8 +6,8 @@ Tests the performance improvements of os.scandir() over Path.glob/iterdir().
 
 import os
 import platform
-import time
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -268,11 +268,7 @@ class TestRealWorldPerformance:
             pytest.skip("Home directory not found")
 
         # Limit to prevent scanning too many files
-        scanner = DirectoryScanner(
-            str(home),
-            max_files=5000,
-            max_seconds=10
-        )
+        scanner = DirectoryScanner(str(home), max_files=5000, max_seconds=10)
 
         start = time.time()
         files = scanner.scan()

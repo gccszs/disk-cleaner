@@ -8,15 +8,14 @@ Provides:
 - HashCache: LRU cache for computed hashes
 """
 
-import os
 import hashlib
+import os
 import threading
-from pathlib import Path
-from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple, Callable
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from collections import OrderedDict
-import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Dict, List, Optional, Tuple
 
 from diskcleaner.optimization.scan import FileInfo
 
@@ -24,6 +23,7 @@ from diskcleaner.optimization.scan import FileInfo
 @dataclass
 class DuplicateGroup:
     """Group of duplicate files."""
+
     files: List[FileInfo]
     size: int
     count: int
@@ -33,11 +33,11 @@ class DuplicateGroup:
     def to_dict(self) -> dict:
         """Convert to dictionary."""
         return {
-            'files': [f.to_dict() for f in self.files],
-            'size': self.size,
-            'count': self.count,
-            'hash': self.hash_value,
-            'reclaimable': self.reclaimable_space,
+            "files": [f.to_dict() for f in self.files],
+            "size": self.size,
+            "count": self.count,
+            "hash": self.hash_value,
+            "reclaimable": self.reclaimable_space,
         }
 
 
@@ -51,7 +51,7 @@ class AdaptiveHasher:
     - Large files (> 100MB): Multi-segment sampling
     """
 
-    def __init__(self, algorithm: str = 'auto', chunk_size: int = 1024 * 1024):
+    def __init__(self, algorithm: str = "auto", chunk_size: int = 1024 * 1024):
         """
         Initialize adaptive hasher.
 
@@ -92,9 +92,9 @@ class AdaptiveHasher:
         """Compute full file hash."""
         h = self.algorithm()
 
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             # Use large chunk reading for efficiency
-            for chunk in iter(lambda: f.read(self.chunk_size), b''):
+            for chunk in iter(lambda: f.read(self.chunk_size), b""):
                 h.update(chunk)
 
         return h.hexdigest()
@@ -113,7 +113,7 @@ class AdaptiveHasher:
         h = self.algorithm()
         size = file.stat().st_size
 
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             for chunk_pos in chunks:
                 offset = int(size * chunk_pos)
                 f.seek(offset)
@@ -136,7 +136,7 @@ class AdaptiveHasher:
         h = self.algorithm()
         size = file.stat().st_size
 
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             for i in range(chunks):
                 offset = int(size * i / chunks)
                 f.seek(offset)
@@ -155,35 +155,39 @@ class AdaptiveHasher:
         Returns:
             Hash constructor function
         """
-        if algorithm == 'auto':
+        if algorithm == "auto":
             # Try fastest available
             try:
                 import xxhash
+
                 return xxhash.xxh3_128
             except ImportError:
                 pass
 
             try:
                 import blake3
+
                 return blake3.blake3
             except ImportError:
                 pass
 
             return hashlib.sha256
 
-        elif algorithm == 'sha256':
+        elif algorithm == "sha256":
             return hashlib.sha256
 
-        elif algorithm == 'xxhash':
+        elif algorithm == "xxhash":
             try:
                 import xxhash
+
                 return xxhash.xxh3_128
             except ImportError:
                 return hashlib.sha256
 
-        elif algorithm == 'blake3':
+        elif algorithm == "blake3":
             try:
                 import blake3
+
                 return blake3.blake3
             except ImportError:
                 return hashlib.sha256
@@ -199,7 +203,7 @@ class ParallelHasher:
     Optimized for CPU-bound hash computation.
     """
 
-    def __init__(self, max_workers: Optional[int] = None, algorithm: str = 'auto'):
+    def __init__(self, max_workers: Optional[int] = None, algorithm: str = "auto"):
         """
         Initialize parallel hasher.
 
@@ -211,9 +215,7 @@ class ParallelHasher:
         self.algorithm = algorithm
         self.executor: Optional[ProcessPoolExecutor] = None
 
-    def hash_files_parallel(self,
-                           files: List[Path],
-                           progress_callback=None) -> Dict[Path, str]:
+    def hash_files_parallel(self, files: List[Path], progress_callback=None) -> Dict[Path, str]:
         """
         Compute hashes for multiple files in parallel.
 
@@ -249,11 +251,13 @@ class ParallelHasher:
             completed += 1
 
             if progress_callback:
-                progress_callback({
-                    'current': completed,
-                    'total': len(files),
-                    'file': str(file),
-                })
+                progress_callback(
+                    {
+                        "current": completed,
+                        "total": len(files),
+                        "file": str(file),
+                    }
+                )
 
         # Cleanup
         self.executor.shutdown(wait=True)
@@ -262,7 +266,7 @@ class ParallelHasher:
         return result
 
     @staticmethod
-    def _hash_single_file(file_path: str, algorithm: str = 'auto') -> str:
+    def _hash_single_file(file_path: str, algorithm: str = "auto") -> str:
         """
         Static method: Compute hash for a single file.
 
@@ -320,9 +324,9 @@ class FastFilter:
 
         return candidates
 
-    def filter_by_extension(self,
-                           files: List[FileInfo],
-                           extensions: Optional[List[str]] = None) -> List[FileInfo]:
+    def filter_by_extension(
+        self, files: List[FileInfo], extensions: Optional[List[str]] = None
+    ) -> List[FileInfo]:
         """
         Filter files by extension.
 
@@ -339,10 +343,9 @@ class FastFilter:
         ext_set = set(ext.lower() for ext in extensions)
         return [f for f in files if Path(f.path).suffix.lower() in ext_set]
 
-    def filter_by_size(self,
-                      files: List[FileInfo],
-                      min_size: int = 0,
-                      max_size: Optional[int] = None) -> List[FileInfo]:
+    def filter_by_size(
+        self, files: List[FileInfo], min_size: int = 0, max_size: Optional[int] = None
+    ) -> List[FileInfo]:
         """
         Filter files by size range.
 
@@ -382,9 +385,7 @@ class HashCache:
         self.hits = 0
         self.misses = 0
 
-    def get_or_compute(self,
-                      file: Path,
-                      compute_func: Optional[Callable] = None) -> Optional[str]:
+    def get_or_compute(self, file: Path, compute_func: Optional[Callable] = None) -> Optional[str]:
         """
         Get cached hash or compute if not cached.
 
@@ -513,11 +514,11 @@ class HashCache:
             hit_rate = self.hits / total if total > 0 else 0
 
             return {
-                'size': len(self.cache),
-                'max_size': self.max_size,
-                'hits': self.hits,
-                'misses': self.misses,
-                'hit_rate': int(hit_rate * 100),  # percentage
+                "size": len(self.cache),
+                "max_size": self.max_size,
+                "hits": self.hits,
+                "misses": self.misses,
+                "hit_rate": int(hit_rate * 100),  # percentage
             }
 
 
@@ -528,10 +529,7 @@ class DuplicateFinder:
     Combines all optimization components for efficient duplicate detection.
     """
 
-    def __init__(self,
-                 use_parallel: bool = True,
-                 use_cache: bool = True,
-                 algorithm: str = 'auto'):
+    def __init__(self, use_parallel: bool = True, use_cache: bool = True, algorithm: str = "auto"):
         """
         Initialize duplicate finder.
 
@@ -555,9 +553,9 @@ class DuplicateFinder:
         if use_cache:
             self.cache = HashCache()
 
-    def find_duplicates(self,
-                       files: List[FileInfo],
-                       progress_callback=None) -> List[DuplicateGroup]:
+    def find_duplicates(
+        self, files: List[FileInfo], progress_callback=None
+    ) -> List[DuplicateGroup]:
         """
         Find duplicate files using adaptive strategy.
 
@@ -573,7 +571,7 @@ class DuplicateFinder:
 
         # Step 1: Fast pre-filtering
         if progress_callback:
-            progress_callback({'stage': 'filtering', 'message': 'Quick pre-filtering'})
+            progress_callback({"stage": "filtering", "message": "Quick pre-filtering"})
 
         candidates = self.filter.quick_dedup(files)
 
@@ -587,7 +585,7 @@ class DuplicateFinder:
 
         # Step 2: Compute hashes
         if progress_callback:
-            progress_callback({'stage': 'hashing', 'message': 'Computing hashes'})
+            progress_callback({"stage": "hashing", "message": "Computing hashes"})
 
         if self.use_parallel and len(files_to_hash) > 10:
             hashes = self._hash_parallel(files_to_hash, progress_callback)
@@ -610,22 +608,22 @@ class DuplicateFinder:
         for hash_value, group in hash_groups.items():
             if len(group) > 1:  # Only if multiple files have same hash
                 size = group[0].size
-                duplicates.append(DuplicateGroup(
-                    files=group,
-                    size=size,
-                    count=len(group),
-                    hash_value=hash_value,
-                    reclaimable_space=size * (len(group) - 1),
-                ))
+                duplicates.append(
+                    DuplicateGroup(
+                        files=group,
+                        size=size,
+                        count=len(group),
+                        hash_value=hash_value,
+                        reclaimable_space=size * (len(group) - 1),
+                    )
+                )
 
         # Sort by reclaimable space (descending)
         duplicates.sort(key=lambda d: d.reclaimable_space, reverse=True)
 
         return duplicates
 
-    def _hash_sequential(self,
-                        files: List[FileInfo],
-                        progress_callback=None) -> Dict[str, str]:
+    def _hash_sequential(self, files: List[FileInfo], progress_callback=None) -> Dict[str, str]:
         """Compute hashes sequentially."""
         hashes = {}
 
@@ -633,33 +631,27 @@ class DuplicateFinder:
             file = Path(file_info.path)
 
             if self.cache:
-                hash_value = self.cache.get_or_compute(
-                    file,
-                    self.hasher.compute_hash
-                )
+                hash_value = self.cache.get_or_compute(file, self.hasher.compute_hash)
             else:
                 hash_value = self.hasher.compute_hash(file)
 
             hashes[file_info.path] = hash_value
 
             if progress_callback and i % 10 == 0:
-                progress_callback({
-                    'current': i,
-                    'total': len(files),
-                })
+                progress_callback(
+                    {
+                        "current": i,
+                        "total": len(files),
+                    }
+                )
 
         return hashes
 
-    def _hash_parallel(self,
-                      files: List[FileInfo],
-                      progress_callback=None) -> Dict[str, str]:
+    def _hash_parallel(self, files: List[FileInfo], progress_callback=None) -> Dict[str, str]:
         """Compute hashes in parallel."""
         file_paths = [Path(f.path) for f in files]
 
-        hashes = self.parallel_hasher.hash_files_parallel(
-            file_paths,
-            progress_callback
-        )
+        hashes = self.parallel_hasher.hash_files_parallel(file_paths, progress_callback)
 
         return hashes
 

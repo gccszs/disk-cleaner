@@ -16,8 +16,9 @@ from typing import Dict, List
 
 # Import progress bar from diskcleaner core
 try:
-    from diskcleaner.core.progress import ProgressBar, IndeterminateProgress
+    from diskcleaner.core.progress import ProgressBar
     from diskcleaner.core.scanner import DirectoryScanner
+
     PROGRESS_AVAILABLE = True
 except ImportError:
     # Fallback if diskcleaner is not installed
@@ -92,7 +93,7 @@ class DiskAnalyzer:
                         str(scan_path),
                         max_files=50000,
                         max_seconds=30,
-                        cache_enabled=False  # Disable cache for one-time scan
+                        cache_enabled=False,  # Disable cache for one-time scan
                     )
 
                     print(f"\n🔍 Scanning {scan_path}...")
@@ -107,12 +108,14 @@ class DiskAnalyzer:
                             all_dirs[file_info.path] = file_info
                         elif not file_info.is_dir and file_info.size > 10 * 1024 * 1024:
                             # Only track files > 10MB
-                            all_files.append({
-                                "path": file_info.path,
-                                "name": file_info.name,
-                                "size_gb": round(file_info.size / (1024**3), 2),
-                                "size_mb": round(file_info.size / (1024**2), 2),
-                            })
+                            all_files.append(
+                                {
+                                    "path": file_info.path,
+                                    "name": file_info.name,
+                                    "size_gb": round(file_info.size / (1024**3), 2),
+                                    "size_mb": round(file_info.size / (1024**2), 2),
+                                }
+                            )
 
                     # Now calculate directory sizes (top-level only)
                     print("📊 Analyzing directory sizes...")
@@ -122,12 +125,14 @@ class DiskAnalyzer:
                             try:
                                 size = self._get_dir_size_fast(Path(dir_path))
                                 if size > 0:
-                                    results["directories"].append({
-                                        "path": dir_path,
-                                        "name": dir_info.name,
-                                        "size_gb": round(size / (1024**3), 2),
-                                        "size_mb": round(size / (1024**2), 2),
-                                    })
+                                    results["directories"].append(
+                                        {
+                                            "path": dir_path,
+                                            "name": dir_info.name,
+                                            "size_gb": round(size / (1024**3), 2),
+                                            "size_mb": round(size / (1024**2), 2),
+                                        }
+                                    )
                             except (PermissionError, OSError):
                                 pass
 
@@ -244,9 +249,7 @@ class DiskAnalyzer:
                             total_size += entry.stat().st_size
                         elif entry.is_dir(follow_symlinks=False) and max_depth > 0:
                             # Recursively calculate subdirectory size
-                            total_size += self._get_dir_size_fast(
-                                Path(entry.path), max_depth - 1
-                            )
+                            total_size += self._get_dir_size_fast(Path(entry.path), max_depth - 1)
                     except (PermissionError, OSError):
                         continue
         except (PermissionError, OSError):
@@ -369,6 +372,7 @@ def main():
     # Fix Windows console encoding for emoji support
     if sys.platform == "win32":
         import codecs
+
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
         sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
 
@@ -379,8 +383,9 @@ def main():
     parser.add_argument("--top", "-n", type=int, default=20, help="Number of top items to show")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
-    parser.add_argument("--no-progress", action="store_true",
-                       help="Disable progress bars (useful for scripting)")
+    parser.add_argument(
+        "--no-progress", action="store_true", help="Disable progress bars (useful for scripting)"
+    )
 
     args = parser.parse_args()
 

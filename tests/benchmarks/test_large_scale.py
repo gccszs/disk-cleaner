@@ -4,19 +4,15 @@ Large-scale performance test with intelligent sampling.
 Tests real-world scenarios with emoji-enhanced terminal UI and graceful fallback.
 """
 
-import sys
 import json
+import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from diskcleaner.optimization.scan import (
-    ConcurrentScanner,
-    QuickProfiler,
-    FileInfo,
-)
 from diskcleaner.optimization.profiler import PerformanceProfiler
+from diskcleaner.optimization.scan import ConcurrentScanner, FileInfo, QuickProfiler
 
 
 class SafeTerminal:
@@ -24,7 +20,7 @@ class SafeTerminal:
 
     def __init__(self):
         """Detect terminal encoding capabilities."""
-        self.encoding = sys.stdout.encoding or 'utf-8'
+        self.encoding = sys.stdout.encoding or "utf-8"
         self.supports_emoji = self._check_emoji_support()
 
     def _check_emoji_support(self) -> bool:
@@ -43,7 +39,7 @@ class SafeTerminal:
             print(text)
         except UnicodeEncodeError:
             # Fallback to ASCII
-            ascii_text = text.encode('ascii', 'ignore').decode('ascii')
+            ascii_text = text.encode("ascii", "ignore").decode("ascii")
             print(ascii_text)
 
     def emoji(self, emoji_text: str, ascii_fallback: str) -> str:
@@ -89,7 +85,9 @@ class LargeScalePerformanceTest:
         profile = profiler.profile(d_path)
 
         self.terminal.print(f"{check} Estimated files: {profile.file_count:,}")
-        self.terminal.print(f"{check} Estimated size: {profile.total_size / 1024 / 1024 / 1024:.2f} GB")
+        self.terminal.print(
+            f"{check} Estimated size: {profile.total_size / 1024 / 1024 / 1024:.2f} GB"
+        )
         self.terminal.print(f"{check} Estimated depth: {profile.max_depth}")
 
         # Get top-level directories
@@ -107,28 +105,36 @@ class LargeScalePerformanceTest:
                 sub_profile = profiler.profile(subdir)
 
                 dir_info = {
-                    'path': str(subdir),
-                    'name': subdir.name,
-                    'estimated_files': sub_profile.file_count,
-                    'estimated_size': sub_profile.total_size,
-                    'is_system': subdir.name.lower() in ['$recycle', 'system volume information',
-                                                          'system32', 'windows', 'program files'],
+                    "path": str(subdir),
+                    "name": subdir.name,
+                    "estimated_files": sub_profile.file_count,
+                    "estimated_size": sub_profile.total_size,
+                    "is_system": subdir.name.lower()
+                    in [
+                        "$recycle",
+                        "system volume information",
+                        "system32",
+                        "windows",
+                        "program files",
+                    ],
                 }
                 dir_infos.append(dir_info)
 
                 # Print summary
                 size_mb = sub_profile.total_size / 1024 / 1024
-                self.terminal.print(f"  {check} {subdir.name:<30} "
-                                  f"~{sub_profile.file_count:6,} files | {size_mb:8.2f} MB")
+                self.terminal.print(
+                    f"  {check} {subdir.name:<30} "
+                    f"~{sub_profile.file_count:6,} files | {size_mb:8.2f} MB"
+                )
 
             except (PermissionError, Exception) as e:
                 # Graceful fallback - skip problematic directories
                 dir_info = {
-                    'path': str(subdir),
-                    'name': subdir.name,
-                    'estimated_files': 0,
-                    'estimated_size': 0,
-                    'error': str(e),
+                    "path": str(subdir),
+                    "name": subdir.name,
+                    "estimated_files": 0,
+                    "estimated_size": 0,
+                    "error": str(e),
                 }
                 dir_infos.append(dir_info)
                 self.terminal.print(f"  ⚠️ {subdir.name:<30} (skipped: {type(e).__name__})")
@@ -152,30 +158,36 @@ class LargeScalePerformanceTest:
         self.terminal.print(divider)
 
         # Filter out system directories
-        user_dirs = [d for d in dir_infos if not d.get('is_system', False)]
+        user_dirs = [d for d in dir_infos if not d.get("is_system", False)]
 
         # Sort by estimated file count
-        user_dirs.sort(key=lambda x: x.get('estimated_files', 0), reverse=True)
+        user_dirs.sort(key=lambda x: x.get("estimated_files", 0), reverse=True)
 
         # Categorize by size
-        small = [d for d in user_dirs if d.get('estimated_files', 0) < 1000]
-        medium = [d for d in user_dirs if 1000 <= d.get('estimated_files', 0) < 10000]
-        large = [d for d in user_dirs if d.get('estimated_files', 0) >= 10000]
+        small = [d for d in user_dirs if d.get("estimated_files", 0) < 1000]
+        medium = [d for d in user_dirs if 1000 <= d.get("estimated_files", 0) < 10000]
+        large = [d for d in user_dirs if d.get("estimated_files", 0) >= 10000]
 
         # Select representatives (up to 3 from each category)
         selected = []
 
         if large:
-            selected.extend(large[:min(3, len(large))])
+            selected.extend(large[: min(3, len(large))])
         if medium:
-            selected.extend(medium[:min(3, len(medium))])
+            selected.extend(medium[: min(3, len(medium))])
         if small:
-            selected.extend(small[:min(2, len(small))])
+            selected.extend(small[: min(2, len(small))])
 
         self.terminal.print(f"\nSelected {len(selected)} directories for testing:")
-        self.terminal.print(f"  Large dirs (≥10K): {len([d for d in selected if d.get('estimated_files', 0) >= 10000])}")
-        self.terminal.print(f"  Medium dirs (1K-10K): {len([d for d in selected if 1000 <= d.get('estimated_files', 0) < 10000])}")
-        self.terminal.print(f"  Small dirs (<1K): {len([d for d in selected if d.get('estimated_files', 0) < 1000])}")
+        self.terminal.print(
+            f"  Large dirs (≥10K): {len([d for d in selected if d.get('estimated_files', 0) >= 10000])}"
+        )
+        self.terminal.print(
+            f"  Medium dirs (1K-10K): {len([d for d in selected if 1000 <= d.get('estimated_files', 0) < 10000])}"
+        )
+        self.terminal.print(
+            f"  Small dirs (<1K): {len([d for d in selected if d.get('estimated_files', 0) < 1000])}"
+        )
 
         return selected
 
@@ -190,23 +202,23 @@ class LargeScalePerformanceTest:
         Returns:
             Test result dict or None if failed
         """
-        path = Path(dir_info['path'])
-        name = dir_info['name']
+        path = Path(dir_info["path"])
+        name = dir_info["name"]
         search = self.terminal.emoji("🔍", "[TEST]")
 
         self.terminal.print(f"\n[{index}/{total}] {search} Testing: {name}")
 
         try:
             # Create progress callback
-            progress_data = {'files_scanned': 0, 'start_time': time.time()}
+            progress_data = {"files_scanned": 0, "start_time": time.time()}
 
             def progress_callback(progress):
                 """Real-time progress update."""
                 # progress is a dict with keys: count, errors, size
-                files_scanned = progress.get('count', 0)
-                errors = progress.get('errors', 0)
-                progress_data['files_scanned'] = files_scanned
-                elapsed = time.time() - progress_data['start_time']
+                files_scanned = progress.get("count", 0)
+                errors = progress.get("errors", 0)
+                progress_data["files_scanned"] = files_scanned
+                elapsed = time.time() - progress_data["start_time"]
 
                 if elapsed > 0.5:  # Only show after 0.5s to avoid flicker
                     throughput = files_scanned / elapsed
@@ -216,62 +228,75 @@ class LargeScalePerformanceTest:
                     bar = self.terminal.emoji("█", "=") * bar_length
                     bar += self.terminal.emoji("░", "-") * (20 - bar_length)
 
-                    stats = f"\r     {bar} | " \
-                           f"📊 {files_scanned:,} files | " \
-                           f"⚡ {throughput:,.0f}/s | " \
-                           f"⏱️ {elapsed:.2f}s | " \
-                           f"❌ {errors}"
+                    stats = (
+                        f"\r     {bar} | "
+                        f"📊 {files_scanned:,} files | "
+                        f"⚡ {throughput:,.0f}/s | "
+                        f"⏱️ {elapsed:.2f}s | "
+                        f"❌ {errors}"
+                    )
 
                     try:
-                        print(stats, end='', flush=True)
+                        print(stats, end="", flush=True)
                     except UnicodeEncodeError:
                         # Fallback to simple progress
-                        print(f"\r     Scanning: {files_scanned:,} files | {throughput:,.0f}/s", end='', flush=True)
+                        print(
+                            f"\r     Scanning: {files_scanned:,} files | {throughput:,.0f}/s",
+                            end="",
+                            flush=True,
+                        )
 
             # Scan with progress
             scanner = ConcurrentScanner()
             perf_profiler = PerformanceProfiler()
 
-            with perf_profiler.profile('scan'):
+            with perf_profiler.profile("scan"):
                 result = scanner.scan(path, progress_callback=progress_callback)
 
             # Clear progress line
-            print('\r' + ' ' * 100 + '\r', end='')
+            print("\r" + " " * 100 + "\r", end="")
 
             # Calculate metrics
-            scan_time = perf_profiler.get_operation_time('scan')
+            scan_time = perf_profiler.get_operation_time("scan")
             throughput = result.total_count / scan_time if scan_time > 0 else 0
             target_met = self._check_target(result.total_count, scan_time)
 
-            check = self.terminal.emoji("✅", "[OK]") if target_met else self.terminal.emoji("⚠️", "[WARN]")
+            check = (
+                self.terminal.emoji("✅", "[OK]")
+                if target_met
+                else self.terminal.emoji("⚠️", "[WARN]")
+            )
 
             # Print result
-            self.terminal.print(f"     {check} {result.total_count:>8,} files | "
-                              f"{scan_time:>6.3f}s | "
-                              f"{throughput:>8,.0f}/s | "
-                              f"{result.error_count} errors")
+            self.terminal.print(
+                f"     {check} {result.total_count:>8,} files | "
+                f"{scan_time:>6.3f}s | "
+                f"{throughput:>8,.0f}/s | "
+                f"{result.error_count} errors"
+            )
 
             return {
-                'name': name,
-                'path': str(path),
-                'file_count': result.total_count,
-                'scan_time': scan_time,
-                'throughput': throughput,
-                'error_count': result.error_count,
-                'target_met': target_met,
-                'estimated_files': dir_info.get('estimated_files', 0),
-                'estimation_accuracy': dir_info.get('estimated_files', 0) / result.total_count
-                    if result.total_count > 0 else 0,
+                "name": name,
+                "path": str(path),
+                "file_count": result.total_count,
+                "scan_time": scan_time,
+                "throughput": throughput,
+                "error_count": result.error_count,
+                "target_met": target_met,
+                "estimated_files": dir_info.get("estimated_files", 0),
+                "estimation_accuracy": dir_info.get("estimated_files", 0) / result.total_count
+                if result.total_count > 0
+                else 0,
             }
 
         except Exception as e:
             # Graceful error handling
             self.terminal.print(f"     ⚠️ Failed: {type(e).__name__}: {e}")
             return {
-                'name': name,
-                'path': str(path),
-                'error': str(e),
-                'failed': True,
+                "name": name,
+                "path": str(path),
+                "error": str(e),
+                "failed": True,
             }
 
     def _check_target(self, file_count: int, scan_time: float) -> bool:
@@ -310,13 +335,13 @@ class LargeScalePerformanceTest:
             return False, "No successful tests - cannot recommend full scan"
 
         # Calculate statistics
-        successful = [r for r in self.results if not r.get('failed', False)]
-        failed = [r for r in self.results if r.get('failed', False)]
+        successful = [r for r in self.results if not r.get("failed", False)]
+        failed = [r for r in self.results if r.get("failed", False)]
 
-        total_files = sum(r.get('file_count', 0) for r in successful)
-        total_time = sum(r.get('scan_time', 0) for r in successful)
+        total_files = sum(r.get("file_count", 0) for r in successful)
+        total_time = sum(r.get("scan_time", 0) for r in successful)
         avg_throughput = total_files / total_time if total_time > 0 else 0
-        targets_passed = sum(1 for r in successful if r.get('target_met', False))
+        targets_passed = sum(1 for r in successful if r.get("target_met", False))
 
         # Print summary
         self.terminal.print(f"\nDirectories tested: {len(successful)}")
@@ -329,7 +354,11 @@ class LargeScalePerformanceTest:
 
         # Target status
         all_passed = targets_passed == len(successful) and len(failed) == 0
-        status = self.terminal.emoji("✅", "[PASS]") if all_passed else self.terminal.emoji("⚠️", "[WARN]")
+        status = (
+            self.terminal.emoji("✅", "[PASS]")
+            if all_passed
+            else self.terminal.emoji("⚠️", "[WARN]")
+        )
         self.terminal.print(f"\n{status} Targets: {targets_passed}/{len(successful)} passed")
 
         # Recommendation
@@ -348,17 +377,24 @@ class LargeScalePerformanceTest:
 
     def save_detailed_results(self):
         """Save detailed results to JSON file."""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = self.output_dir / f"large_scale_test_{timestamp}.json"
 
         try:
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    'timestamp': datetime.now().isoformat(),
-                    'total_tests': len(self.results),
-                    'successful_tests': len([r for r in self.results if not r.get('failed', False)]),
-                    'results': self.results,
-                }, f, indent=2, ensure_ascii=False)
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "total_tests": len(self.results),
+                        "successful_tests": len(
+                            [r for r in self.results if not r.get("failed", False)]
+                        ),
+                        "results": self.results,
+                    },
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
+                )
 
             self.terminal.print(f"\n💾 Detailed results saved to: {output_file}")
         except Exception as e:
@@ -421,9 +457,9 @@ def main():
     """Run large-scale performance test."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Large-scale performance test')
-    parser.add_argument('--path', type=str, default='D:/', help='Path to test (default: D:/)')
-    parser.add_argument('--output', type=str, default=None, help='Output directory for results')
+    parser = argparse.ArgumentParser(description="Large-scale performance test")
+    parser.add_argument("--path", type=str, default="D:/", help="Path to test (default: D:/)")
+    parser.add_argument("--output", type=str, default=None, help="Output directory for results")
 
     args = parser.parse_args()
 

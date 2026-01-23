@@ -10,66 +10,66 @@ This module provides intelligent, layered performance optimizations:
 All optimizations are pluggable and can be disabled via configuration.
 """
 
-from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport
 from diskcleaner.optimization.concurrency import ConcurrencyManager
-from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus
-from diskcleaner.optimization.scan import (
-    QuickProfiler,
-    ConcurrentScanner,
-    IncrementalCache,
-    ScanStrategy,
-    ScanProfile,
-    ScanResult,
-    ScanSnapshot,
-    FileInfo,
-)
 from diskcleaner.optimization.delete import (
-    BatchDeleter,
     AsyncDeleter,
-    SmartDeleter,
-    DeletionManager,
-    DeleteStrategy,
+    BatchDeleter,
     DeleteResult,
+    DeleteStrategy,
+    DeletionManager,
     ProgressUpdate,
+    SmartDeleter,
 )
 from diskcleaner.optimization.hash import (
     AdaptiveHasher,
-    ParallelHasher,
-    FastFilter,
-    HashCache,
     DuplicateFinder,
     DuplicateGroup,
+    FastFilter,
+    HashCache,
+    ParallelHasher,
+)
+from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus
+from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport
+from diskcleaner.optimization.scan import (
+    ConcurrentScanner,
+    FileInfo,
+    IncrementalCache,
+    QuickProfiler,
+    ScanProfile,
+    ScanResult,
+    ScanSnapshot,
+    ScanStrategy,
 )
 
 __all__ = [
     # Infrastructure
-    'PerformanceProfiler',
-    'PerformanceReport',
-    'ConcurrencyManager',
-    'MemoryMonitor',
-    'MemoryStatus',
+    "PerformanceProfiler",
+    "PerformanceReport",
+    "ConcurrencyManager",
+    "MemoryMonitor",
+    "MemoryStatus",
     # Scanning
-    'QuickProfiler',
-    'ConcurrentScanner',
-    'IncrementalCache',
-    'ScanStrategy',
-    'ScanProfile',
-    'ScanResult',
-    'ScanSnapshot',
-    'FileInfo',
+    "QuickProfiler",
+    "ConcurrentScanner",
+    "IncrementalCache",
+    "ScanStrategy",
+    "ScanProfile",
+    "ScanResult",
+    "ScanSnapshot",
+    "FileInfo",
     # Deletion
-    'BatchDeleter',
-    'AsyncDeleter',
-    'SmartDeleter',
-    'DeletionManager',
-    'DeleteStrategy',
-    'DeleteResult',
-    'ProgressUpdate',
+    "BatchDeleter",
+    "AsyncDeleter",
+    "SmartDeleter",
+    "DeletionManager",
+    "DeleteStrategy",
+    "DeleteResult",
+    "ProgressUpdate",
     # Hash
-    'AdaptiveHasher',
-    'ParallelHasher',
-    'FastFilter',
-    'HashCache',
-    'DuplicateFinder',
-    'DuplicateGroup',
+    "AdaptiveHasher",
+    "ParallelHasher",
+    "FastFilter",
+    "HashCache",
+    "DuplicateFinder",
+    "DuplicateGroup",
 ]

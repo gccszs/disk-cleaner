@@ -8,20 +8,21 @@ Tests:
 - ScanStrategy
 """
 
-import pytest
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest
+
 from diskcleaner.optimization.scan import (
-    QuickProfiler,
     ConcurrentScanner,
+    FileInfo,
     IncrementalCache,
-    ScanStrategy,
+    QuickProfiler,
     ScanProfile,
     ScanResult,
     ScanSnapshot,
-    FileInfo,
+    ScanStrategy,
 )
 
 
@@ -37,7 +38,7 @@ class TestQuickProfiler:
     def test_profile_nonexistent_directory(self):
         """Test profiling non-existent directory."""
         profiler = QuickProfiler()
-        profile = profiler.profile(Path('/nonexistent'))
+        profile = profiler.profile(Path("/nonexistent"))
 
         assert profile.file_count == 0
         assert profile.total_size == 0
@@ -89,7 +90,7 @@ class TestConcurrentScanner:
     def test_scan_nonexistent_directory(self):
         """Test scanning non-existent directory."""
         scanner = ConcurrentScanner()
-        result = scanner.scan(Path('/nonexistent'))
+        result = scanner.scan(Path("/nonexistent"))
 
         assert result.total_count == 0
         assert result.total_size == 0
@@ -294,27 +295,28 @@ class TestScanStrategy:
     def test_should_exclude_windows_paths(self):
         """Test Windows path exclusion."""
         strategy = ScanStrategy()
-        strategy.excludes = ['C:\\Windows']
+        strategy.excludes = ["C:\\Windows"]
 
-        assert strategy.should_exclude('C:\\Windows\\System32')
-        assert not strategy.should_exclude('C:\\Users\\test')
+        assert strategy.should_exclude("C:\\Windows\\System32")
+        assert not strategy.should_exclude("C:\\Users\\test")
 
     def test_should_exclude_unix_paths(self):
         """Test Unix path exclusion."""
         import os
+
         strategy = ScanStrategy()
-        strategy.excludes = ['/proc', '/sys']
+        strategy.excludes = ["/proc", "/sys"]
 
         # Only test if on Unix or if the path normalization works
-        test_path = '/proc/cpuinfo'
-        if os.path.exists(test_path) or os.name != 'nt':
+        test_path = "/proc/cpuinfo"
+        if os.path.exists(test_path) or os.name != "nt":
             # On Unix or if path exists
-            assert strategy.should_exclude('/proc/cpuinfo')
-            assert not strategy.should_exclude('/home/user')
+            assert strategy.should_exclude("/proc/cpuinfo")
+            assert not strategy.should_exclude("/home/user")
         else:
             # On Windows, just verify the method runs without error
-            strategy.should_exclude('/proc/cpuinfo')
-            strategy.should_exclude('/home/user')
+            strategy.should_exclude("/proc/cpuinfo")
+            strategy.should_exclude("/home/user")
 
     def test_should_stop_early_disabled(self):
         """Test early stop when disabled."""
@@ -348,12 +350,7 @@ class TestFileInfo:
     def test_file_info_creation(self):
         """Test creating FileInfo."""
         info = FileInfo(
-            path="/test/file.txt",
-            name="file.txt",
-            size=1000,
-            mtime=123.0,
-            is_dir=False,
-            depth=2
+            path="/test/file.txt", name="file.txt", size=1000, mtime=123.0, is_dir=False, depth=2
         )
 
         assert info.path == "/test/file.txt"
@@ -365,26 +362,21 @@ class TestFileInfo:
 
     def test_file_info_to_dict(self):
         """Test converting FileInfo to dict."""
-        info = FileInfo(
-            path="/test/file.txt",
-            name="file.txt",
-            size=1000,
-            mtime=123.0
-        )
+        info = FileInfo(path="/test/file.txt", name="file.txt", size=1000, mtime=123.0)
 
         data = info.to_dict()
-        assert data['path'] == "/test/file.txt"
-        assert data['size'] == 1000
+        assert data["path"] == "/test/file.txt"
+        assert data["size"] == 1000
 
     def test_file_info_from_dict(self):
         """Test creating FileInfo from dict."""
         data = {
-            'path': '/test/file.txt',
-            'name': 'file.txt',
-            'size': 1000,
-            'mtime': 123.0,
-            'is_dir': False,
-            'depth': 0
+            "path": "/test/file.txt",
+            "name": "file.txt",
+            "size": 1000,
+            "mtime": 123.0,
+            "is_dir": False,
+            "depth": 0,
         }
 
         info = FileInfo.from_dict(data)
@@ -397,15 +389,9 @@ class TestScanResult:
 
     def test_scan_result_creation(self):
         """Test creating ScanResult."""
-        items = [
-            FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)
-        ]
+        items = [FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)]
         result = ScanResult(
-            items=items,
-            total_count=1,
-            total_size=100,
-            error_count=0,
-            scan_time=0.5
+            items=items, total_count=1, total_size=100, error_count=0, scan_time=0.5
         )
 
         assert result.total_count == 1
@@ -414,19 +400,13 @@ class TestScanResult:
 
     def test_scan_result_to_dict(self):
         """Test converting ScanResult to dict."""
-        items = [
-            FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)
-        ]
-        result = ScanResult(
-            items=items,
-            total_count=1,
-            total_size=100
-        )
+        items = [FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)]
+        result = ScanResult(items=items, total_count=1, total_size=100)
 
         data = result.to_dict()
-        assert data['total_count'] == 1
-        assert data['total_size'] == 100
-        assert len(data['items']) == 1
+        assert data["total_count"] == 1
+        assert data["total_size"] == 100
+        assert len(data["items"]) == 1
 
 
 class TestScanSnapshot:
@@ -434,15 +414,9 @@ class TestScanSnapshot:
 
     def test_snapshot_creation(self):
         """Test creating ScanSnapshot."""
-        items = [
-            FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)
-        ]
+        items = [FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)]
         snapshot = ScanSnapshot(
-            path="/test",
-            timestamp=123456.0,
-            items=items,
-            total_count=1,
-            total_size=100
+            path="/test", timestamp=123456.0, items=items, total_count=1, total_size=100
         )
 
         assert snapshot.path == "/test"
@@ -450,38 +424,32 @@ class TestScanSnapshot:
 
     def test_snapshot_to_dict(self):
         """Test converting snapshot to dict."""
-        items = [
-            FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)
-        ]
+        items = [FileInfo(path="/test/file.txt", name="file.txt", size=100, mtime=123.0)]
         snapshot = ScanSnapshot(
-            path="/test",
-            timestamp=123456.0,
-            items=items,
-            total_count=1,
-            total_size=100
+            path="/test", timestamp=123456.0, items=items, total_count=1, total_size=100
         )
 
         data = snapshot.to_dict()
-        assert data['path'] == "/test"
-        assert len(data['items']) == 1
+        assert data["path"] == "/test"
+        assert len(data["items"]) == 1
 
     def test_snapshot_from_dict(self):
         """Test creating snapshot from dict."""
         data = {
-            'path': '/test',
-            'timestamp': 123456.0,
-            'items': [
+            "path": "/test",
+            "timestamp": 123456.0,
+            "items": [
                 {
-                    'path': '/test/file.txt',
-                    'name': 'file.txt',
-                    'size': 100,
-                    'mtime': 123.0,
-                    'is_dir': False,
-                    'depth': 0
+                    "path": "/test/file.txt",
+                    "name": "file.txt",
+                    "size": 100,
+                    "mtime": 123.0,
+                    "is_dir": False,
+                    "depth": 0,
                 }
             ],
-            'total_count': 1,
-            'total_size': 100
+            "total_count": 1,
+            "total_size": 100,
         }
 
         snapshot = ScanSnapshot.from_dict(data)

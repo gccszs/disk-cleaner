@@ -6,7 +6,7 @@ Provides optimal worker count calculation and resource cleanup.
 """
 
 import os
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Dict, Optional
 
 
@@ -26,7 +26,9 @@ class ConcurrencyManager:
         self.process_pools: Dict[str, ProcessPoolExecutor] = {}
         self._initialized = False
 
-    def get_thread_pool(self, purpose: str, max_workers: Optional[int] = None) -> ThreadPoolExecutor:
+    def get_thread_pool(
+        self, purpose: str, max_workers: Optional[int] = None
+    ) -> ThreadPoolExecutor:
         """
         Get or create a thread pool.
 
@@ -41,15 +43,14 @@ class ConcurrencyManager:
             return self.thread_pools[purpose]
 
         workers = max_workers or self._optimal_threads(purpose)
-        pool = ThreadPoolExecutor(
-            max_workers=workers,
-            thread_name_prefix=f"{purpose}-"
-        )
+        pool = ThreadPoolExecutor(max_workers=workers, thread_name_prefix=f"{purpose}-")
         self.thread_pools[purpose] = pool
         self._initialized = True
         return pool
 
-    def get_process_pool(self, purpose: str, max_workers: Optional[int] = None) -> ProcessPoolExecutor:
+    def get_process_pool(
+        self, purpose: str, max_workers: Optional[int] = None
+    ) -> ProcessPoolExecutor:
         """
         Get or create a process pool.
 
@@ -64,9 +65,7 @@ class ConcurrencyManager:
             return self.process_pools[purpose]
 
         workers = max_workers or self._optimal_processes(purpose)
-        pool = ProcessPoolExecutor(
-            max_workers=workers
-        )
+        pool = ProcessPoolExecutor(max_workers=workers)
         self.process_pools[purpose] = pool
         self._initialized = True
         return pool
@@ -79,11 +78,11 @@ class ConcurrencyManager:
         """
         cpu_count = os.cpu_count() or 1
 
-        if purpose.startswith('io_'):
+        if purpose.startswith("io_"):
             # I/O密集型：可以用更多线程
             # 限制在32以内，避免过多上下文切换
             return min(32, cpu_count * 4)
-        elif purpose == 'ui_update':
+        elif purpose == "ui_update":
             # UI更新只需要少量线程
             return 2
         else:
@@ -98,7 +97,7 @@ class ConcurrencyManager:
         """
         cpu_count = os.cpu_count() or 1
 
-        if purpose == 'hash_compute':
+        if purpose == "hash_compute":
             # 哈希计算是CPU密集型
             return cpu_count
         else:

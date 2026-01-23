@@ -7,14 +7,14 @@ and measure optimization effectiveness.
 
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional
-from pathlib import Path
 
 
 @dataclass
 class PerformanceReport:
     """Performance report for an operation or session."""
+
     operation: str
     total_time: float
     memory_used: float  # MB
@@ -74,8 +74,8 @@ class PerformanceProfiler:
             memory_used = (peak_mem - start_mem) / 1024 / 1024  # Convert to MB
 
             # Record metrics (initialize list if needed)
-            time_key = f'{operation}_time'
-            mem_key = f'{operation}_memory'
+            time_key = f"{operation}_time"
+            mem_key = f"{operation}_memory"
 
             if time_key not in self.metrics:
                 self.metrics[time_key] = []
@@ -88,7 +88,7 @@ class PerformanceProfiler:
 
             self._operation_stack.pop()
 
-    def record(self, operation: str, value: float, metric: str = 'time'):
+    def record(self, operation: str, value: float, metric: str = "time"):
         """
         Manually record a metric.
 
@@ -97,7 +97,7 @@ class PerformanceProfiler:
             value: Metric value
             metric: Metric type ('time', 'memory', 'throughput')
         """
-        key = f'{operation}_{metric}'
+        key = f"{operation}_{metric}"
         if key not in self.metrics:
             self.metrics[key] = []
         self.metrics[key].append(value)
@@ -108,14 +108,14 @@ class PerformanceProfiler:
 
     def get_average_time(self, operation: str) -> float:
         """Get average execution time for an operation."""
-        times = self.metrics.get(f'{operation}_time', [])
+        times = self.metrics.get(f"{operation}_time", [])
         if not times:
             return 0.0
         return sum(times) / len(times)
 
     def get_peak_memory(self, operation: str) -> float:
         """Get peak memory usage for an operation (MB)."""
-        memories = self.metrics.get(f'{operation}_memory', [])
+        memories = self.metrics.get(f"{operation}_memory", [])
         if not memories:
             return 0.0
         return max(memories)
@@ -147,7 +147,7 @@ class PerformanceProfiler:
         """Get reports for all tracked operations."""
         reports = []
         for key in self.metrics.keys():
-            if key.endswith('_time'):
+            if key.endswith("_time"):
                 operation = key[:-5]  # Remove '_time' suffix
                 if self.metrics[key]:  # Only if has data
                     item_count = int(self.get_average_time(operation) * 1000)  # Estimate
@@ -163,7 +163,7 @@ class PerformanceProfiler:
         """
         operation_times = {}
         for key, times in self.metrics.items():
-            if key.endswith('_time') and times:
+            if key.endswith("_time") and times:
                 operation = key[:-5]
                 avg_time = sum(times) / len(times)
                 operation_times[operation] = avg_time
@@ -183,14 +183,12 @@ class PerformanceProfiler:
         """Generate a summary of all metrics."""
         lines = ["Performance Summary:", "=" * 50]
 
-        for operation in ['scan', 'delete', 'hash']:
-            if self.metrics.get(f'{operation}_time'):
+        for operation in ["scan", "delete", "hash"]:
+            if self.metrics.get(f"{operation}_time"):
                 avg_time = self.get_average_time(operation)
                 peak_mem = self.get_peak_memory(operation)
                 lines.append(
-                    f"{operation.capitalize()}: "
-                    f"{avg_time:.2f}s avg, "
-                    f"{peak_mem:.1f} MB peak"
+                    f"{operation.capitalize()}: " f"{avg_time:.2f}s avg, " f"{peak_mem:.1f} MB peak"
                 )
 
         bottleneck = self.identify_bottleneck()

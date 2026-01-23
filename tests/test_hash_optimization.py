@@ -9,17 +9,18 @@ Tests:
 - DuplicateFinder
 """
 
-import pytest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest
+
 from diskcleaner.optimization.hash import (
     AdaptiveHasher,
-    ParallelHasher,
-    FastFilter,
-    HashCache,
     DuplicateFinder,
     DuplicateGroup,
+    FastFilter,
+    HashCache,
+    ParallelHasher,
 )
 from diskcleaner.optimization.scan import FileInfo
 
@@ -74,8 +75,8 @@ class TestAdaptiveHasher:
     def test_algorithm_selection(self):
         """Test algorithm selection."""
         # Should not raise exception
-        hasher_sha256 = AdaptiveHasher(algorithm='sha256')
-        hasher_auto = AdaptiveHasher(algorithm='auto')
+        hasher_sha256 = AdaptiveHasher(algorithm="sha256")
+        hasher_auto = AdaptiveHasher(algorithm="auto")
 
         assert hasher_sha256 is not None
         assert hasher_auto is not None
@@ -303,13 +304,13 @@ class TestHashCache:
         for i in range(3):
             cache.put(temp_files[i], f"hash{i}")
 
-        assert cache.get_stats()['size'] == 3
+        assert cache.get_stats()["size"] == 3
 
         # Add 4th item should evict oldest
         cache.put(temp_files[3], "hash3")
 
         stats = cache.get_stats()
-        assert stats['size'] == 3
+        assert stats["size"] == 3
 
     def test_cache_stats(self, tmp_path):
         """Test cache statistics."""
@@ -327,9 +328,9 @@ class TestHashCache:
         cache.get(test_file)
 
         stats = cache.get_stats()
-        assert stats['hits'] == 1
-        assert stats['misses'] == 1
-        assert stats['size'] == 1
+        assert stats["hits"] == 1
+        assert stats["misses"] == 1
+        assert stats["size"] == 1
 
     def test_cache_clear(self, tmp_path):
         """Test clearing cache."""
@@ -338,11 +339,11 @@ class TestHashCache:
         test_file.write_text("content")
 
         cache.put(test_file, "abc123")
-        assert cache.get_stats()['size'] == 1
+        assert cache.get_stats()["size"] == 1
 
         cache.clear()
-        assert cache.get_stats()['size'] == 0
-        assert cache.get_stats()['hits'] == 0
+        assert cache.get_stats()["size"] == 0
+        assert cache.get_stats()["hits"] == 0
 
     def test_cache_invalidate(self, tmp_path):
         """Test invalidating cache entry."""
@@ -401,12 +402,14 @@ class TestDuplicateFinder:
         for i in range(3):
             file = tmp_path / f"file_{i}.txt"
             file.write_text(f"unique_content_{i}" * 100)
-            files.append(FileInfo(
-                path=str(file),
-                name=f"file_{i}.txt",
-                size=file.stat().st_size,
-                mtime=file.stat().st_mtime,
-            ))
+            files.append(
+                FileInfo(
+                    path=str(file),
+                    name=f"file_{i}.txt",
+                    size=file.stat().st_size,
+                    mtime=file.stat().st_mtime,
+                )
+            )
 
         finder = DuplicateFinder()
         result = finder.find_duplicates(files)
@@ -484,9 +487,9 @@ class TestDuplicateFinder:
         stats = finder.get_cache_stats()
 
         assert stats is not None
-        assert 'size' in stats
-        assert 'hits' in stats
-        assert 'misses' in stats
+        assert "size" in stats
+        assert "hits" in stats
+        assert "misses" in stats
 
     def test_cache_disabled(self):
         """Test with cache disabled."""
@@ -552,6 +555,6 @@ class TestDuplicateGroup:
         )
 
         data = group.to_dict()
-        assert data['count'] == 1
-        assert data['size'] == 100
-        assert isinstance(data['files'], list)
+        assert data["count"] == 1
+        assert data["size"] == 100
+        assert isinstance(data["files"], list)

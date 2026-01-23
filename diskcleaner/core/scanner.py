@@ -21,7 +21,6 @@ from typing import Generator, List, Optional, Set, Tuple
 from diskcleaner.config import Config
 from diskcleaner.core.cache import CacheManager, FileSnapshot, ScanSnapshot
 
-
 # Cross-platform path exclusions
 PLATFORM_EXCLUDES = {
     "windows": [
@@ -62,7 +61,7 @@ PLATFORM_EXCLUDES = {
         "/bin",
         "/sbin",
         "/etc",
-    ]
+    ],
 }
 
 
@@ -370,11 +369,9 @@ class DirectoryScanner:
                             # Check if subdirectory should be excluded
                             subpath = Path(entry.path)
                             if not should_exclude_path(subpath):
-                                yield from self._scan_directory_scandir(
-                                    subpath, depth + 1, visited
-                                )
+                                yield from self._scan_directory_scandir(subpath, depth + 1, visited)
 
-                    except (PermissionError, OSError) as e:
+                    except (PermissionError, OSError):
                         # Skip files we can't access
                         continue
 
