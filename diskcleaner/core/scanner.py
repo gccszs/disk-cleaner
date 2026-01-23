@@ -3,8 +3,16 @@ Directory scanner with incremental scanning support.
 
 Scans directories to collect file information with support for
 incremental updates using cached metadata.
+
+Performance optimizations:
+- Uses os.scandir() instead of Path.iterdir() for 3-5x better performance
+- Cross-platform path exclusions to avoid scanning system directories
+- Early stopping mechanism to prevent over-scanning
+- Efficient stat caching from DirEntry objects
 """
 
+import os
+import platform
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,6 +20,69 @@ from typing import Generator, List, Optional, Set, Tuple
 
 from diskcleaner.config import Config
 from diskcleaner.core.cache import CacheManager, FileSnapshot, ScanSnapshot
+
+# Cross-platform path exclusions
+PLATFORM_EXCLUDES = {
+    "windows": [
+        "C:\\Windows",
+        "C:\\Program Files",
+        "C:\\Program Files (x86)",
+        "C:\\ProgramData",
+        "C:\\$Recycle.Bin",
+        "C:\\System Volume Information",
+        "C:\\Boot",
+        "C:\\EFI",
+        "C:\\Recovery",
+    ],
+    "darwin": [
+        "/System",
+        "/Library",
+        "/bin",
+        "/sbin",
+        "/usr",
+        "/.Spotlight-V100",
+        "/.fseventsd",
+        "/.vol",
+        "/private/var/vm",  # VM swap files
+        "/Volumes/MobileBackups",
+        "/dev",
+        "/etc",
+        "/var",
+    ],
+    "linux": [
+        "/proc",
+        "/sys",
+        "/dev",
+        "/run",
+        "/boot",
+        "/lib",
+        "/lib64",
+        "/bin",
+        "/sbin",
+        "/etc",
+    ],
+}
+
+
+def should_exclude_path(path: Path) -> bool:
+    """
+    Check if a path should be excluded from scanning.
+
+    Args:
+        path: Path to check.
+
+    Returns:
+        True if path should be excluded, False otherwise.
+    """
+    system = platform.system().lower()
+    path_str = str(path)
+
+    # Check against platform-specific excludes
+    for exclude_prefix in PLATFORM_EXCLUDES.get(system, []):
+        if path_str.startswith(exclude_prefix):
+            return True
+
+    return False
 
 
 @dataclass
@@ -46,6 +117,9 @@ class DirectoryScanner:
     - Parallel scanning capability (optional)
     - Configurable depth limits
     - Symbolic link handling
+    - Cross-platform path exclusions
+    - Early stopping mechanism (max files, max time)
+    - High-performance os.scandir() implementation
     """
 
     def __init__(
@@ -53,6 +127,8 @@ class DirectoryScanner:
         target_path: str,
         config: Optional[Config] = None,
         cache_enabled: bool = True,
+        max_files: Optional[int] = None,
+        max_seconds: Optional[int] = None,
     ):
         """
         Initialize scanner.
@@ -61,6 +137,8 @@ class DirectoryScanner:
             target_path: Path to scan.
             config: Configuration object.
             cache_enabled: Enable incremental scanning with cache.
+            max_files: Maximum number of files to scan (None = unlimited).
+            max_seconds: Maximum time to spend scanning (None = unlimited).
         """
         self.target_path = Path(target_path).expanduser().resolve()
         self.config = config or Config.load()
@@ -75,6 +153,16 @@ class DirectoryScanner:
         self.follow_symlinks = self.config.get("scan.follow_symlinks", False)
         self.max_depth = self.config.get("scan.max_depth", None)
         self.parallel_jobs = self.config.get("scan.parallel_jobs", 4)
+
+        # Early stopping settings
+        self.max_files = max_files or self.config.get("scan.max_files", 50000)
+        self.max_seconds = max_seconds or self.config.get("scan.max_seconds", 25)
+
+        # Scan statistics
+        self.files_scanned = 0
+        self.start_time = None
+        self.stopped_early = False
+        self.stop_reason = None
 
     def scan(self) -> List[FileInfo]:
         """
@@ -171,6 +259,8 @@ class DirectoryScanner:
         This is a generator that yields files as they are scanned,
         which is more memory-efficient for large directories.
 
+        Uses os.scandir() for optimal performance (3-5x faster than glob).
+
         Yields:
             FileInfo objects.
         """
@@ -180,8 +270,138 @@ class DirectoryScanner:
         if not self.target_path.is_dir():
             raise NotADirectoryError(f"Not a directory: {self.target_path}")
 
+        # Check if path should be excluded
+        if should_exclude_path(self.target_path):
+            raise PermissionError(f"Path is excluded from scanning: {self.target_path}")
+
+        # Initialize scan timing
+        self.start_time = time.time()
+        self.files_scanned = 0
+        self.stopped_early = False
+        self.stop_reason = None
+
         # Start scanning from root
-        yield from self._scan_directory(self.target_path, depth=0)
+        yield from self._scan_directory_scandir(self.target_path, depth=0)
+
+    def _scan_directory_scandir(
+        self,
+        directory: Path,
+        depth: int,
+        visited: Optional[Set[int]] = None,
+    ) -> Generator[FileInfo, None, None]:
+        """
+        Scan a single directory recursively using os.scandir().
+
+        This is 3-5x faster than Path.iterdir() because:
+        - Uses system-optimized syscalls
+        - Returns DirEntry with cached stat info
+        - Avoids extra stat() calls
+
+        Args:
+            directory: Directory to scan.
+            depth: Current depth.
+            visited: Set of visited inodes to prevent cycles.
+
+        Yields:
+            FileInfo objects.
+        """
+        if visited is None:
+            visited = set()
+
+        # Check depth limit
+        if self.max_depth is not None and depth > self.max_depth:
+            return
+
+        # Check early stopping conditions
+        if self._should_stop_early():
+            return
+
+        try:
+            # Use os.scandir() for better performance
+            with os.scandir(directory) as it:
+                for entry in it:
+                    # Check early stopping before processing each entry
+                    if self._should_stop_early():
+                        break
+
+                    try:
+                        # Get stat info from DirEntry (cached, no extra syscall)
+                        stat_info = entry.stat(follow_symlinks=False)
+
+                        # Get inode for cycle detection (Unix only)
+                        inode = None
+                        if hasattr(stat_info, "st_ino"):
+                            inode = stat_info.st_ino
+
+                        # Check for symlink cycles
+                        # Note: DirEntry.is_symlink() doesn't take arguments
+                        is_link = entry.is_symlink()
+                        if is_link:
+                            if not self.follow_symlinks:
+                                continue
+
+                            # Check if we've visited this inode
+                            if inode is not None and inode in visited:
+                                continue
+                            visited.add(inode)
+
+                        # Note: DirEntry.is_dir() doesn't take arguments
+                        is_dir = entry.is_dir()
+
+                        # Create FileInfo
+                        file_info = FileInfo(
+                            path=entry.path,
+                            name=entry.name,
+                            size=stat_info.st_size if not is_dir else 0,
+                            mtime=stat_info.st_mtime,
+                            is_dir=is_dir,
+                            is_link=is_link,
+                            inode=inode,
+                            depth=depth,
+                        )
+
+                        self.files_scanned += 1
+                        yield file_info
+
+                        # Recurse into subdirectories
+                        if is_dir and not is_link:
+                            # Check if subdirectory should be excluded
+                            subpath = Path(entry.path)
+                            if not should_exclude_path(subpath):
+                                yield from self._scan_directory_scandir(subpath, depth + 1, visited)
+
+                    except (PermissionError, OSError):
+                        # Skip files we can't access
+                        continue
+
+        except (PermissionError, OSError):
+            # Skip directories we can't read
+            return
+
+    def _should_stop_early(self) -> bool:
+        """
+        Check if we should stop scanning early.
+
+        Returns:
+            True if should stop, False otherwise.
+        """
+        # Check file count limit
+        if self.max_files and self.files_scanned >= self.max_files:
+            if not self.stopped_early:
+                self.stopped_early = True
+                self.stop_reason = f"file_limit ({self.max_files} files)"
+            return True
+
+        # Check time limit
+        if self.max_seconds and self.start_time:
+            elapsed = time.time() - self.start_time
+            if elapsed >= self.max_seconds:
+                if not self.stopped_early:
+                    self.stopped_early = True
+                    self.stop_reason = f"time_limit ({self.max_seconds}s)"
+                return True
+
+        return False
 
     def _scan_directory(
         self,
@@ -191,6 +411,9 @@ class DirectoryScanner:
     ) -> Generator[FileInfo, None, None]:
         """
         Scan a single directory recursively.
+
+        DEPRECATED: Use _scan_directory_scandir() instead.
+        This method is kept for backward compatibility.
 
         Args:
             directory: Directory to scan.

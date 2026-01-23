@@ -6,7 +6,6 @@ Supports scheduled cleanup tasks with configurable intervals.
 Cross-platform scheduler using platform-specific mechanisms.
 """
 
-import argparse
 import json
 import os
 import platform
@@ -195,6 +194,17 @@ def print_tasks(tasks: List[Dict]):
 
 
 def main():
+    # Fix Windows console encoding for emoji support
+    import sys
+
+    if sys.platform == "win32":
+        import codecs
+
+        sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+        sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
+
+    import argparse
+
     parser = argparse.ArgumentParser(description="Disk Cleaner Scheduler")
     parser.add_argument("--config", "-c", help="Configuration file path")
 
