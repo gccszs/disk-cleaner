@@ -155,7 +155,7 @@ class DirectoryScanner:
         self.parallel_jobs = self.config.get("scan.parallel_jobs", 4)
 
         # Early stopping settings
-        self.max_files = max_files or self.config.get("scan.max_files", 50000)
+        self.max_files = max_files or self.config.get("scan.max_files", 1000000)
         self.max_seconds = max_seconds or self.config.get("scan.max_seconds", 25)
 
         # Scan statistics
