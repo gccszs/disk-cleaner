@@ -32,6 +32,14 @@ from diskcleaner.optimization.delete import (
     DeleteResult,
     ProgressUpdate,
 )
+from diskcleaner.optimization.hash import (
+    AdaptiveHasher,
+    ParallelHasher,
+    FastFilter,
+    HashCache,
+    DuplicateFinder,
+    DuplicateGroup,
+)
 
 __all__ = [
     # Infrastructure
@@ -57,4 +65,11 @@ __all__ = [
     'DeleteStrategy',
     'DeleteResult',
     'ProgressUpdate',
+    # Hash
+    'AdaptiveHasher',
+    'ParallelHasher',
+    'FastFilter',
+    'HashCache',
+    'DuplicateFinder',
+    'DuplicateGroup',
 ]
