@@ -12,9 +12,9 @@ from diskcleaner.optimization.profiler import PerformanceProfiler
 from diskcleaner.optimization.scan import ConcurrentScanner, QuickProfiler
 
 
-def test_real_directory_scan(path: Path, name: str) -> dict:
+def scan_real_directory(path: Path, name: str) -> dict:
     """
-    Test scanning performance on a real directory.
+    Scan a real directory and return performance metrics.
 
     Args:
         path: Directory to scan
@@ -99,7 +99,7 @@ def main():
     for path_str, name in test_paths:
         path = Path(path_str)
         try:
-            result = test_real_directory_scan(path, name)
+            result = scan_real_directory(path, name)
             if "error" not in result:
                 results.append(result)
         except Exception as e:
