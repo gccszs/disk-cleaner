@@ -521,7 +521,7 @@ def print_report(results: Dict):
 
         # Safely handle categories with no locations
         if not category.get("locations"):
-            print(f"  ℹ️  No locations found for this category")
+            print("  ℹ️  No locations found for this category")
             continue
 
         for location in category["locations"]:
