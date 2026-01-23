@@ -32,10 +32,14 @@ class LinuxPlatform:
         user_cache = os.path.expanduser("~/.cache")
         if os.path.exists(user_cache):
             # Add common application caches
-            for app_dir in os.listdir(user_cache):
-                app_path = os.path.join(user_cache, app_dir)
-                if os.path.isdir(app_path):
-                    locations.append(app_path)
+            try:
+                for app_dir in os.listdir(user_cache):
+                    app_path = os.path.join(user_cache, app_dir)
+                    if os.path.isdir(app_path):
+                        locations.append(app_path)
+            except (OSError, PermissionError):
+                # Skip if we can't read cache directory
+                pass
 
         # Thumbnail cache
         thumb_cache = os.path.expanduser("~/.thumbnails")
