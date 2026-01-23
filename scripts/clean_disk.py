@@ -126,6 +126,19 @@ class DiskCleaner:
 
         return True
 
+    def _deduplicate_paths(self, paths: List[str]) -> List[str]:
+        """Deduplicate list of paths by resolving to real paths."""
+        seen = set()
+        unique_paths = []
+        for path in paths:
+            if path and os.path.exists(path):
+                # Resolve to real path to handle symlinks and duplicates
+                real_path = os.path.realpath(path)
+                if real_path not in seen:
+                    seen.add(real_path)
+                    unique_paths.append(real_path)
+        return unique_paths
+
     def get_cleanable_locations(self) -> Dict[str, List[str]]:
         """Get platform-specific locations that can be cleaned"""
         locations = {"temp": [], "cache": [], "logs": [], "recycle": [], "downloads_old": []}
@@ -137,7 +150,7 @@ class DiskCleaner:
                 os.environ.get("TMP", ""),
                 os.path.join(os.environ.get("LOCALAPPDATA", ""), "Temp"),
             ]
-            locations["temp"].extend([d for d in temp_dirs if d and os.path.exists(d)])
+            locations["temp"].extend(self._deduplicate_paths(temp_dirs))
 
             # Cache directories
             cache_dirs = [
@@ -162,7 +175,7 @@ class DiskCleaner:
                     "Cache",
                 ),
             ]
-            locations["cache"].extend([d for d in cache_dirs if d and os.path.exists(d)])
+            locations["cache"].extend(self._deduplicate_paths(cache_dirs))
 
             # Windows specific
             locations["logs"].extend(
@@ -233,6 +246,10 @@ class DiskCleaner:
             user_cache = os.path.expanduser("~/.cache")
             if os.path.exists(user_cache):
                 locations["cache"].append(user_cache)
+
+        # Deduplicate all location lists
+        for key in locations:
+            locations[key] = self._deduplicate_paths(locations[key])
 
         return locations
 
@@ -311,11 +328,19 @@ class DiskCleaner:
                         result["files_deleted"] += 1
                         result["space_freed_mb"] += size / (1024 * 1024)
 
-                    # Update progress
+                    # Update progress (safely get item name)
                     if progress:
-                        progress.update(1, item.name)
+                        try:
+                            item_name = item.name
+                        except (AttributeError, OSError, RuntimeError):
+                            item_name = str(item)
+                        progress.update(1, item_name)
 
                 except (PermissionError, OSError) as e:
+                    result["errors"].append(str(e))
+                    self.errors.append(f"{item}: {e}")
+                except (AttributeError, RuntimeError) as e:
+                    # Handle unexpected errors from accessing item attributes
                     result["errors"].append(str(e))
                     self.errors.append(f"{item}: {e}")
 
@@ -494,14 +519,19 @@ def print_report(results: Dict):
     for category in results["categories"]:
         print(f"\n🗑️  {category['category'].upper().replace('_', ' ')}:")
 
+        # Safely handle categories with no locations
+        if not category.get("locations"):
+            print(f"  ℹ️  No locations found for this category")
+            continue
+
         for location in category["locations"]:
-            if location["files_deleted"] > 0:
-                space_mb = location["space_freed_mb"]
+            if location.get("files_deleted", 0) > 0:
+                space_mb = location.get("space_freed_mb", 0)
                 space_str = f"{space_mb:.2f} MB" if space_mb < 1024 else f"{space_mb/1024:.2f} GB"
-                print(f"  ✅ {location['path']}")
-                print(f"     Files: {location['files_deleted']}, Space: {space_str}")
-            elif location["errors"]:
-                print(f"  ⚠️  {location['path']}: {len(location['errors'])} errors")
+                print(f"  ✅ {location.get('path', 'Unknown')}")
+                print(f"     Files: {location.get('files_deleted', 0)}, Space: {space_str}")
+            elif location.get("errors"):
+                print(f"  ⚠️  {location.get('path', 'Unknown')}: {len(location['errors'])} errors")
 
     summary = results["summary"]
     print("\n📊 SUMMARY:")

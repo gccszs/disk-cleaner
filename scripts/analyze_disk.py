@@ -283,7 +283,18 @@ class DiskAnalyzer:
                 "/var/cache",
             ]
 
-        return [d for d in temp_dirs if d and os.path.exists(d)]
+        # Filter out empty paths, resolve to absolute paths, and deduplicate
+        seen = set()
+        unique_dirs = []
+        for d in temp_dirs:
+            if d and os.path.exists(d):
+                # Resolve to real path to handle symlinks and relative paths
+                real_path = os.path.realpath(d)
+                if real_path not in seen:
+                    seen.add(real_path)
+                    unique_dirs.append(real_path)
+
+        return unique_dirs
 
     def analyze_temp_files(self) -> Dict:
         """Analyze temporary file usage with progress bar"""
