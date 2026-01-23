@@ -13,6 +13,16 @@ All optimizations are pluggable and can be disabled via configuration.
 from diskcleaner.optimization.profiler import PerformanceProfiler, PerformanceReport
 from diskcleaner.optimization.concurrency import ConcurrencyManager
 from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus
+from diskcleaner.optimization.scan import (
+    QuickProfiler,
+    ConcurrentScanner,
+    IncrementalCache,
+    ScanStrategy,
+    ScanProfile,
+    ScanResult,
+    ScanSnapshot,
+    FileInfo,
+)
 
 __all__ = [
     'PerformanceProfiler',
@@ -20,4 +30,12 @@ __all__ = [
     'ConcurrencyManager',
     'MemoryMonitor',
     'MemoryStatus',
+    'QuickProfiler',
+    'ConcurrentScanner',
+    'IncrementalCache',
+    'ScanStrategy',
+    'ScanProfile',
+    'ScanResult',
+    'ScanSnapshot',
+    'FileInfo',
 ]
