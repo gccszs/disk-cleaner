@@ -8,9 +8,7 @@ Tests:
 """
 
 import time
-from pathlib import Path
 
-import pytest
 
 from diskcleaner.optimization.concurrency import ConcurrencyManager
 from diskcleaner.optimization.memory import MemoryMonitor, MemoryStatus

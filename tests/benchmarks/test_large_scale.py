@@ -179,15 +179,22 @@ class LargeScalePerformanceTest:
             selected.extend(small[: min(2, len(small))])
 
         self.terminal.print(f"\nSelected {len(selected)} directories for testing:")
-        self.terminal.print(
-            f"  Large dirs (≥10K): {len([d for d in selected if d.get('estimated_files', 0) >= 10000])}"
+        large_count = len(
+            [d for d in selected if d.get("estimated_files", 0) >= 10000]
         )
-        self.terminal.print(
-            f"  Medium dirs (1K-10K): {len([d for d in selected if 1000 <= d.get('estimated_files', 0) < 10000])}"
+        medium_count = len(
+            [
+                d
+                for d in selected
+                if 1000 <= d.get("estimated_files", 0) < 10000
+            ]
         )
-        self.terminal.print(
-            f"  Small dirs (<1K): {len([d for d in selected if d.get('estimated_files', 0) < 1000])}"
+        small_count = len(
+            [d for d in selected if d.get("estimated_files", 0) < 1000]
         )
+        self.terminal.print(f"  Large dirs (≥10K): {large_count}")
+        self.terminal.print(f"  Medium dirs (1K-10K): {medium_count}")
+        self.terminal.print(f"  Small dirs (<1K): {small_count}")
 
         return selected
 

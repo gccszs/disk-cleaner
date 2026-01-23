@@ -8,7 +8,6 @@ import sys
 import time
 from io import StringIO
 
-import pytest
 
 from diskcleaner.core.progress import IndeterminateProgress, ProgressBar, progress_iterator
 

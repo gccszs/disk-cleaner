@@ -8,17 +8,16 @@ import json
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, List, Optional
+from typing import Dict, Optional
 
-from diskcleaner.optimization.delete import BatchDeleter
 from diskcleaner.optimization.hash import (
     AdaptiveHasher,
     DuplicateFinder,
-    FastFilter,
-    HashCache,
-    ParallelHasher,
 )
-from diskcleaner.optimization.scan import ConcurrentScanner, FileInfo, IncrementalCache
+from diskcleaner.optimization.scan import (
+    ConcurrentScanner,
+    FileInfo,
+)
 
 
 class PerformanceBenchmark:

@@ -321,7 +321,7 @@ class TestRealWorldPerformance:
                 return count
 
             start = time.time()
-            old_count = old_method()
+            _ = old_method()  # Count not used, only timing matters
             old_time = time.time() - start
 
             # Test new method (DirectoryScanner with os.scandir)

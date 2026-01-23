@@ -8,10 +8,7 @@ Tests:
 - DeletionManager
 """
 
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
-import pytest
 
 from diskcleaner.optimization.delete import (
     AsyncDeleter,
@@ -136,10 +133,10 @@ class TestBatchDeleter:
             f.write_text("x")
 
         # Large batch
-        large_files = [tmp_path / f"large_{i}.txt" for i in range(10000)]
+        _ = [tmp_path / f"large_{i}.txt" for i in range(10000)]
 
         # Just verify it runs without error
-        deleter = BatchDeleter()
+        _ = BatchDeleter()
 
         # Clean up small files
         for f in small_files:

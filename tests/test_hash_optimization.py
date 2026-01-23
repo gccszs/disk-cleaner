@@ -9,10 +9,7 @@ Tests:
 - DuplicateFinder
 """
 
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
-import pytest
 
 from diskcleaner.optimization.hash import (
     AdaptiveHasher,

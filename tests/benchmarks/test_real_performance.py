@@ -43,7 +43,7 @@ def scan_real_directory(path: Path, name: str) -> dict:
     print(f"  Estimated time: {profile.estimated_time:.2f}s")
 
     # Actual scan
-    print(f"\n[2/2] Full Scan...")
+    print("\n[2/2] Full Scan...")
     scanner = ConcurrentScanner()
     profiler_perf = PerformanceProfiler()
 
@@ -115,21 +115,24 @@ def main():
         total_time = sum(r["scan_time"] for r in results)
         avg_throughput = total_files / total_time if total_time > 0 else 0
 
-        print(f"\nTotal Statistics:")
+        print("\nTotal Statistics:")
         print(f"  Total files scanned: {total_files:,}")
         print(f"  Total time: {total_time:.3f} seconds")
         print(f"  Average throughput: {avg_throughput:,.0f} files/second")
 
-        print(f"\nIndividual Results:")
-        print(f"{'Name':<30} {'Files':>10} {'Time (s)':>10} {'Throughput':>15}")
+        print("\nIndividual Results:")
+        header = f"{'Name':<30} {'Files':>10} {'Time (s)':>10} {'Throughput':>15}"
+        print(header)
         print("-" * 65)
         for r in results:
-            print(
-                f"{r['name']:<30} {r['file_count']:>10,} {r['scan_time']:>10.3f} {r['throughput']:>15,.0f}"
+            line = (
+                f"{r['name']:<30} {r['file_count']:>10,} "
+                f"{r['scan_time']:>10.3f} {r['throughput']:>15,.0f}"
             )
+            print(line)
 
         # Find performance targets
-        print(f"\nPerformance vs Targets:")
+        print("\nPerformance vs Targets:")
         for r in results:
             if r["file_count"] >= 10000:
                 target_met = r["scan_time"] < 30
