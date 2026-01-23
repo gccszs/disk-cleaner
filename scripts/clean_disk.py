@@ -595,8 +595,15 @@ def main():
 
     # Calculate summary if not already present
     if "summary" not in results:
-        total_files = sum(c["locations"][0]["files_deleted"] for c in results["categories"])
-        total_space = sum(c["locations"][0]["space_freed_mb"] for c in results["categories"])
+        total_files = 0
+        total_space = 0
+        for category in results["categories"]:
+            # Safely sum across all locations (categories may have no locations)
+            if category.get("locations"):
+                for location in category["locations"]:
+                    total_files += location.get("files_deleted", 0)
+                    total_space += location.get("space_freed_mb", 0)
+
         results["summary"] = {
             "total_files_deleted": total_files,
             "total_space_freed_mb": round(total_space, 2),
