@@ -78,18 +78,31 @@ class TestPerformanceProfiler:
         """Test bottleneck identification."""
         profiler = PerformanceProfiler()
 
-        # Simulate multiple operations
+        # Simulate multiple operations with more significant time differences
+        # Use larger time gaps to ensure test reliability across all environments
         with profiler.profile("fast"):
-            time.sleep(0.01)
+            time.sleep(0.001)  # 1ms - very fast
 
         with profiler.profile("slow"):
-            time.sleep(0.05)
+            time.sleep(0.05)  # 50ms - slow
 
         with profiler.profile("medium"):
-            time.sleep(0.02)
+            time.sleep(0.01)  # 10ms - medium
 
         bottleneck = profiler.identify_bottleneck()
-        assert bottleneck == "slow"
+
+        # The slowest operation should be identified
+        # We check it's one of the operations and that it has the longest time
+        assert bottleneck in ["fast", "slow", "medium"]
+
+        # Verify that "slow" has the longest average time
+        fast_time = profiler.get_average_time("fast")
+        slow_time = profiler.get_average_time("slow")
+        medium_time = profiler.get_average_time("medium")
+
+        assert slow_time > fast_time, "slow should be slower than fast"
+        assert slow_time > medium_time, "slow should be slower than medium"
+        assert bottleneck == "slow", f"slow should be bottleneck, got {bottleneck}"
 
     def test_reset(self):
         """Test resetting profiler."""
