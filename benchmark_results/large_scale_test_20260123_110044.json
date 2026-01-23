@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-01-23T11:00:44.755542",
+  "total_tests": 8,
+  "successful_tests": 8,
+  "results": [
+    {
+      "name": "研一课件",
+      "path": "D:\\研一课件",
+      "file_count": 342047,
+      "scan_time": 9.77262258529663,
+      "throughput": 35000.53307232245,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 238067,
+      "estimation_accuracy": 0.6960066891392118
+    },
+    {
+      "name": "game",
+      "path": "D:\\game",
+      "file_count": 37260,
+      "scan_time": 1.3838236331939697,
+      "throughput": 26925.396492905023,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 28640,
+      "estimation_accuracy": 0.7686527106816962
+    },
+    {
+      "name": "STEAM",
+      "path": "D:\\STEAM",
+      "file_count": 34406,
+      "scan_time": 1.2779512405395508,
+      "throughput": 26922.779921927064,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 26811,
+      "estimation_accuracy": 0.7792536185549032
+    },
+    {
+      "name": "soft_ware",
+      "path": "D:\\soft_ware",
+      "file_count": 11866,
+      "scan_time": 0.5542354583740234,
+      "throughput": 21409.67312847797,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 9601,
+      "estimation_accuracy": 0.8091184898027979
+    },
+    {
+      "name": "other_pj",
+      "path": "D:\\other_pj",
+      "file_count": 10516,
+      "scan_time": 0.46386241912841797,
+      "throughput": 22670.515149210005,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 9264,
+      "estimation_accuracy": 0.8809433244579689
+    },
+    {
+      "name": "tecent_d",
+      "path": "D:\\tecent_d",
+      "file_count": 5579,
+      "scan_time": 0.2880690097808838,
+      "throughput": 19366.887136674643,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 5106,
+      "estimation_accuracy": 0.9152177809643305
+    },
+    {
+      "name": "QQMusicCache",
+      "path": "D:\\QQMusicCache",
+      "file_count": 637,
+      "scan_time": 0.13541793823242188,
+      "throughput": 4703.9558297416825,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 554,
+      "estimation_accuracy": 0.869701726844584
+    },
+    {
+      "name": "sougou",
+      "path": "D:\\sougou",
+      "file_count": 466,
+      "scan_time": 0.12234807014465332,
+      "throughput": 3808.805479718999,
+      "error_count": 0,
+      "target_met": true,
+      "estimated_files": 412,
+      "estimation_accuracy": 0.8841201716738197
+    }
+  ]
+}
