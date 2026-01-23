@@ -147,7 +147,7 @@ class ProgressBar:
             # Truncate long item names
             max_item_length = 50
             if len(item) > max_item_length:
-                item = "..." + item[-(max_item_length - 3) :]
+                item = "..." + item[-(max_item_length - 3):]
             parts.append(f"| {item}")
 
         return " ".join(parts)
@@ -261,7 +261,7 @@ class IndeterminateProgress:
         if item:
             max_item_length = 50
             if len(item) > max_item_length:
-                item = "..." + item[-(max_item_length - 3) :]
+                item = "..." + item[-(max_item_length - 3):]
             parts.append(f"| {item}")
 
         display_str = " ".join(parts)

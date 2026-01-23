@@ -17,7 +17,6 @@ from diskcleaner.optimization.scan import (
     FileInfo,
     IncrementalCache,
     QuickProfiler,
-    ScanProfile,
     ScanResult,
     ScanSnapshot,
     ScanStrategy,

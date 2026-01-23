@@ -326,7 +326,8 @@ class PerformanceBenchmark:
                 dup = scenario["duplicate"]
                 if "elapsed_time" in dup:
                     print(
-                        f"  Duplicate: {dup['elapsed_time']:.3f}s for {dup.get('files_scanned', 0)} files"
+                        f"  Duplicate: {dup['elapsed_time']:.3f}s for "
+                        f"{dup.get('files_scanned', 0)} files"
                     )
 
         print("\n" + "=" * 60)
