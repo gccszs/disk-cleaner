@@ -178,6 +178,7 @@ class TestConcurrencyManager:
         manager = ConcurrencyManager()
 
         pool = manager.get_thread_pool("test")
+        assert pool is not None
         manager.shutdown_pool("test")
 
         # Pool should be removed
@@ -315,6 +316,7 @@ class TestIntegration:
 
         with profiler.profile("concurrent_test"):
             pool = manager.get_thread_pool("test")
+            assert pool is not None
             # Simulate some work
             import time
 

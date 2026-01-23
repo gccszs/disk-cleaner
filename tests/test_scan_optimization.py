@@ -9,6 +9,7 @@ Tests:
 """
 
 import time
+from pathlib import Path
 
 
 from diskcleaner.optimization.scan import (
