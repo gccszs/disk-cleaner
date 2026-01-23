@@ -26,12 +26,21 @@ except ImportError:
 
 
 class DiskAnalyzer:
-    def __init__(self, path: str = None, top_n: int = 20, show_progress: bool = True):
+    def __init__(
+        self,
+        path: str = None,
+        top_n: int = 20,
+        show_progress: bool = True,
+        max_files: int = None,
+        max_seconds: int = None,
+    ):
         self.path = path or self._get_default_path()
         self.top_n = top_n
         self.platform = platform.system()
         self.system = platform.system().lower()
         self.show_progress = show_progress and PROGRESS_AVAILABLE and sys.stdout.isatty()
+        self.max_files = max_files
+        self.max_seconds = max_seconds
 
     def _get_default_path(self) -> str:
         """Get default path based on platform"""
@@ -89,10 +98,14 @@ class DiskAnalyzer:
             if PROGRESS_AVAILABLE:
                 try:
                     # Use DirectoryScanner with progress tracking
+                    # Use instance limits if provided, otherwise use sensible defaults
+                    max_files = self.max_files if self.max_files is not None else 1000000
+                    max_seconds = self.max_seconds if self.max_seconds is not None else 300
+
                     scanner = DirectoryScanner(
                         str(scan_path),
-                        max_files=50000,
-                        max_seconds=30,
+                        max_files=max_files,
+                        max_seconds=max_seconds,
                         cache_enabled=False,  # Disable cache for one-time scan
                     )
 
@@ -389,9 +402,41 @@ def main():
 
     import argparse
 
-    parser = argparse.ArgumentParser(description="Analyze disk space usage")
+    parser = argparse.ArgumentParser(
+        description="Analyze disk space usage",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Analyze current drive (C:\\ on Windows, / on Unix)
+  python scripts/analyze_disk.py
+
+  # Analyze specific path with default limits
+  python scripts/analyze_disk.py --path "D:/Projects"
+
+  # Analyze with custom limits for large drives
+  python scripts/analyze_disk.py --path "D:/" --file-limit 2000000 --time-limit 600
+
+  # Get top 50 largest items
+  python scripts/analyze_disk.py --top 50
+
+  # Output as JSON for automation
+  python scripts/analyze_disk.py --json --output report.json
+        """,
+    )
     parser.add_argument("--path", "-p", help="Path to analyze", default=None)
     parser.add_argument("--top", "-n", type=int, default=20, help="Number of top items to show")
+    parser.add_argument(
+        "--file-limit",
+        type=int,
+        default=None,
+        help="Maximum number of files to scan (default: 1000000)",
+    )
+    parser.add_argument(
+        "--time-limit",
+        type=int,
+        default=None,
+        help="Maximum scan time in seconds (default: 300)",
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
     parser.add_argument(
@@ -401,7 +446,13 @@ def main():
     args = parser.parse_args()
 
     show_progress = not args.no_progress and not args.json
-    analyzer = DiskAnalyzer(path=args.path, top_n=args.top, show_progress=show_progress)
+    analyzer = DiskAnalyzer(
+        path=args.path,
+        top_n=args.top,
+        show_progress=show_progress,
+        max_files=args.file_limit,
+        max_seconds=args.time_limit,
+    )
     report = analyzer.generate_report()
 
     if args.json:
