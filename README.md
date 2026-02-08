@@ -80,27 +80,27 @@ Python 3.6 or higher (no external dependencies required - uses only standard lib
 
 ```bash
 # Analyze disk space
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 
 # Smart cleanup with duplicate detection (NEW v2.0)
 python -c "from diskcleaner.core import SmartCleanupEngine; engine = SmartCleanupEngine('.'); print(engine.get_summary(engine.analyze()))"
 
 # Preview cleanup (dry-run mode)
-python scripts/clean_disk.py --dry-run
+python skills/disk-cleaner/scripts/clean_disk.py --dry-run
 
 # Monitor disk usage
-python scripts/monitor_disk.py
+python skills/disk-cleaner/scripts/monitor_disk.py
 
 # Continuous monitoring
-python scripts/monitor_disk.py --watch
+python skills/disk-cleaner/scripts/monitor_disk.py --watch
 ```
 
 ### v2.0 Advanced Usage
 
 ```bash
 # Schedule automated cleanup (NEW v2.0)
-python scripts/scheduler.py add "Daily Cleanup" /tmp 24h --type smart
-python scripts/scheduler.py run  # Run due tasks
+python skills/disk-cleaner/scripts/scheduler.py add "Daily Cleanup" /tmp 24h --type smart
+python skills/disk-cleaner/scripts/scheduler.py run  # Run due tasks
 
 # Platform-specific cleanup suggestions
 python -c "from diskcleaner.platforms import WindowsPlatform; import pprint; pprint.pprint(WindowsPlatform.get_system_maintenance_items())"
@@ -135,16 +135,16 @@ ui.display_menu()  # Shows 5 view options
 
 ```bash
 # Add daily cleanup task
-python scripts/scheduler.py add "Daily Temp Cleanup" /tmp 24h --type temp
+python skills/disk-cleaner/scripts/scheduler.py add "Daily Temp Cleanup" /tmp 24h --type temp
 
 # List all scheduled tasks
-python scripts/scheduler.py list
+python skills/disk-cleaner/scripts/scheduler.py list
 
 # Run due tasks (dry-run by default)
-python scripts/scheduler.py run
+python skills/disk-cleaner/scripts/scheduler.py run
 
 # Run with actual deletion
-python scripts/scheduler.py run --force
+python skills/disk-cleaner/scripts/scheduler.py run --force
 ```
 
 ### Example 3: Platform-Specific Cleanup
@@ -195,7 +195,7 @@ git clone https://github.com/gccszs/disk-cleaner.git
 cd disk-cleaner
 
 # Scripts are ready to use (no dependencies needed)
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 ```
 
 ## Usage Examples
@@ -204,19 +204,19 @@ python scripts/analyze_disk.py
 
 ```bash
 # Analyze current drive (C:\ on Windows, / on Unix)
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 
 # Analyze specific path
-python scripts/analyze_disk.py --path "D:\Projects"
+python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Projects"
 
 # Get top 50 largest items
-python scripts/analyze_disk.py --top 50
+python skills/disk-cleaner/scripts/analyze_disk.py --top 50
 
 # Output as JSON for automation
-python scripts/analyze_disk.py --json
+python skills/disk-cleaner/scripts/analyze_disk.py --json
 
 # Save report to file
-python scripts/analyze_disk.py --output disk_report.json
+python skills/disk-cleaner/scripts/analyze_disk.py --output disk_report.json
 ```
 
 ### Cleaning Junk Files
@@ -225,36 +225,36 @@ python scripts/analyze_disk.py --output disk_report.json
 
 ```bash
 # Preview cleanup (recommended first step)
-python scripts/clean_disk.py --dry-run
+python skills/disk-cleaner/scripts/clean_disk.py --dry-run
 
 # Actually clean files
-python scripts/clean_disk.py --force
+python skills/disk-cleaner/scripts/clean_disk.py --force
 
 # Clean specific categories
-python scripts/clean_disk.py --temp       # Clean temp files only
-python scripts/clean_disk.py --cache      # Clean cache only
-python scripts/clean_disk.py --logs       # Clean logs only
-python scripts/clean_disk.py --recycle    # Clean recycle bin only
-python scripts/clean_disk.py --downloads 90  # Clean downloads older than 90 days
+python skills/disk-cleaner/scripts/clean_disk.py --temp       # Clean temp files only
+python skills/disk-cleaner/scripts/clean_disk.py --cache      # Clean cache only
+python skills/disk-cleaner/scripts/clean_disk.py --logs       # Clean logs only
+python skills/disk-cleaner/scripts/clean_disk.py --recycle    # Clean recycle bin only
+python skills/disk-cleaner/scripts/clean_disk.py --downloads 90  # Clean downloads older than 90 days
 ```
 
 ### Disk Monitoring
 
 ```bash
 # Check current status
-python scripts/monitor_disk.py
+python skills/disk-cleaner/scripts/monitor_disk.py
 
 # Continuous monitoring (every 60 seconds)
-python scripts/monitor_disk.py --watch
+python skills/disk-cleaner/scripts/monitor_disk.py --watch
 
 # Custom thresholds
-python scripts/monitor_disk.py --warning 70 --critical 85
+python skills/disk-cleaner/scripts/monitor_disk.py --warning 70 --critical 85
 
 # Alert mode (CI/CD friendly - exit codes based on status)
-python scripts/monitor_disk.py --alerts-only
+python skills/disk-cleaner/scripts/monitor_disk.py --alerts-only
 
 # Custom monitoring interval (5 minutes)
-python scripts/monitor_disk.py --watch --interval 300
+python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300
 ```
 
 ## Scripts Reference
@@ -351,25 +351,25 @@ Executables and system files are protected:
 ### 1. Free Up C Drive Space on Windows
 ```bash
 # Analyze what's taking space
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 
 # Preview cleanup
-python scripts/clean_disk.py --dry-run
+python skills/disk-cleaner/scripts/clean_disk.py --dry-run
 
 # Execute cleanup
-python scripts/clean_disk.py --force
+python skills/disk-cleaner/scripts/clean_disk.py --force
 ```
 
 ### 2. Automated Disk Monitoring
 ```bash
 # Run in background with custom thresholds
-python scripts/monitor_disk.py --watch --warning 70 --critical 85 --interval 300
+python skills/disk-cleaner/scripts/monitor_disk.py --watch --warning 70 --critical 85 --interval 300
 ```
 
 ### 3. CI/CD Integration
 ```bash
 # Check disk space in pipeline
-python scripts/monitor_disk.py --alerts-only --json
+python skills/disk-cleaner/scripts/monitor_disk.py --alerts-only --json
 
 # Exit codes: 0=OK, 1=WARNING, 2=CRITICAL
 if [ $? -ne 0 ]; then
@@ -382,14 +382,23 @@ fi
 ### Project Structure
 ```
 disk-cleaner/
-├── SKILL.md                 # Claude Code skill definition
-├── README.md                # This file
-├── scripts/
-│   ├── analyze_disk.py      # Disk analysis tool
-│   ├── clean_disk.py        # Junk file cleaner
-│   └── monitor_disk.py      # Disk usage monitor
-└── references/
-    └── temp_locations.md    # Platform-specific temp file locations
+├── skills/                   # Skills marketplace directory
+│   └── disk-cleaner/
+│       ├── SKILL.md          # Claude Code skill definition
+│       ├── README.md         # Skill documentation
+│       ├── scripts/          # Executable scripts
+│       │   ├── analyze_disk.py
+│       │   ├── clean_disk.py
+│       │   ├── monitor_disk.py
+│       │   └── scheduler.py
+│       └── references/       # Reference documentation
+│           └── temp_locations.md
+├── diskcleaner/              # Core Python module
+│   ├── core/                 # Core functionality
+│   ├── optimization/         # Performance optimizations
+│   └── platforms/            # Platform-specific code
+├── tests/                    # Test suite (244 tests)
+└── docs/                     # Additional documentation
 ```
 
 ### Contributing

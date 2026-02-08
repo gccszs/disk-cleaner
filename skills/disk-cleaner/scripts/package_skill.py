@@ -16,13 +16,27 @@ from pathlib import Path
 def create_skill_package(output_path: str = None):
     """Create a .skill package with only necessary files."""
 
-    # Files and directories to include
-    include_items = [
-        "SKILL.md",
-        "diskcleaner/",
-        "scripts/",
-        "references/",
+    # Find project root (repository root)
+    # Script is at: <repo>/skills/disk-cleaner/scripts/package_skill.py
+    # Project root is three levels up
+    project_root = Path(__file__).parent.parent.parent.parent
+
+    # Find skill root (skills/disk-cleaner/)
+    skill_root = Path(__file__).parent.parent
+
+    # Files and directories to include (relative paths)
+    # Core module is at project root, skill files are at skill root
+    core_items = [
+        (project_root / "diskcleaner", "diskcleaner"),
     ]
+
+    skill_items = [
+        (skill_root / "SKILL.md", "SKILL.md"),
+        (skill_root / "scripts", "scripts"),
+        (skill_root / "references", "references"),
+    ]
+
+    all_items = core_items + skill_items
 
     # Patterns to exclude
     exclude_patterns = [
@@ -42,11 +56,8 @@ def create_skill_package(output_path: str = None):
         skill_dir.mkdir()
 
         # Copy included items
-        project_root = Path(__file__).parent.parent
-
-        for item in include_items:
-            src = project_root / item
-            dst = skill_dir / item
+        for src, dst_name in all_items:
+            dst = skill_dir / dst_name
 
             if src.is_dir():
                 shutil.copytree(src, dst, ignore=shutil.ignore_patterns(*exclude_patterns))
@@ -55,7 +66,7 @@ def create_skill_package(output_path: str = None):
 
         # Create .skill file (which is a zip file)
         if output_path is None:
-            output_path = project_root / "disk-cleaner.skill"
+            output_path = project_root / "skills" / "disk-cleaner" / "disk-cleaner.skill"
 
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zipf:
             for file_path in skill_dir.rglob("*"):
