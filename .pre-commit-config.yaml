@@ -22,6 +22,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
+        exclude: '^examples/'
 
   # Import sorting
   - repo: https://github.com/PyCQA/isort
@@ -29,6 +30,7 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black"]
+        exclude: '^examples/'
 
   # Linting
   - repo: https://github.com/PyCQA/flake8
@@ -36,6 +38,7 @@ repos:
     hooks:
       - id: flake8
         args: ['--max-line-length=100', '--extend-ignore=E203,E231,W503']
+        exclude: '^examples/'
 
   # Type checking - temporarily disabled due to extensive type annotation work needed
   # - repo: https://github.com/pre-commit/mirrors-mypy

@@ -29,55 +29,55 @@ High-performance cross-platform disk management toolkit with advanced optimizati
 
 ```bash
 # Analyze current drive (C:\ on Windows, / on Unix)
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 
 # Analyze specific path
-python scripts/analyze_disk.py --path "D:\Projects"
+python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Projects"
 
 # Get top 50 largest items
-python scripts/analyze_disk.py --top 50
+python skills/disk-cleaner/scripts/analyze_disk.py --top 50
 
 # Output as JSON
-python scripts/analyze_disk.py --json
+python skills/disk-cleaner/scripts/analyze_disk.py --json
 
 # Save report
-python scripts/analyze_disk.py --output disk_report.json
+python skills/disk-cleaner/scripts/analyze_disk.py --output disk_report.json
 ```
 
 ### Clean Junk Files
 
 ```bash
 # Dry run (default - safe simulation)
-python scripts/clean_disk.py --dry-run
+python skills/disk-cleaner/scripts/clean_disk.py --dry-run
 
 # Actually clean files (use --force)
-python scripts/clean_disk.py --force
+python skills/disk-cleaner/scripts/clean_disk.py --force
 
 # Clean specific category
-python scripts/clean_disk.py --temp       # Clean temp files only
-python scripts/clean_disk.py --cache      # Clean cache only
-python scripts/clean_disk.py --logs       # Clean logs only
-python scripts/clean_disk.py --recycle    # Clean recycle bin only
-python scripts/clean_disk.py --downloads 90  # Clean downloads older than 90 days
+python skills/disk-cleaner/scripts/clean_disk.py --temp       # Clean temp files only
+python skills/disk-cleaner/scripts/clean_disk.py --cache      # Clean cache only
+python skills/disk-cleaner/scripts/clean_disk.py --logs       # Clean logs only
+python skills/disk-cleaner/scripts/clean_disk.py --recycle    # Clean recycle bin only
+python skills/disk-cleaner/scripts/clean_disk.py --downloads 90  # Clean downloads older than 90 days
 ```
 
 ### Monitor Disk Usage
 
 ```bash
 # Check current status
-python scripts/monitor_disk.py
+python skills/disk-cleaner/scripts/monitor_disk.py
 
 # Continuous monitoring (every 60 seconds)
-python scripts/monitor_disk.py --watch
+python skills/disk-cleaner/scripts/monitor_disk.py --watch
 
 # Custom thresholds
-python scripts/monitor_disk.py --warning 70 --critical 85
+python skills/disk-cleaner/scripts/monitor_disk.py --warning 70 --critical 85
 
 # Alert mode (CI/CD friendly)
-python scripts/monitor_disk.py --alerts-only
+python skills/disk-cleaner/scripts/monitor_disk.py --alerts-only
 
 # Custom monitoring interval
-python scripts/monitor_disk.py --watch --interval 300
+python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300
 ```
 
 ## Performance Features
@@ -214,17 +214,17 @@ The scripts implement multiple safety layers:
 
 When user says "My C drive is full":
 
-1. Analyze current state: `python scripts/analyze_disk.py`
-2. Preview cleanup: `python scripts/clean_disk.py --dry-run`
+1. Analyze current state: `python skills/disk-cleaner/scripts/analyze_disk.py`
+2. Preview cleanup: `python skills/disk-cleaner/scripts/clean_disk.py --dry-run`
 3. Review report, confirm with user
-4. Execute cleanup: `python scripts/clean_disk.py --force`
-5. Verify results: `python scripts/analyze_disk.py`
+4. Execute cleanup: `python skills/disk-cleaner/scripts/clean_disk.py --force`
+5. Verify results: `python skills/disk-cleaner/scripts/analyze_disk.py`
 
 ### Workflow 2: Continuous Monitoring
 
 For proactive disk management:
 
-1. Start monitor: `python scripts/monitor_disk.py --watch --interval 300`
+1. Start monitor: `python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300`
 2. Set appropriate thresholds: `--warning 70 --critical 85`
 3. Monitor alerts and take action when needed
 
@@ -234,10 +234,10 @@ For analyzing large directories (100K+ files):
 
 ```bash
 # Use intelligent sampling for quick estimates
-python scripts/analyze_disk.py --path "D:\Large\Project" --sample
+python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Large\Project" --sample
 
 # Full scan if needed
-python scripts/analyze_disk.py --path "D:\Large\Project" --full
+python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Large\Project" --full
 
 # Performance: Can scan 442K files in ~14 seconds
 ```
@@ -248,13 +248,13 @@ For thorough cleanup:
 
 ```bash
 # Preview all cleaning
-python scripts/clean_disk.py --dry-run
+python skills/disk-cleaner/scripts/clean_disk.py --dry-run
 
 # If satisfied, execute
-python scripts/clean_disk.py --force
+python skills/disk-cleaner/scripts/clean_disk.py --force
 
 # Analyze results
-python scripts/analyze_disk.py
+python skills/disk-cleaner/scripts/analyze_disk.py
 ```
 
 ## Output Formats
