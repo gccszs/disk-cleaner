@@ -18,17 +18,17 @@ test-fast:      ## 快速测试（跳过慢速测试）
 
 lint:           ## 代码检查
 	@echo "Running black..."
-	black --check diskcleaner/ tests/ examples/
+	black --check diskcleaner/ tests/
 	@echo "Running isort..."
-	isort --check-only diskcleaner/ tests/ examples/
+	isort --check-only diskcleaner/ tests/
 	@echo "Running flake8..."
-	flake8 diskcleaner/ tests/ examples/ --max-line-length=100
+	flake8 diskcleaner/ tests/ --max-line-length=100
 	@echo "Running mypy..."
 	mypy diskcleaner/
 
 format:         ## 自动格式化代码
-	black diskcleaner/ tests/ examples/
-	isort diskcleaner/ tests/ examples/
+	black diskcleaner/ tests/
+	isort diskcleaner/ tests/
 
 clean:          ## 清理临时文件
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/
