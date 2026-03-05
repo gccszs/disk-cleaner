@@ -18,7 +18,7 @@ Install directly from CLI:
 ```bash
 npx add-skill gccszs/disk-cleaner
 ```
-
+OR
 ```bash
 npx skills add gccszs/disk-cleaner
 ```
