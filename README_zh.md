@@ -11,14 +11,16 @@
 
 ## ⚡ 快速安装
 
-### 方式1：作为 Claude Code 技能安装（推荐）
+### 方式1：作为 Agent SKILL 技能安装（推荐）
 
-直接从 GitHub 安装：
+直接从CLI安装：
 
 ```bash
 npx add-skill gccszs/disk-cleaner
 ```
-
+```bash
+npx skills add gccszs/disk-cleaner
+```
 这将安装包含所有必要文件的技能。`.skill` 包仅包含核心组件：
 - ✅ 核心模块 (`diskcleaner/`)
 - ✅ 可执行脚本 (`scripts/`)
