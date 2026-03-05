@@ -18,6 +18,7 @@
 ```bash
 npx add-skill gccszs/disk-cleaner
 ```
+或者
 ```bash
 npx skills add gccszs/disk-cleaner
 ```
