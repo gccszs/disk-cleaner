@@ -11,12 +11,16 @@ A comprehensive cross-platform disk space monitoring, analysis, and intelligent 
 
 ## ⚡ Quick Install
 
-### Option 1: Install as Claude Code Skill (Recommended)
+### Option 1: Install as Agent Skill (Recommended)
 
-Install directly from GitHub:
+Install directly from CLI:
 
 ```bash
 npx add-skill gccszs/disk-cleaner
+```
+
+```bash
+npx skills add gccszs/disk-cleaner
 ```
 
 This will install the skill with all necessary files. The `.skill` package contains only the essential components:
