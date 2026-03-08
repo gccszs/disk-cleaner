@@ -320,8 +320,8 @@ python scripts/skill_bootstrap.py --test-import
         created_time = __import__('datetime').datetime.now().isoformat()
         version_content = f"""{{
   "name": "disk-cleaner",
-  "version": "2.0.0",
-  "description": "High-performance cross-platform disk space monitoring, analysis, and cleaning toolkit",
+  "version": "2.1.0",
+  "description": "High-performance cross-platform disk space monitoring, analysis, and cleaning toolkit with progressive scanning and cross-platform encoding fixes",
   "python_requires": ">=3.7",
   "created": "{created_time}"
 }}

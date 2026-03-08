@@ -1,9 +1,9 @@
-# Disk Cleaner v2.0 - Intelligent Cross-Platform Disk Management
+# Disk Cleaner v2.1 - Intelligent Cross-Platform Disk Management
 
 **[English](README.md)** | **[中文文档](README_zh.md)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/gccszs/disk-cleaner)
 [![Skill](https://img.shields.io/badge/skill-add--skill-blue)](https://github.com/gccszs/disk-cleaner)
 
@@ -44,7 +44,7 @@ See [Usage](#usage-examples) section for how to run the scripts.
 
 ---
 
-## ✨ v2.0 New Features
+## ✨ v2.1 New Features
 
 ### 🚀 Critical Cross-Platform Encoding Fix
 - **✅ ASCII-Safe Output** - All scripts use ASCII characters for 100% cross-platform compatibility
@@ -124,7 +124,7 @@ python skills/disk-cleaner/scripts/check_skill.py
 # Analyze disk space (with smart defaults)
 python skills/disk-cleaner/scripts/analyze_disk.py
 
-# Smart cleanup with duplicate detection (NEW v2.0)
+# Smart cleanup with duplicate detection (NEW v2.1)
 python -c "from diskcleaner.core import SmartCleanupEngine; engine = SmartCleanupEngine('.'); print(engine.get_summary(engine.analyze()))"
 
 # Preview cleanup (dry-run mode)
@@ -137,7 +137,7 @@ python skills/disk-cleaner/scripts/monitor_disk.py
 python skills/disk-cleaner/scripts/monitor_disk.py --watch
 ```
 
-### v2.0 Advanced Usage
+### v2.1 Advanced Usage
 
 ```bash
 # Quick sample (estimate scan time) - NEW v2.0

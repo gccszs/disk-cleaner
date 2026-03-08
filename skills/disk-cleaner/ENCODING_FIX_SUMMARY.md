@@ -1,4 +1,4 @@
-# 编码问题修复总结 (Encoding Fix Summary)
+# 编码问题修复总结 v2.1 (Encoding Fix Summary)
 
 ## 🎯 修复目标
 

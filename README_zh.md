@@ -1,9 +1,9 @@
-# 磁盘清理工具 v2.0 - 智能跨平台磁盘管理
+# 磁盘清理工具 v2.1 - 智能跨平台磁盘管理
 
 **[English](README.md)** | **[中文文档](README_zh.md)**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/gccszs/disk-cleaner)
 [![Skill](https://img.shields.io/badge/skill-add--skill-blue)](https://github.com/gccszs/disk-cleaner)
 
@@ -43,7 +43,7 @@ cd disk-cleaner
 
 ---
 
-## ✨ v2.0 新特性
+## ✨ v2.1 新特性
 
 ### 🚨 关键跨平台编码修复
 - **✅ ASCII安全输出** - 所有脚本使用ASCII字符，确保100%跨平台兼容
@@ -123,7 +123,7 @@ python skills/disk-cleaner/scripts/check_skill.py
 # 分析磁盘空间（智能默认值）
 python skills/disk-cleaner/scripts/analyze_disk.py
 
-# 智能清理及重复检测（v2.0新增）
+# 智能清理及重复检测（v2.1新增）
 python -c "from diskcleaner.core import SmartCleanupEngine; engine = SmartCleanupEngine('.'); print(engine.get_summary(engine.analyze()))"
 
 # 预览清理（干运行模式）
@@ -136,7 +136,7 @@ python skills/disk-cleaner/scripts/monitor_disk.py
 python skills/disk-cleaner/scripts/monitor_disk.py --watch
 ```
 
-### v2.0 高级使用
+### v2.1 高级使用
 
 ```bash
 # 快速采样（估算扫描时间）- v2.0新增
