@@ -57,13 +57,22 @@ jobs:
           pip install black isort flake8 mypy
 
       - name: Check code formatting with black
-        run: black --check diskcleaner/ tests/
+        run: |
+          black --check diskcleaner/ tests/
+          black --check skills/disk-cleaner/scripts/ || true
+        shell: bash
 
       - name: Check import sorting with isort
-        run: isort --check-only diskcleaner/ tests/
+        run: |
+          isort --check-only diskcleaner/ tests/
+          isort --check-only skills/disk-cleaner/scripts/ || true
+        shell: bash
 
       - name: Lint with flake8
-        run: flake8 diskcleaner/ tests/ --max-line-length=100 --extend-ignore=E203,E231,W503
+        run: |
+          flake8 diskcleaner/ tests/ --max-line-length=100 --extend-ignore=E203,E231,W503
+          flake8 skills/disk-cleaner/scripts/ --max-line-length=100 --extend-ignore=E203,E231,W503,F401,F541,F841,F811 || true
+        shell: bash
 
       - name: Type check with mypy
         run: mypy diskcleaner/ --config-file=mypy.ini || true

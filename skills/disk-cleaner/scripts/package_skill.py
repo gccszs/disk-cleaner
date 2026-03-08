@@ -83,7 +83,9 @@ def find_project_root() -> Path:
         return cwd
 
     raise FileNotFoundError(
-        f"无法找到项目根目录。请从 disk-cleaner 仓库目录运行此脚本。\n" f"当前脚本位置: {script_path}\n" f"当前工作目录: {cwd}"
+        f"无法找到项目根目录。请从 disk-cleaner 仓库目录运行此脚本。\n"
+        f"当前脚本位置: {script_path}\n"
+        f"当前工作目录: {cwd}"
     )
 
 
@@ -101,7 +103,8 @@ def find_skill_root(project_root: Path) -> Path:
             return candidate
 
     raise FileNotFoundError(
-        f"无法找到技能根目录（需要 SKILL.md 文件）。\n" f"尝试的位置: {[str(c) for c in candidates]}"
+        f"无法找到技能根目录（需要 SKILL.md 文件）。\n"
+        f"尝试的位置: {[str(c) for c in candidates]}"
     )
 
 

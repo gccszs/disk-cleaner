@@ -404,7 +404,9 @@ def main():
 
     parser.add_argument("--path", "-p", help="扫描路径")
     parser.add_argument("--sample", action="store_true", help="仅快速采样（1秒）")
-    parser.add_argument("--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）")
+    parser.add_argument(
+        "--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）"
+    )
     parser.add_argument("--max-seconds", type=int, default=30, help="最大时间限制-秒（默认: 30）")
     parser.add_argument("--json", action="store_true", help="JSON输出")
     parser.add_argument("--no-progress", action="store_true", help="不显示进度")
