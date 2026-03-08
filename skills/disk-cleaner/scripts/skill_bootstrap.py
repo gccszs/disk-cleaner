@@ -14,11 +14,10 @@ Skill Bootstrap Module - 智能引导模块
 """
 
 import os
-import sys
 import platform
+import sys
 from pathlib import Path
-from typing import Optional, Tuple, Any
-
+from typing import Any, Optional, Tuple
 
 # emoji 的安全替代字符（用于不支持 emoji 的环境）
 EMOJI_FALLBACKS = {
@@ -394,7 +393,7 @@ class SkillBootstrap:
                     "  python analyze_disk.py",
                     "",
                     "方法2: 将 skills/disk-cleaner 添加到 PYTHONPATH",
-                    f"  export PYTHONPATH=/path/to/skills/disk-cleaner:$PYTHONPATH",
+                    "  export PYTHONPATH=/path/to/skills/disk-cleaner:$PYTHONPATH",
                     "",
                     "方法3: 重新安装技能包",
                     "  确保解压到正确的目录",
@@ -535,12 +534,12 @@ def import_diskcleaner_modules():
     modules = {}
 
     try:
-        from diskcleaner.core.progress import ProgressBar
-        from diskcleaner.core.scanner import DirectoryScanner
         from diskcleaner.config import Config
         from diskcleaner.core.cache import CacheManager
         from diskcleaner.core.classifier import FileClassifier
+        from diskcleaner.core.progress import ProgressBar
         from diskcleaner.core.safety import SafetyChecker
+        from diskcleaner.core.scanner import DirectoryScanner
 
         modules.update(
             {

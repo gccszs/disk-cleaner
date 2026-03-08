@@ -22,7 +22,7 @@ try:
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
 
-    from skill_bootstrap import setup_skill_environment, import_diskcleaner_modules
+    from skill_bootstrap import import_diskcleaner_modules, setup_skill_environment
 
     # 设置技能环境并导入模块
     IMPORT_SUCCESS, MODULES = import_diskcleaner_modules()

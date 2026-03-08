@@ -24,7 +24,7 @@ try:
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
 
-    from skill_bootstrap import setup_skill_environment, safe_print, init_console
+    from skill_bootstrap import init_console, safe_print, setup_skill_environment
 
     # 初始化控制台编码
     init_console()
@@ -119,7 +119,7 @@ class ProgressiveDiskAnalyzer:
         }
 
         # 显示采样结果
-        safe_print(f"\n[i] 采样结果:")
+        safe_print("\n[i] 采样结果:")
         safe_print(f"   发现文件: {file_count:,} 个")
         safe_print(f"   目录数: {sample_dirs:,} 个")
         safe_print(f"   扫描速度: {result['files_per_second']:,} 文件/秒")
@@ -156,9 +156,9 @@ class ProgressiveDiskAnalyzer:
         if max_seconds is None:
             max_seconds = 30  # 默认30秒
 
-        safe_print(f"\n[*] 渐进式扫描启动")
+        safe_print("\n[*] 渐进式扫描启动")
         safe_print(f"   限制: {max_files:,} 文件或 {max_seconds} 秒")
-        safe_print(f"   按 Ctrl+C 随时中断查看部分结果\n")
+        safe_print("   按 Ctrl+C 随时中断查看部分结果\n")
 
         self.start_time = time.time()
         results = {"directories": [], "files": [], "scanned": 0}
@@ -286,7 +286,7 @@ class ProgressiveDiskAnalyzer:
 
     def _basic_scan(self) -> Dict:
         """基础扫描方法（当高级功能不可用时）"""
-        safe_print(f"\n使用基础扫描方法...")
+        safe_print("\n使用基础扫描方法...")
 
         results = {"directories": [], "files": []}
         file_count = 0
@@ -350,7 +350,7 @@ class ProgressiveDiskAnalyzer:
         # 扫描信息
         if "scan_info" in results:
             info = results["scan_info"]
-            lines.append(f"\n[i] Scan Info:")
+            lines.append("\n[i] Scan Info:")
             lines.append(f"   Files scanned: {info.get('files_scanned', 0):,}")
             lines.append(f"   Time: {info.get('scan_time_seconds', 0):.1f} seconds")
             if info.get("stopped_early"):
@@ -358,14 +358,14 @@ class ProgressiveDiskAnalyzer:
 
         # 大目录
         if results.get("directories"):
-            lines.append(f"\n[DIR] Largest Directories:")
+            lines.append("\n[DIR] Largest Directories:")
             for i, d in enumerate(results["directories"][:20], 1):
                 size_str = f"{d['size_gb']} GB" if d["size_gb"] > 0 else f"{d['size_mb']} MB"
                 lines.append(f"   {i}. {d['name']}: {size_str}")
 
         # 大文件
         if results.get("files"):
-            lines.append(f"\n[FILE] Largest Files:")
+            lines.append("\n[FILE] Largest Files:")
             for i, f in enumerate(results["files"][:20], 1):
                 size_str = f"{f['size_gb']} GB" if f["size_gb"] > 0 else f"{f['size_mb']} MB"
                 # 缩短路径
@@ -404,9 +404,7 @@ def main():
 
     parser.add_argument("--path", "-p", help="扫描路径")
     parser.add_argument("--sample", action="store_true", help="仅快速采样（1秒）")
-    parser.add_argument(
-        "--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）"
-    )
+    parser.add_argument("--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）")
     parser.add_argument("--max-seconds", type=int, default=30, help="最大时间限制-秒（默认: 30）")
     parser.add_argument("--json", action="store_true", help="JSON输出")
     parser.add_argument("--no-progress", action="store_true", help="不显示进度")
@@ -430,10 +428,10 @@ def main():
     estimated_time = sample_result.get("estimated_time_seconds", 0)
     if estimated_time > 60:  # 超过1分钟
         safe_print(f"\n[!] 预计扫描需要 {estimated_time/60:.1f} 分钟")
-        safe_print(f"建议:")
-        safe_print(f"   1. 使用 --sample 快速采样模式")
-        safe_print(f"   2. 使用 --max-seconds 降低时间限制")
-        safe_print(f"   3. 使用 --max-files 限制文件数量")
+        safe_print("建议:")
+        safe_print("   1. 使用 --sample 快速采样模式")
+        safe_print("   2. 使用 --max-seconds 降低时间限制")
+        safe_print("   3. 使用 --max-files 限制文件数量")
 
         # 非交互模式，直接返回
         if args.json:

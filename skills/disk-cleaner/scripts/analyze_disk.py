@@ -21,7 +21,7 @@ try:
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
 
-    from skill_bootstrap import setup_skill_environment, import_diskcleaner_modules
+    from skill_bootstrap import import_diskcleaner_modules, setup_skill_environment
 
     # 设置技能环境并导入模块
     IMPORT_SUCCESS, MODULES = import_diskcleaner_modules()
@@ -142,7 +142,7 @@ class DiskAnalyzer:
         }
 
         # 显示采样结果
-        print(f"\n[i] 采样结果:")
+        print("\n[i] 采样结果:")
         print(f"   发现文件: {file_count:,} 个")
         print(f"   目录数: {sample_dirs:,} 个")
         print(f"   扫描速度: {result['files_per_second']:,} 文件/秒")
@@ -154,10 +154,10 @@ class DiskAnalyzer:
                 print(f"   预计完整扫描: {estimated_seconds/60:.1f} 分钟")
 
             if estimated_seconds > 120:  # 超过2分钟
-                print(f"\n[i] 建议:")
-                print(f"   使用 --file-limit 限制文件数")
-                print(f"   使用 --time-limit 限制时间")
-                print(f"   或者使用 --sample 仅查看采样结果")
+                print("\n[i] 建议:")
+                print("   使用 --file-limit 限制文件数")
+                print("   使用 --time-limit 限制时间")
+                print("   或者使用 --sample 仅查看采样结果")
 
         return result
 
@@ -582,12 +582,12 @@ Examples:
         # 如果预计超过2分钟，建议使用限制
         if estimated_time > 120:
             print(f"\n[!] 预计完整扫描需要 {estimated_time/60:.1f} 分钟")
-            print(f"\n[i] 建议使用以下选项之一:")
-            print(f"   --sample         快速采样模式（1秒）")
-            print(f"   --file-limit 10000  限制文件数")
-            print(f"   --time-limit 30   限制时间（秒）")
-            print(f"   --progressive    渐进式扫描")
-            print(f"\n如需继续完整扫描，请按 Ctrl+C 并重新运行时添加相应参数")
+            print("\n[i] 建议使用以下选项之一:")
+            print("   --sample         快速采样模式（1秒）")
+            print("   --file-limit 10000  限制文件数")
+            print("   --time-limit 30   限制时间（秒）")
+            print("   --progressive    渐进式扫描")
+            print("\n如需继续完整扫描，请按 Ctrl+C 并重新运行时添加相应参数")
 
     report = analyzer.generate_report()
 

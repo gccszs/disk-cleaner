@@ -6,8 +6,8 @@ Disk Cleaner 技能包诊断工具
 """
 
 import os
-import sys
 import platform
+import sys
 from pathlib import Path
 
 
@@ -252,7 +252,7 @@ def main():
         print(f"{icon} {name}")
 
     if passed == total:
-        print(f"\n[*] 所有检查通过！技能包可以正常使用。")
+        print("\n[*] 所有检查通过！技能包可以正常使用。")
         return 0
     else:
         print(f"\n[!] 发现 {total - passed} 个问题需要解决。")
