@@ -46,6 +46,35 @@ See [Usage](#usage-examples) section for how to run the scripts.
 
 ## ✨ v2.0 New Features
 
+### 🚀 Critical Cross-Platform Encoding Fix
+- **✅ ASCII-Safe Output** - All scripts use ASCII characters for 100% cross-platform compatibility
+- **🌐 Universal Console Support** - Works on Windows GBK, Linux UTF-8, macOS UTF-8, and any other encoding
+- **🛡️ No Encoding Errors** - Eliminates UnicodeEncodeError on all platforms
+- **📝 Smart Emoji Policy** - Scripts use ASCII, Agents can use emojis when reporting to users
+
+### ⚡ Progressive Scanning for Large Disks
+- **🔍 Quick Sample Mode** - Estimate disk size and scan time in just 1 second
+- **📊 Progressive Scan Mode** - Get partial results in 30 seconds for large disks (500GB+)
+- **⏱️ Smart Time Limits** - Prevent users from waiting hours for full scans
+- **🔄 Real-Time Feedback** - Progress updates every 2 seconds
+- **⏸️ Interruptible** - Press Ctrl+C to get partial results anytime
+
+### 🤖 Intelligent Bootstrap System
+- **📍 Auto Location Detection** - Automatically searches 20+ common skill package locations
+- **🔧 Environment Variable Support** - Override with `DISK_CLEANER_SKILL_PATH`
+- **📦 Auto Module Import** - Automatically imports diskcleaner modules with fallbacks
+- **🌍 Cross-Platform Python Detection** - Tries both `python` and `python3`
+- **🛠️ Diagnostic Tool** - `check_skill.py` verifies all functionality
+
+### 🎯 Advanced Performance Optimizations
+- **⚡ QuickProfiler** - Fast sampling to estimate scan characteristics
+- **🚀 ConcurrentScanner** - Multi-threaded I/O for 3-5x speedup
+- **🔍 os.scandir() Optimization** - 3-5x faster than Path.glob
+- **💾 IncrementalCache** - Cache scan results for faster repeat scans
+- **🧠 Memory Monitoring** - Auto-adapts based on available memory
+- **⏹️ Early Stopping** - Configurable file/time limits
+
+### 🔧 Core v2.0 Features
 - **🤖 Intelligent 3D Classification** - Files categorized by type, risk level, and age
 - **🔍 Adaptive Duplicate Detection** - Fast/accurate strategies with automatic optimization
 - **⚡ Incremental Scanning** - Cache-based performance optimization for repeated scans
@@ -78,12 +107,21 @@ See [Usage](#usage-examples) section for how to run the scripts.
 
 ### Prerequisites
 
-Python 3.6 or higher (no external dependencies required - uses only standard library).
+Python 3.7 or higher (no external dependencies required - uses only standard library).
 
 ### Basic Usage
 
 ```bash
-# Analyze disk space
+# Quick sample mode (1 second) - NEW v2.0
+python skills/disk-cleaner/scripts/analyze_disk.py --sample
+
+# Progressive scanning for large disks - NEW v2.0
+python skills/disk-cleaner/scripts/analyze_progressive.py --max-seconds 30
+
+# Verify skill package - NEW v2.0
+python skills/disk-cleaner/scripts/check_skill.py
+
+# Analyze disk space (with smart defaults)
 python skills/disk-cleaner/scripts/analyze_disk.py
 
 # Smart cleanup with duplicate detection (NEW v2.0)
@@ -102,6 +140,15 @@ python skills/disk-cleaner/scripts/monitor_disk.py --watch
 ### v2.0 Advanced Usage
 
 ```bash
+# Quick sample (estimate scan time) - NEW v2.0
+python skills/disk-cleaner/scripts/analyze_disk.py --sample --json
+
+# Progressive scanning (30-second limit) - NEW v2.0
+python skills/disk-cleaner/scripts/analyze_progressive.py --max-seconds 30
+
+# Progressive scanning (file limit) - NEW v2.0
+python skills/disk-cleaner/scripts/analyze_progressive.py --max-files 50000
+
 # Schedule automated cleanup (NEW v2.0)
 python skills/disk-cleaner/scripts/scheduler.py add "Daily Cleanup" /tmp 24h --type smart
 python skills/disk-cleaner/scripts/scheduler.py run  # Run due tasks
@@ -265,13 +312,78 @@ python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300
 
 ### `analyze_disk.py`
 
-Disk space analysis tool that identifies space consumption patterns.
+Disk space analysis tool with progressive scanning support (v2.0+).
+
+**New in v2.0:**
+- **Quick Sample Mode** (`--sample`): 1-second estimation of scan time
+- **Smart Limits**: Default 50,000 files, 30 seconds for large disks
+- **Progressive Display**: Real-time feedback during scanning
+- **Auto-Sampling**: Automatically suggests scan mode based on disk size
 
 **Capabilities:**
 - Scan directories to find largest files and folders
 - Analyze temporary file locations
 - Calculate disk usage statistics
 - Generate detailed reports
+
+### `analyze_progressive.py` (NEW v2.0)
+
+Progressive scanning tool specifically designed for large disks.
+
+**Features:**
+- **Quick Sample** (`--sample`): 1-second estimation
+- **Progressive Scan** (`--max-seconds`): Get results in 30 seconds
+- **File Limit** (`--max-files`): Limit scan to specific file count
+- **Real-Time Progress**: Updates every 2 seconds
+- **Interruptible**: Press Ctrl+C for partial results
+
+**Usage:**
+```bash
+# Quick sample
+python skills/disk-cleaner/scripts/analyze_progressive.py --sample
+
+# 30-second progressive scan
+python skills/disk-cleaner/scripts/analyze_progressive.py --max-seconds 30
+
+# Limit file count
+python skills/disk-cleaner/scripts/analyze_progressive.py --max-files 50000
+```
+
+### `check_skill.py` (NEW v2.0)
+
+Diagnostic tool to verify skill package functionality.
+
+**Checks:**
+- Python version and platform
+- File structure integrity
+- Module imports
+- File permissions
+- Script execution
+
+**Usage:**
+```bash
+python skills/disk-cleaner/scripts/check_skill.py
+```
+
+### `skill_bootstrap.py` (NEW v2.0)
+
+Intelligent bootstrap module for automatic environment setup.
+
+**Features:**
+- Auto-detects skill package location (20+ locations)
+- Automatically imports diskcleaner modules
+- Cross-platform encoding handling
+- Graceful fallbacks for errors
+
+**Usage:**
+```python
+from skill_bootstrap import import_diskcleaner_modules
+
+success, modules = import_diskcleaner_modules()
+if success:
+    ProgressBar = modules['ProgressBar']
+    DirectoryScanner = modules['DirectoryScanner']
+```
 
 ### `clean_disk.py`
 
@@ -311,11 +423,15 @@ Continuous or one-shot disk usage monitoring.
 | Feature | Windows | Linux | macOS |
 |---------|---------|-------|-------|
 | Disk Analysis | ✅ | ✅ | ✅ |
+| Progressive Scanning (NEW) | ✅ | ✅ | ✅ |
+| Quick Sample Mode (NEW) | ✅ | ✅ | ✅ |
 | Temp Cleaning | ✅ | ✅ | ✅ |
 | Cache Cleaning | ✅ | ✅ | ✅ |
 | Log Cleaning | ✅ | ✅ | ✅ |
 | Recycle Bin | ✅ | ✅ | ✅ |
 | Real-time Monitoring | ✅ | ✅ | ✅ |
+| GBK Console Support (NEW) | ✅ | N/A | N/A |
+| UTF-8 Console Support | ✅ | ✅ | ✅ |
 
 ### Windows-Specific Locations
 - `%TEMP%`, `%TMP%`, `%LOCALAPPDATA%\Temp`
@@ -388,19 +504,31 @@ fi
 disk-cleaner/
 ├── skills/                   # Skills marketplace directory
 │   └── disk-cleaner/
-│       ├── SKILL.md          # Claude Code skill definition
+│       ├── SKILL.md          # Complete skill guide (v2.0)
+│       ├── ENCODING_FIX_SUMMARY.md    # Encoding fix documentation (NEW)
+│       ├── PROGRESSIVE_SCAN_SUMMARY.md # Progressive scanning guide (NEW)
+│       ├── UNIVERSAL_INSTALL.md       # Universal installation guide (NEW)
+│       ├── NO_PYTHON_GUIDE.md         # Guide for users without Python (NEW)
+│       ├── FIXES.md                  # v2.0 fixes list (NEW)
+│       ├── AGENT_QUICK_REF.txt       # Agent quick reference (NEW)
 │       ├── README.md         # Skill documentation
+│       ├── diskcleaner.skill # Self-contained skill package (v2.0)
 │       ├── scripts/          # Executable scripts
-│       │   ├── analyze_disk.py
-│       │   ├── clean_disk.py
-│       │   ├── monitor_disk.py
-│       │   └── scheduler.py
+│       │   ├── analyze_disk.py       # Enhanced with progressive scanning
+│       │   ├── analyze_progressive.py # NEW: Progressive scanning
+│       │   ├── clean_disk.py          # Safe cleanup
+│       │   ├── monitor_disk.py        # Disk monitoring
+│       │   ├── scheduler.py           # Automated scheduling
+│       │   ├── check_skill.py         # NEW: Diagnostic tool
+│       │   ├── skill_bootstrap.py     # NEW: Intelligent bootstrap
+│       │   └── package_skill.py       # Package creation tool
+│       ├── diskcleaner/      # Core Python module (self-contained)
+│       │   ├── core/         # Core functionality
+│       │   ├── optimization/ # Performance optimizations (v2.0)
+│       │   ├── platforms/    # Platform-specific code
+│       │   └── config/       # Configuration
 │       └── references/       # Reference documentation
 │           └── temp_locations.md
-├── diskcleaner/              # Core Python module
-│   ├── core/                 # Core functionality
-│   ├── optimization/         # Performance optimizations
-│   └── platforms/            # Platform-specific code
 ├── tests/                    # Test suite (244 tests)
 └── docs/                     # Additional documentation
 ```
