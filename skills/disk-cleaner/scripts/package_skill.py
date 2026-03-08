@@ -25,15 +25,17 @@ def init_console():
     if platform.system().lower() == "windows":
         try:
             import ctypes
+
             ctypes.windll.kernel32.SetConsoleOutputCP(65001)
-            if hasattr(sys.stdout, 'buffer'):
+            if hasattr(sys.stdout, "buffer"):
                 import io
+
                 sys.stdout = io.TextIOWrapper(
-                    sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True
+                    sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True
                 )
-            if hasattr(sys.stderr, 'buffer'):
+            if hasattr(sys.stderr, "buffer"):
                 sys.stderr = io.TextIOWrapper(
-                    sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True
+                    sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
                 )
         except Exception:
             pass
@@ -186,7 +188,7 @@ def create_skill_package(
     output_path: Path = None,
     project_root: Path = None,
     skill_root: Path = None,
-    verify: bool = True
+    verify: bool = True,
 ) -> Path:
     """
     创建技能包
@@ -314,19 +316,21 @@ python scripts/skill_bootstrap.py --test-import
 
 更多信息请查看 SKILL.md
 """
-        (skill_dir / "README.txt").write_text(readme_content, encoding='utf-8')
+        (skill_dir / "README.txt").write_text(readme_content, encoding="utf-8")
 
         # 创建版本文件
-        created_time = __import__('datetime').datetime.now().isoformat()
+        created_time = __import__("datetime").datetime.now().isoformat()
         version_content = f"""{{
   "name": "disk-cleaner",
   "version": "2.1.0",
-  "description": "High-performance cross-platform disk space monitoring, analysis, and cleaning toolkit with progressive scanning and cross-platform encoding fixes",
+  "description": "High-performance cross-platform disk space monitoring, "
+  "analysis, and cleaning toolkit with progressive scanning and "
+  "cross-platform encoding fixes",
   "python_requires": ">=3.7",
   "created": "{created_time}"
 }}
 """
-        (skill_dir / "skill.json").write_text(version_content, encoding='utf-8')
+        (skill_dir / "skill.json").write_text(version_content, encoding="utf-8")
 
         # 创建 zip 文件
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zipf:
@@ -406,6 +410,7 @@ def verify_skill_package(skill_path: Path) -> bool:
 
             try:
                 from skill_bootstrap import import_diskcleaner_modules
+
                 success, modules = import_diskcleaner_modules()
 
                 if success:
@@ -446,35 +451,14 @@ def main():
 
   # 只验证现有技能包
   python scripts/package_skill.py --verify-only disk-cleaner.skill
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--output", "-o",
-        type=Path,
-        help="输出 .skill 文件路径"
-    )
-    parser.add_argument(
-        "--project-root",
-        type=Path,
-        help="项目根目录（默认自动检测）"
-    )
-    parser.add_argument(
-        "--skill-root",
-        type=Path,
-        help="技能根目录（默认自动检测）"
-    )
-    parser.add_argument(
-        "--no-verify",
-        action="store_true",
-        help="跳过验证步骤"
-    )
-    parser.add_argument(
-        "--verify-only",
-        type=Path,
-        metavar="SKILL_FILE",
-        help="只验证现有的技能包"
-    )
+    parser.add_argument("--output", "-o", type=Path, help="输出 .skill 文件路径")
+    parser.add_argument("--project-root", type=Path, help="项目根目录（默认自动检测）")
+    parser.add_argument("--skill-root", type=Path, help="技能根目录（默认自动检测）")
+    parser.add_argument("--no-verify", action="store_true", help="跳过验证步骤")
+    parser.add_argument("--verify-only", type=Path, metavar="SKILL_FILE", help="只验证现有的技能包")
 
     args = parser.parse_args()
 
@@ -488,7 +472,7 @@ def main():
             output_path=args.output,
             project_root=args.project_root,
             skill_root=args.skill_root,
-            verify=not args.no_verify
+            verify=not args.no_verify,
         )
         print(f"\n[*] 技能包创建成功: {output_path}")
         sys.exit(0)
@@ -496,6 +480,7 @@ def main():
     except Exception as e:
         print(f"\n[X] 错误: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

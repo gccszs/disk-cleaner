@@ -31,14 +31,11 @@ except Exception as e:
     if platform.system().lower() == "windows" and sys.stdout.isatty():
         try:
             import io
-            if hasattr(sys.stdout, 'buffer'):
-                sys.stdout = io.TextIOWrapper(
-                    sys.stdout.buffer, encoding='utf-8', errors='replace'
-                )
-            if hasattr(sys.stderr, 'buffer'):
-                sys.stderr = io.TextIOWrapper(
-                    sys.stderr.buffer, encoding='utf-8', errors='replace'
-                )
+
+            if hasattr(sys.stdout, "buffer"):
+                sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+            if hasattr(sys.stderr, "buffer"):
+                sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
         except Exception:
             pass  # 使用系统默认
 

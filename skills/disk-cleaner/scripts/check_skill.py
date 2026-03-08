@@ -17,15 +17,17 @@ def init_console():
     if platform.system().lower() == "windows":
         try:
             import ctypes
+
             ctypes.windll.kernel32.SetConsoleOutputCP(65001)
-            if hasattr(sys.stdout, 'buffer'):
+            if hasattr(sys.stdout, "buffer"):
                 import io
+
                 sys.stdout = io.TextIOWrapper(
-                    sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True
+                    sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True
                 )
-            if hasattr(sys.stderr, 'buffer'):
+            if hasattr(sys.stderr, "buffer"):
                 sys.stderr = io.TextIOWrapper(
-                    sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True
+                    sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
                 )
         except Exception:
             pass
@@ -39,7 +41,7 @@ def print_section(title: str):
     """打印分节标题"""
     print(f"\n{'='*60}")
     print(f" {title}")
-    print('='*60)
+    print("=" * 60)
 
 
 def print_check(name: str, status: bool, details: str = ""):
@@ -125,6 +127,7 @@ def check_imports():
             sys.path.insert(0, str(script_dir))
 
         from skill_bootstrap import get_bootstrap
+
         bootstrap = get_bootstrap()
         print_check("  引导模块", True, "skill_bootstrap.py")
     except ImportError as e:
@@ -165,7 +168,8 @@ def check_permissions():
     # 检查是否有创建临时文件的权限
     try:
         import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', delete=True) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=True) as f:
             f.write("test")
         print_check("临时文件创建", True)
     except Exception as e:
@@ -205,8 +209,8 @@ def check_scripts():
 
         # 尝试编译脚本（检查语法）
         try:
-            with open(script_path, 'r', encoding='utf-8') as f:
-                compile(f.read(), str(script_path), 'exec')
+            with open(script_path, "r", encoding="utf-8") as f:
+                compile(f.read(), str(script_path), "exec")
             print_check(f"  {script_name}", True, "语法检查通过")
         except SyntaxError as e:
             print_check(f"  {script_name}", False, f"语法错误: {e}")
@@ -287,13 +291,13 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="诊断 Disk Cleaner 技能包")
-    parser.add_argument('--verbose', '-v', action='store_true', help='显示详细信息')
-    parser.add_argument('--fix', action='store_true', help='尝试自动修复问题')
+    parser.add_argument("--verbose", "-v", action="store_true", help="显示详细信息")
+    parser.add_argument("--fix", action="store_true", help="尝试自动修复问题")
 
     args = parser.parse_args()
 
     # 设置调试模式
     if args.verbose:
-        os.environ['DISK_CLEANER_DEBUG'] = 'true'
+        os.environ["DISK_CLEANER_DEBUG"] = "true"
 
     sys.exit(main())

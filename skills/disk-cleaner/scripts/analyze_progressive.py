@@ -32,8 +32,8 @@ try:
     IMPORT_SUCCESS, MODULES = bootstrap.import_diskcleaner_modules()
 
     if IMPORT_SUCCESS:
-        DirectoryScanner = MODULES.get('DirectoryScanner')
-        Config = MODULES.get('Config')
+        DirectoryScanner = MODULES.get("DirectoryScanner")
+        Config = MODULES.get("Config")
     else:
         DirectoryScanner = None
         Config = None
@@ -132,8 +132,9 @@ class ProgressiveDiskAnalyzer:
 
         return result
 
-    def progressive_scan(self, max_files: int = None, max_seconds: int = None,
-                         show_progress: bool = True) -> Dict:
+    def progressive_scan(
+        self, max_files: int = None, max_seconds: int = None, show_progress: bool = True
+    ) -> Dict:
         """
         渐进式扫描 - 实时显示结果
 
@@ -186,19 +187,23 @@ class ProgressiveDiskAnalyzer:
 
                 # 收集大文件（>10MB）
                 if not file_info.is_dir and file_info.size > 10 * 1024 * 1024:
-                    results["files"].append({
-                        "path": file_info.path,
-                        "name": file_info.name,
-                        "size_gb": round(file_info.size / (1024**3), 2),
-                        "size_mb": round(file_info.size / (1024**2), 2),
-                    })
+                    results["files"].append(
+                        {
+                            "path": file_info.path,
+                            "name": file_info.name,
+                            "size_gb": round(file_info.size / (1024**3), 2),
+                            "size_mb": round(file_info.size / (1024**2), 2),
+                        }
+                    )
 
                 # 收集目录（仅顶层）
                 if file_info.is_dir and Path(file_info.path).parent == self.target_path:
-                    results["directories"].append({
-                        "path": file_info.path,
-                        "name": file_info.name,
-                    })
+                    results["directories"].append(
+                        {
+                            "path": file_info.path,
+                            "name": file_info.name,
+                        }
+                    )
 
             # 扫描完成
             elapsed = time.time() - self.start_time
@@ -250,11 +255,13 @@ class ProgressiveDiskAnalyzer:
             try:
                 size = self._get_dir_size_fast(dir_path, max_depth)
                 if size > 0:
-                    results.append({
-                        **dir_info,
-                        "size_gb": round(size / (1024**3), 2),
-                        "size_mb": round(size / (1024**2), 2),
-                    })
+                    results.append(
+                        {
+                            **dir_info,
+                            "size_gb": round(size / (1024**3), 2),
+                            "size_mb": round(size / (1024**2), 2),
+                        }
+                    )
             except (PermissionError, OSError):
                 pass
 
@@ -291,12 +298,14 @@ class ProgressiveDiskAnalyzer:
                     try:
                         size = self._get_dir_size_fast(item, max_depth=1)
                         if size > 1024 * 1024:  # > 1MB
-                            results["directories"].append({
-                                "path": str(item),
-                                "name": item.name,
-                                "size_gb": round(size / (1024**3), 2),
-                                "size_mb": round(size / (1024**2), 2),
-                            })
+                            results["directories"].append(
+                                {
+                                    "path": str(item),
+                                    "name": item.name,
+                                    "size_gb": round(size / (1024**3), 2),
+                                    "size_mb": round(size / (1024**2), 2),
+                                }
+                            )
                     except (PermissionError, OSError):
                         pass
                     file_count += 1
@@ -304,12 +313,14 @@ class ProgressiveDiskAnalyzer:
                     try:
                         size = item.stat().st_size
                         if size > 10 * 1024 * 1024:  # > 10MB
-                            results["files"].append({
-                                "path": str(item),
-                                "name": item.name,
-                                "size_gb": round(size / (1024**3), 2),
-                                "size_mb": round(size / (1024**2), 2),
-                            })
+                            results["files"].append(
+                                {
+                                    "path": str(item),
+                                    "name": item.name,
+                                    "size_gb": round(size / (1024**3), 2),
+                                    "size_mb": round(size / (1024**2), 2),
+                                }
+                            )
                     except (PermissionError, OSError):
                         pass
                     file_count += 1
@@ -342,23 +353,23 @@ class ProgressiveDiskAnalyzer:
             lines.append(f"\n[i] Scan Info:")
             lines.append(f"   Files scanned: {info.get('files_scanned', 0):,}")
             lines.append(f"   Time: {info.get('scan_time_seconds', 0):.1f} seconds")
-            if info.get('stopped_early'):
+            if info.get("stopped_early"):
                 lines.append(f"   Stopped early: {info.get('stop_reason', 'Unknown')}")
 
         # 大目录
         if results.get("directories"):
             lines.append(f"\n[DIR] Largest Directories:")
             for i, d in enumerate(results["directories"][:20], 1):
-                size_str = f"{d['size_gb']} GB" if d['size_gb'] > 0 else f"{d['size_mb']} MB"
+                size_str = f"{d['size_gb']} GB" if d["size_gb"] > 0 else f"{d['size_mb']} MB"
                 lines.append(f"   {i}. {d['name']}: {size_str}")
 
         # 大文件
         if results.get("files"):
             lines.append(f"\n[FILE] Largest Files:")
             for i, f in enumerate(results["files"][:20], 1):
-                size_str = f"{f['size_gb']} GB" if f['size_gb'] > 0 else f"{f['size_mb']} MB"
+                size_str = f"{f['size_gb']} GB" if f["size_gb"] > 0 else f"{f['size_mb']} MB"
                 # 缩短路径
-                path_str = f"...{f['path'][-50:]}" if len(f['path']) > 50 else f['path']
+                path_str = f"...{f['path'][-50:]}" if len(f["path"]) > 50 else f["path"]
                 lines.append(f"   {i}. {f['name']}: {size_str}")
                 lines.append(f"      {path_str}")
 
@@ -388,15 +399,15 @@ def main():
 
   # 自定义路径
   python scripts/analyze_progressive.py --path "D:\\Projects" --sample
-        """
+        """,
     )
 
     parser.add_argument("--path", "-p", help="扫描路径")
     parser.add_argument("--sample", action="store_true", help="仅快速采样（1秒）")
-    parser.add_argument("--max-files", type=int, default=50000,
-                       help="最大文件数限制（默认: 50000）")
-    parser.add_argument("--max-seconds", type=int, default=30,
-                       help="最大时间限制-秒（默认: 30）")
+    parser.add_argument(
+        "--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）"
+    )
+    parser.add_argument("--max-seconds", type=int, default=30, help="最大时间限制-秒（默认: 30）")
     parser.add_argument("--json", action="store_true", help="JSON输出")
     parser.add_argument("--no-progress", action="store_true", help="不显示进度")
 
@@ -431,9 +442,7 @@ def main():
 
     # 渐进式扫描
     results = analyzer.progressive_scan(
-        max_files=args.max_files,
-        max_seconds=args.max_seconds,
-        show_progress=not args.no_progress
+        max_files=args.max_files, max_seconds=args.max_seconds, show_progress=not args.no_progress
     )
 
     if args.json:

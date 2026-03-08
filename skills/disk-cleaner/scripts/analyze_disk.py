@@ -28,8 +28,8 @@ try:
     PROGRESS_AVAILABLE = IMPORT_SUCCESS
 
     if IMPORT_SUCCESS:
-        ProgressBar = MODULES['ProgressBar']
-        DirectoryScanner = MODULES['DirectoryScanner']
+        ProgressBar = MODULES["ProgressBar"]
+        DirectoryScanner = MODULES["DirectoryScanner"]
     else:
         ProgressBar = None
         DirectoryScanner = None
@@ -39,6 +39,7 @@ except Exception as e:
     try:
         from diskcleaner.core.progress import ProgressBar
         from diskcleaner.core.scanner import DirectoryScanner
+
         PROGRESS_AVAILABLE = True
         print(f"[Warning] 技能包引导失败，使用已安装版本: {e}", file=sys.stderr)
     except ImportError:

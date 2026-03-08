@@ -29,7 +29,7 @@ try:
     PROGRESS_AVAILABLE = IMPORT_SUCCESS
 
     if IMPORT_SUCCESS:
-        ProgressBar = MODULES['ProgressBar']
+        ProgressBar = MODULES["ProgressBar"]
     else:
         ProgressBar = None
 
@@ -37,6 +37,7 @@ except Exception as e:
     # 如果引导模块也失败，尝试直接导入（可能已安装）
     try:
         from diskcleaner.core.progress import ProgressBar
+
         PROGRESS_AVAILABLE = True
         print(f"[Warning] 技能包引导失败，使用已安装版本: {e}", file=sys.stderr)
     except ImportError:
