@@ -14,6 +14,34 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
+# monitor_disk.py 不依赖 diskcleaner 核心模块
+# 但为了保持一致性，我们仍然包含引导模块以便未来扩展
+try:
+    script_dir = Path(__file__).parent.resolve()
+    if str(script_dir) not in sys.path:
+        sys.path.insert(0, str(script_dir))
+
+    from skill_bootstrap import setup_skill_environment
+
+    # 设置技能环境（主要是为了编码处理）
+    _, _ = setup_skill_environment(require_modules=False)
+
+except Exception as e:
+    # 如果引导模块失败，使用基础编码处理
+    if platform.system().lower() == "windows" and sys.stdout.isatty():
+        try:
+            import io
+            if hasattr(sys.stdout, 'buffer'):
+                sys.stdout = io.TextIOWrapper(
+                    sys.stdout.buffer, encoding='utf-8', errors='replace'
+                )
+            if hasattr(sys.stderr, 'buffer'):
+                sys.stderr = io.TextIOWrapper(
+                    sys.stderr.buffer, encoding='utf-8', errors='replace'
+                )
+        except Exception:
+            pass  # 使用系统默认
+
 
 class DiskMonitor:
     def __init__(self, warning_threshold: int = 80, critical_threshold: int = 90):
@@ -28,7 +56,7 @@ class DiskMonitor:
 
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals gracefully"""
-        print("\n\n🛑 Shutting down monitor...")
+        print("\n\n[STOP] Shutting down monitor...")
         self.running = False
 
     def get_mount_points(self) -> List[str]:
@@ -155,7 +183,7 @@ class DiskMonitor:
 
         for drive in results["drives"]:
             if "error" in drive:
-                print(f"\n❌ {drive['path']}: ERROR - {drive['error']}")
+                print(f"\n[X] {drive['path']}: ERROR - {drive['error']}")
                 continue
 
             path = drive["path"]
@@ -165,11 +193,11 @@ class DiskMonitor:
 
             # Status indicator
             if status == "critical":
-                indicator = "🔴 CRITICAL"
+                indicator = "[!] CRITICAL"
             elif status == "warning":
-                indicator = "🟡 WARNING"
+                indicator = "[!] WARNING"
             else:
-                indicator = "🟢 OK"
+                indicator = "[OK] OK"
 
             # Build usage bar
             bar_length = 30
@@ -181,9 +209,9 @@ class DiskMonitor:
             print(f"  Free: {free_gb} GB / {drive['total_gb']} GB")
 
             if status == "critical":
-                print(f"  ⚠️  CRITICAL: Disk is {usage}% full!")
+                print(f"  [!] CRITICAL: Disk is {usage}% full!")
             elif status == "warning":
-                print(f"  ⚠️  WARNING: Disk is {usage}% full")
+                print(f"  [!] WARNING: Disk is {usage}% full")
 
         # Summary
         summary = results["summary"]
@@ -197,7 +225,7 @@ class DiskMonitor:
 
     def continuous_monitor(self, interval: int = 60):
         """Continuously monitor disk usage at specified interval"""
-        print(f"\n🔍 Monitoring disk usage every {interval} seconds...")
+        print(f"\n[*] Monitoring disk usage every {interval} seconds...")
         print("Press Ctrl+C to stop\n")
 
         while self.running:
@@ -206,7 +234,7 @@ class DiskMonitor:
 
             # Check for critical issues
             if results["summary"]["overall_status"] == "critical":
-                print("🚨 CRITICAL DISK SPACE ISSUES DETECTED!")
+                print("[!] CRITICAL DISK SPACE ISSUES DETECTED!")
                 print("   Immediate action required!\n")
 
             # Wait for next interval
@@ -250,7 +278,7 @@ def print_alerts(results: Dict):
     if summary["overall_status"] == "ok":
         return
 
-    print(f"\n🚨 DISK SPACE ALERTS - {results['timestamp']}")
+    print(f"\n[!] DISK SPACE ALERTS - {results['timestamp']}")
     print("=" * 60)
 
     for drive in results["drives"]:
@@ -261,11 +289,11 @@ def print_alerts(results: Dict):
             free_gb = drive["free_gb"]
 
             if status == "critical":
-                print(f"🔴 CRITICAL: {path}")
+                print(f"[!] CRITICAL: {path}")
                 print(f"   Usage: {usage}% | Free: {free_gb} GB")
                 print("   ACTION REQUIRED IMMEDIATELY")
             else:
-                print(f"🟡 WARNING: {path}")
+                print(f"[!] WARNING: {path}")
                 print(f"   Usage: {usage}% | Free: {free_gb} GB")
                 print("   Consider cleaning up soon")
 
@@ -273,13 +301,6 @@ def print_alerts(results: Dict):
 
 
 def main():
-    # Fix Windows console encoding for emoji support
-    import codecs
-
-    if sys.platform == "win32":
-        sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
-        sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
-
     import argparse
 
     parser = argparse.ArgumentParser(description="Monitor disk usage")
@@ -323,7 +344,7 @@ def main():
         if args.output:
             with open(args.output, "w") as f:
                 json.dump(results, f, indent=2)
-            print(f"✅ Report saved to {args.output}")
+            print(f"[OK] Report saved to {args.output}")
 
         # Exit with error code if thresholds exceeded
         if results["summary"]["overall_status"] == "critical":

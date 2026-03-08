@@ -1,0 +1,236 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║            DISK CLEANER - UNIVERSAL AGENT QUICK REFERENCE CARD              ║
+║                  (Works with ALL AI IDEs on ALL platforms)                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─ UNIVERSAL REQUIREMENTS ────────────────────────────────────────────────────┐
+│                                                                              │
+│  ✅ Python 3.7+ (ONLY requirement)                                          │
+│  ✅ Works on: Windows, macOS, Linux                                         │
+│  ✅ Works with: Cursor, Windsurf, Continue, Aider, Claude Code, etc.       │
+│  ✅ Works at: Global, Project, or User level                               │
+│  ✅ NO pip install needed (self-contained)                                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 1: DETECT PYTHON (PLATFORM AGNOSTIC) ───────────────────────────────┐
+│                                                                              │
+│   import subprocess, os                                                      │
+│                                                                              │
+│   # Use 'python' on Windows, 'python3' on Unix                             │
+│   python_cmd = 'python' if os.name == 'nt' else 'python3'                  │
+│                                                                              │
+│   result = subprocess.run([python_cmd, '--version'],                       │
+│                          capture_output=True, text=True)                    │
+│   if result.returncode != 0:                                                │
+│       print("ERROR: Python 3.7+ required")                                 │
+│       print("Install: https://www.python.org/downloads/")                  │
+│       return False                                                          │
+│                                                                              │
+│   print(f"OK: Python {result.stderr.strip()}")                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 2: FIND SKILL PACKAGE (LOCATION INDEPENDENT) ───────────────────────┐
+│                                                                              │
+│   from pathlib import Path                                                  │
+│                                                                              │
+│   # Search in order of priority (works everywhere)                         │
+│   search_paths = [                                                          │
+│       # Current directory                                                   │
+│       Path.cwd() / 'disk-cleaner',                                         │
+│       Path.cwd() / 'skills' / 'disk-cleaner',                              │
+│       Path.cwd() / '.skills' / 'disk-cleaner',                             │
+│       # Project root (up to 3 levels)                                      │
+│       *[p / 'skills' / 'disk-cleaner'                                      │
+│        for p in [Path.cwd(), *Path.cwd().parents][:3]],                    │
+│       # User home (universal)                                              │
+│       Path.home() / 'skills' / 'disk-cleaner',                             │
+│       Path.home() / '.skills' / 'disk-cleaner',                            │
+│   ]                                                                         │
+│                                                                              │
+│   # Find valid skill package                                               │
+│   skill_path = None                                                         │
+│   for path in search_paths:                                                │
+│       if (path / 'scripts' / 'analyze_disk.py').exists():                   │
+│           skill_path = path                                                │
+│           break                                                              │
+│                                                                              │
+│   if not skill_path:                                                        │
+│       print("ERROR: Skill package not found")                              │
+│       print("Extract to: skills/disk-cleaner/ or ~/.skills/disk-cleaner/")  │
+│       return False                                                          │
+│                                                                              │
+│   print(f"OK: Found at {skill_path}")                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 3: VERIFY SKILL (OPTIONAL BUT RECOMMENDED) ──────────────────────────┐
+│                                                                              │
+│   result = subprocess.run(                                                   │
+│       [python_cmd, 'scripts/check_skill.py'],                              │
+│       cwd=str(skill_path),                                                  │
+│       capture_output=True, text=True                                        │
+│   )                                                                         │
+│                                                                              │
+│   if result.returncode != 0:                                                │
+│       print("ERROR: Skill verification failed")                             │
+│       print(result.stdout)                                                  │
+│       return False                                                          │
+│                                                                              │
+│   print("OK: Skill verified")                                               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 4: EXECUTE OPERATION ─────────────────────────────────────────────────┐
+│                                                                              │
+│   operations = {                                                             │
+│       'analyze': 'analyze_disk.py',                                         │
+│       'clean': 'clean_disk.py',                                             │
+│       'monitor': 'monitor_disk.py',                                         │
+│   }                                                                         │
+│                                                                              │
+│   script = skill_path / 'scripts' / operations[operation]                   │
+│   cmd = [python_cmd, str(script)]                                           │
+│                                                                              │
+│   # Add operation-specific args                                             │
+│   if operation == 'analyze' and target_path:                                │
+│       cmd.extend(['--path', str(target_path)])                              │
+│   elif operation == 'clean':                                                 │
+│       cmd.append('--dry-run')  # ALWAYS use dry-run first!                  │
+│                                                                              │
+│   result = subprocess.run(cmd, cwd=str(skill_path),                         │
+│                          capture_output=True, text=True)                     │
+│                                                                              │
+│   print(result.stdout)                                                      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ USER INTENT MAPPING ──────────────────────────────────────────────────────┐
+│                                                                              │
+│   User says any of:              → Execute:                                │
+│   ─────────────────────────────────────────────────                        │
+│   "analyze disk"                   analyze_disk.py                          │
+│   "check disk space"               analyze_disk.py --top 50                 │
+│   "what's using space"             analyze_disk.py                          │
+│   "disk usage"                     analyze_disk.py                          │
+│                                                                              │
+│   "clean temp files"               clean_disk.py --temp --dry-run           │
+│   "preview cleanup"                clean_disk.py --dry-run                  │
+│   "remove junk files"              clean_disk.py --dry-run                  │
+│                                                                              │
+│   "monitor disk"                   monitor_disk.py                          │
+│   "check disk health"              monitor_disk.py                          │
+│   "disk space alert"               monitor_disk.py                          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CROSS-PLATFORM COMMANDS ──────────────────────────────────────────────────┐
+│                                                                              │
+│   Platform     Python Command    Check Command                              │
+│   ────────────────────────────────────────────────────                    │
+│   Windows      python           python --version                           │
+│   macOS        python3          python3 --version                          │
+│   Linux        python3          python3 --version                          │
+│                                                                              │
+│   Universal:                                                                   │
+│   python_cmd = 'python' if os.name == 'nt' else 'python3'                  │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ INSTALLATION LOCATIONS (ALL WORK) ────────────────────────────────────────┐
+│                                                                              │
+│   User Level (Recommended):                                                 │
+│     ~/.skills/disk-cleaner/          # Unix-like (macOS, Linux)             │
+│     ~/agent-skills/disk-cleaner/     # Alternative                           │
+│     C:\Users\You\skills\disk-cleaner\  # Windows                            │
+│                                                                              │
+│   Project Level:                                                              │
+│     project/skills/disk-cleaner/      # Any project                         │
+│     project/.skills/disk-cleaner/     # Hidden                              │
+│                                                                              │
+│   Global/System Level:                                                       │
+│     /usr/local/share/skills/disk-cleaner/  # Linux (system-wide)            │
+│     C:\ProgramData\skills\disk-cleaner\   # Windows (system-wide)           │
+│                                                                              │
+│   ANY location works! The skill includes intelligent auto-detection.        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ AI IDE COMPATIBILITY ─────────────────────────────────────────────────────┐
+│                                                                              │
+│   ✅ Cursor      - Extract to ~/.cursor/skills/ or project/skills/         │
+│   ✅ Windsurf    - Extract to ~/.windsurf/skills/ or project/skills/       │
+│   ✅ Continue    - Extract to ~/.continue/skills/ or project/skills/        │
+│   ✅ Aider       - Use via subprocess: !python skills/.../analyze_disk.py │
+│   ✅ Claude Code - Extract to ~/.claude/skills/ or project/skills/         │
+│   ✅ Any IDE     - Works via subprocess, just extract and use             │
+│                                                                              │
+│   NO IDE-specific configuration needed!                                     │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ SAFETY RULES (CRITICAL) ─────────────────────────────────────────────────┐
+│                                                                              │
+│   ⚠️  NEVER run clean_disk.py without --dry-run first                      │
+│   ⚠️  ALWAYS preview before actual cleaning                               │
+│   ⚠️  ALWAYS use absolute paths to skill package                           │
+│   ⚠️  ALWAYS check subprocess returncode                                   │
+│   ⚠️  ALWAYS capture and show output to user                              │
+│   ⚠️  ALWAYS handle exceptions gracefully                                  │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ COPY-PASTE UNIVERSAL TEMPLATE ───────────────────────────────────────────┐
+│                                                                              │
+│   import subprocess, os                                                     │
+│   from pathlib import Path                                                  │
+│                                                                              │
+│   # 1. Detect Python                                                        │
+│   python_cmd = 'python' if os.name == 'nt' else 'python3'                  │
+│   result = subprocess.run([python_cmd, '--version'],                       │
+│                          capture_output=True, text=True)                    │
+│   if result.returncode != 0:                                                │
+│       print("ERROR: Python required")                                       │
+│       return                                                                │
+│                                                                              │
+│   # 2. Find skill package                                                   │
+│   skill_path = None                                                         │
+│   for candidate in [                                                         │
+│       Path.cwd() / 'skills' / 'disk-cleaner',                              │
+│       Path.home() / 'skills' / 'disk-cleaner',                             │
+│   ]:                                                                         │
+│       if (candidate / 'scripts' / 'analyze_disk.py').exists():                │
+│           skill_path = candidate                                            │
+│           break                                                              │
+│                                                                              │
+│   if not skill_path:                                                        │
+│       print("ERROR: Skill not found")                                      │
+│       return                                                                │
+│                                                                              │
+│   # 3. Execute operation                                                    │
+│   result = subprocess.run(                                                   │
+│       [python_cmd, 'scripts/analyze_disk.py'],                             │
+│       cwd=str(skill_path),                                                  │
+│       capture_output=True, text=True                                        │
+│   )                                                                         │
+│                                                                              │
+│   print(result.stdout)                                                      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ ERROR HANDLING (UNIVERSAL) ───────────────────────────────────────────────┐
+│                                                                              │
+│   Python not found    → Install: https://www.python.org/downloads/         │
+│   Skill not found      → Extract to: skills/disk-cleaner/ or               │
+│                         ~/.skills/disk-cleaner/                              │
+│   Permission denied    → Use appropriate permissions for your platform      │
+│   Timeout              → Large directory scanning takes time                │
+│   Module error         → Run: python scripts/check_skill.py                │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  SUMMARY: Works EVERYWHERE - All platforms, All IDEs, All locations        ║
+║  Just Python 3.7+ required. Extract and use. No special setup needed.      ║
+╚══════════════════════════════════════════════════════════════════════════════╝

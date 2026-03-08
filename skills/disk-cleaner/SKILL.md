@@ -1,404 +1,1275 @@
 ---
 name: disk-cleaner
-description: "High-performance cross-platform disk space monitoring, analysis, and cleaning toolkit with v2.0 optimization enhancements. Use when Claude needs to: (1) Analyze disk space usage and identify large files/directories consuming space, (2) Clean temporary files, caches, logs, and other junk files safely, (3) Monitor disk usage with configurable warning/critical thresholds, (4) Generate detailed reports on disk health and cleanup recommendations. Features advanced optimization: 3-5x faster scanning with os.scandir(), concurrent multi-threaded I/O, intelligent sampling for large directories, memory-adaptive processing, and cross-platform compatibility (Windows/macOS/Linux). Specializes in Windows C drive cleanup while maintaining full compatibility with Unix systems. Provides interactive CLI, automated scripts, detailed reporting modes, and comprehensive test coverage (244 tests). All operations prioritize safety with built-in protection for system files."
+description: "Cross-platform disk space management toolkit with intelligent optimization. REQUIREMENTS: Python 3.7+. UNIVERSAL COMPATIBILITY: Works with ALL AI IDEs (Cursor, Windsurf, Continue, Aider, Claude Code, etc.). PLATFORM-INDEPENDENT: Works at any location - global, project, or user level. SELF-CONTAINED: No pip install needed, includes intelligent bootstrap. KEY FEATURES: (1) PROGRESSIVE SCANNING: Quick sample (1s) + Progressive mode for large disks, (2) INTELLIGENT BOOTSTRAP: Auto-detection of skill location and auto-import of modules, (3) CROSS-PLATFORM ENCODING: Safe emoji/Unicode handling on all platforms, (4) DIAGNOSTIC TOOLS: check_skill.py for quick verification, (5) OPTIMIZED SCANNING: 3-5x faster with os.scandir(), concurrent scanning, intelligent sampling. AGENT WORKFLOW: (1) Check Python, (2) Find skill package (20+ locations auto-detected), (3) Run diagnostics, (4) Use progressive scanning for large disks. The skill package includes all optimization modules - no features are lost!"
 ---
 
-# Disk Cleaner Skill v2.0
+# Disk Cleaner Skill - Complete Feature Guide for All Agents
 
-High-performance cross-platform disk management toolkit with advanced optimization features for monitoring, analyzing, and cleaning disk space safely.
+## 🚨 IMPORTANT: Emoji Usage Policy
 
-## 🚀 What's New in v2.0
+### For Script Output (Cross-Platform Safety)
+- **NEVER use emoji in script output** - All scripts use ASCII-safe characters
+- Scripts use: `[OK]`, `[X]`, `[!]`, `[*]`, `[i]`, `[DIR]`, `[FILE]`, `[PKG]`, `[x]`
+- This ensures compatibility with Windows GBK and other non-UTF-8 consoles
+- **DO NOT modify script output to add emoji** - This will break cross-platform compatibility
 
-### Performance Enhancements
-- **3-5x faster scanning** with os.scandir() optimization
-- **Concurrent multi-threaded scanning** for I/O-bound operations
-- **Intelligent sampling** with QuickProfiler (estimates in 0.5-1s instead of full scan)
-- **Memory-adaptive processing** with automatic memory monitoring
-- **Optimized duplicate detection** with parallel hashing and caching
+### For Agent-to-Human Communication (Recommended)
+- **SHOULD use emoji when reporting results to humans** - Makes output more readable
+- Use these emoji in your final reports to users:
+  - `✅` (Success) - Completed operations, successful scans
+  - `❌` (Error) - Failed operations, critical errors
+  - `⚠️` (Warning) - Warnings, issues that need attention
+  - `🔍` (Scanning) - Search/scan operations
+  - `📊` (Statistics) - Analysis results, statistics
+  - `📁` (Directory) - Directory-related information
+  - `📦` (Package) - Package/module information
+  - `🎉` (Success) - Celebratory messages for successful completion
+  - `🚨` (Critical) - Critical warnings
+  - `💡` (Tip) - Suggestions, recommendations
+  - `📋` (List) - Checklists, summaries
+  - `🔧` (Tool) - Tools, utilities
+  - `🌐` (Global) - Cross-platform, universal features
+  - `🛡️` (Safety) - Safety-related information
+  - `⚡` (Performance) - Performance improvements
+  - `📝` (Document) - Documentation
+  - `🎓` (Learning) - Educational content
+  - `📞` (Support) - Help, support information
+  - `📈` (Growth) - Improvements, gains
+  - `🎯` (Target) - Goals, objectives
+  - `🚀` (Launch) - Quick start, fast operations
+  - `🛠️` (Tools) - Tool-related features
 
-### Reliability Improvements
-- **244 comprehensive tests** across all platforms
-- **Cross-platform compatibility** verified on Windows, macOS, Linux
-- **Python 3.8-3.12 support** with full test coverage
-- **Robust error handling** for permission issues and edge cases
-- **Graceful degradation** when scanning protected directories
-
-## Quick Start
-
-### Analyze Disk Space
-
-```bash
-# Analyze current drive (C:\ on Windows, / on Unix)
-python skills/disk-cleaner/scripts/analyze_disk.py
-
-# Analyze specific path
-python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Projects"
-
-# Get top 50 largest items
-python skills/disk-cleaner/scripts/analyze_disk.py --top 50
-
-# Output as JSON
-python skills/disk-cleaner/scripts/analyze_disk.py --json
-
-# Save report
-python skills/disk-cleaner/scripts/analyze_disk.py --output disk_report.json
+**Example:**
+```
+Script output (ASCII):    [OK] Scan completed: 50,000 files in 30 seconds
+Your report to human:     ✅ Scan completed successfully! Found 50,000 files in 30 seconds
 ```
 
-### Clean Junk Files
+---
 
-```bash
-# Dry run (default - safe simulation)
-python skills/disk-cleaner/scripts/clean_disk.py --dry-run
+## 📦 COMPLETE FEATURE LIST (READ THIS FIRST!)
 
-# Actually clean files (use --force)
-python skills/disk-cleaner/scripts/clean_disk.py --force
+### 🚨 CRITICAL: Progressive Scanning (MANDATORY for Large Disks)
+- ✅ **Quick Sample Mode**: 1-second estimation of disk size and scan time
+- ✅ **Progressive Scan Mode**: Get partial results in 30 seconds for large disks
+- ✅ **Smart Time Limits**: Prevent users from waiting hours
+- ✅ **Real-time Feedback**: Progress updates every 2 seconds
+- ✅ **Interruptible**: Ctrl+C to get partial results
 
-# Clean specific category
-python skills/disk-cleaner/scripts/clean_disk.py --temp       # Clean temp files only
-python skills/disk-cleaner/scripts/clean_disk.py --cache      # Clean cache only
-python skills/disk-cleaner/scripts/clean_disk.py --logs       # Clean logs only
-python skills/disk-cleaner/scripts/clean_disk.py --recycle    # Clean recycle bin only
-python skills/disk-cleaner/scripts/clean_disk.py --downloads 90  # Clean downloads older than 90 days
+### 🔧 Intelligent Bootstrap (Auto-Detection & Import)
+- ✅ **Auto Location Detection**: Searches 20+ common skill package locations
+- ✅ **Environment Variable Support**: DISK_CLEANER_SKILL_PATH override
+- ✅ **Auto Module Import**: Automatically imports diskcleaner modules
+- ✅ **Fallback Mechanisms**: Works even if some features unavailable
+- ✅ **Cross-Platform Python Detection**: Tries both 'python' and 'python3'
+
+### 🌐 Universal Compatibility
+- ✅ **All AI IDEs**: Cursor, Windsurf, Continue, Aider, Claude Code, etc.
+- ✅ **All Platforms**: Windows, macOS, Linux (including Windows GBK console)
+- ✅ **All Installation Levels**: Global, project, user level
+- ✅ **No Configuration Needed**: Works out of the box
+- ✅ **Cross-Platform Encoding**: All scripts use ASCII-safe output (v2.0+)
+
+### 🛡️ Safety & Reliability
+- ✅ **Diagnostic Tool**: check_skill.py - verifies all functionality
+- ✅ **Safe Encoding**: All scripts use ASCII characters (no emoji in output)
+- ✅ **Safe Defaults**: --dry-run for cleaning, smart limits for scanning
+- ✅ **Protected Paths**: Never deletes system directories or executables
+- ✅ **Error Handling**: Graceful degradation on errors
+- ✅ **GBK/UTF-8 Compatible**: Works on Windows GBK, UTF-8, and all other encodings
+
+### ⚡ Performance Optimizations (ALL INCLUDED)
+- ✅ **QuickProfiler**: Fast sampling to estimate scan characteristics
+- ✅ **ConcurrentScanner**: Multi-threaded I/O for 3-5x speedup
+- ✅ **os.scandir() Optimization**: 3-5x faster than Path.glob
+- ✅ **IncrementalCache**: Cache scan results for faster repeat scans
+- ✅ **Memory Monitoring**: Auto-adapts based on available memory
+- ✅ **Early Stopping**: Configurable file/time limits
+
+### 📊 Available Scripts (8 Total)
+1. **analyze_disk.py** - Disk analysis with smart sampling
+2. **analyze_progressive.py** - Progressive scanning for large disks
+3. **clean_disk.py** - Safe junk file cleaning
+4. **monitor_disk.py** - Disk usage monitoring
+5. **check_skill.py** - Diagnostic tool
+6. **skill_bootstrap.py** - Intelligent bootstrap module
+7. **package_skill.py** - Package creation tool
+8. **scheduler.py** - Automated scheduling
+
+### 📚 Documentation (9 Files)
+- SKILL.md - This complete guide
+- AGENT_QUICK_REF.txt - One-page reference
+- UNIVERSAL_INSTALL.md - Universal installation guide
+- NO_PYTHON_GUIDE.md - Help for users without Python
+- PROGRESSIVE_SCAN_SUMMARY.md - Progressive scanning details
+- INSTALL.md - Detailed installation
+- FIXES.md - What's fixed in v2.0
+- README.txt - Quick start
+- references/temp_locations.md - Platform-specific info
+
+---
+
+## 🎯 AGENT CHECKLIST (Must Follow)
+
+### For ANY Disk Analysis Request:
+
+```
+[ ] STEP 1: Check Python availability
+[ ] STEP 2: Find skill package (auto-detects 20+ locations)
+[ ] STEP 3: Run diagnostics: python scripts/check_skill.py
+[ ] STEP 4: Run quick sample: --sample (MANDATORY - do this FIRST)
+[ ] STEP 5: Choose scan mode based on estimate
+[ ] STEP 6: Inform user of expected time
+[ ] STEP 7: Execute scan with appropriate limits
+[ ] STEP 8: Show results and offer next steps
 ```
 
-### Monitor Disk Usage
+### For ANY Clean Request:
 
-```bash
-# Check current status
-python skills/disk-cleaner/scripts/monitor_disk.py
-
-# Continuous monitoring (every 60 seconds)
-python skills/disk-cleaner/scripts/monitor_disk.py --watch
-
-# Custom thresholds
-python skills/disk-cleaner/scripts/monitor_disk.py --warning 70 --critical 85
-
-# Alert mode (CI/CD friendly)
-python skills/disk-cleaner/scripts/monitor_disk.py --alerts-only
-
-# Custom monitoring interval
-python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300
+```
+[ ] STEP 1-3: Same as above
+[ ] STEP 4: ALWAYS use --dry-run first (MANDATORY)
+[ ] STEP 5: Show preview results
+[ ] STEP 6: Ask user confirmation before --force
+[ ] STEP 7: Execute actual cleaning if confirmed
 ```
 
-## Performance Features
+---
 
-### High-Speed Scanning
-The scanner uses advanced optimizations for rapid directory traversal:
+## ⚡ PROGRESSIVE SCANNING (CRITICAL FOR LARGE DISKS)
 
-- **os.scandir() optimization**: 3-5x faster than Path.glob/iterdir()
-- **Bounded queue processing**: Efficient concurrent scanning
-- **Adaptive worker threads**: CPU count × 4 for I/O-bound operations
-- **Smart path exclusion**: Skip system directories automatically
+## 🚨 CRITICAL INFORMATION (Read First)
 
-### Intelligent Sampling (QuickProfiler)
-For large directories, use sampling to get instant estimates:
+### Universal Compatibility
+- ✅ **Works with ALL AI IDEs**: Cursor, Windsurf, Continue, Aider, Claude Code, etc.
+- ✅ **Platform Independent**: Windows, macOS, Linux
+- ✅ **Installation Agnostic**: Works at global, project, or user level
+- ✅ **Self-Contained**: No external dependencies, just Python 3.7+
 
+### The Only Requirement
 ```python
-from diskcleaner.optimization.scan import QuickProfiler
-
-profiler = QuickProfiler(sample_time=1.0)  # 1 second sampling
-profile = profiler.profile(path)  # Returns: estimated file count, size, depth, time
-
-# Example output for 442K files:
-# - Estimated: 450,000 files (within 2%)
-# - Estimated scan time: 14 seconds
-# - Actual scan time: 14 seconds
+import subprocess
+result = subprocess.run(['python', '--version'], capture_output=True, text=True)
+# If this succeeds, you can use this skill
 ```
 
-### Memory Management
-Automatic memory monitoring prevents system overload:
+---
 
-```python
-from diskcleaner.optimization.memory import MemoryMonitor
+## ⚡ PROGRESSIVE SCANNING (CRITICAL FOR LARGE DISKS)
 
-monitor = MemoryMonitor(threshold_mb=1000)
-if monitor.should_pause():
-    # Reduce concurrency
-    workers = monitor.get_optimal_workers(current_workers)
-```
+### 🚨 AGENT MUST USE FOR LARGE DISKS (>100GB)
 
-## Script Reference
+**Problem**: Full disk scan on large disks (500GB+) can take HOURS. Users will lose patience.
 
-### analyze_disk.py
+**Solution**: Use progressive scanning - get results in seconds, not hours!
 
-Main disk analysis tool that identifies space consumption patterns.
+### 📋 Three Scanning Modes
 
-**Key capabilities:**
-- High-speed scanning with os.scandir() (3-5x faster)
-- Scan large directories (100K+ files) in seconds
-- Cross-platform path exclusion (Windows/macOS/Linux)
-- Detailed statistics and reports
+#### Mode 1: Quick Sample (⚡ FASTEST - 1 Second)
 
-**Common use cases:**
-```
-"Analyze my C drive and show what's taking up space"
-"What are the largest directories in my home folder?"
-"Show me temp files taking up space"
-"Scan this 400GB directory quickly"
-```
-
-### clean_disk.py
-
-Safe junk file removal with multiple safety mechanisms.
-
-**Safety features:**
-- Protected paths (never deletes system directories)
-- Protected extensions (never deletes executables)
-- Dry-run mode by default
-- Detailed logging of all operations
-- Handles empty categories gracefully
-
-**Categories cleaned:**
-- **temp**: Temporary files (%TEMP%, /tmp, etc.)
-- **cache**: Application and browser caches
-- **logs**: Log files (older than 30 days default)
-- **recycle**: Recycle bin / trash
-- **downloads**: Old download files (configurable age)
-
-**Important:** Always run with `--dry-run` first to preview changes.
-
-### monitor_disk.py
-
-Continuous or one-shot disk usage monitoring.
-
-**Features:**
-- Multi-drive monitoring (all mount points)
-- Configurable warning/critical thresholds
-- Continuous monitoring mode with alerts
-- JSON output for automation
-- Non-zero exit codes for CI/CD integration
-
-**Exit codes:**
-- 0: All drives OK
-- 1: Warning threshold exceeded
-- 2: Critical threshold exceeded
-
-## Platform-Specific Information
-
-See [temp_locations.md](references/temp_locations.md) for:
-- Complete list of temporary file locations by platform
-- Browser cache locations
-- Development tool caches
-- Safety guidelines for each platform
-
-**Platform-specific optimizations:**
-- **Windows**: Excludes C:\Windows, C:\Program Files, etc.
-- **macOS**: Excludes /System, /Library, /private/var/vm (VM swap)
-- **Linux**: Excludes /proc, /sys, /dev, /run
-
-**When to read this file:**
-- User asks about specific platform cleanup locations
-- Need to understand what gets cleaned on each OS
-- Customizing cleanup for specific applications
-
-## Safety Rules
-
-The scripts implement multiple safety layers:
-
-1. **Protected Paths**: System directories never touched
-2. **Protected Extensions**: Executables and system files protected
-3. **Dry Run Default**: Must use `--force` for actual deletion
-4. **Age Filters**: Logs cleaned only after 30+ days
-5. **Error Handling**: Permission errors don't stop execution
-6. **Graceful Degradation**: Handles edge cases (empty categories, missing paths)
-
-**Protected extensions:**
-```
-.exe, .dll, .sys, .drv, .bat, .cmd, .ps1, .sh, .bash, .zsh,
-.app, .dmg, .pkg, .deb, .rpm, .msi, .iso, .vhd, .vhdx
-```
-
-## Typical Workflows
-
-### Workflow 1: Investigate and Clean
-
-When user says "My C drive is full":
-
-1. Analyze current state: `python skills/disk-cleaner/scripts/analyze_disk.py`
-2. Preview cleanup: `python skills/disk-cleaner/scripts/clean_disk.py --dry-run`
-3. Review report, confirm with user
-4. Execute cleanup: `python skills/disk-cleaner/scripts/clean_disk.py --force`
-5. Verify results: `python skills/disk-cleaner/scripts/analyze_disk.py`
-
-### Workflow 2: Continuous Monitoring
-
-For proactive disk management:
-
-1. Start monitor: `python skills/disk-cleaner/scripts/monitor_disk.py --watch --interval 300`
-2. Set appropriate thresholds: `--warning 70 --critical 85`
-3. Monitor alerts and take action when needed
-
-### Workflow 3: Large-Scale Analysis (NEW)
-
-For analyzing large directories (100K+ files):
+**When to use**: Get instant estimate of directory size and scan time
 
 ```bash
-# Use intelligent sampling for quick estimates
-python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Large\Project" --sample
-
-# Full scan if needed
-python skills/disk-cleaner/scripts/analyze_disk.py --path "D:\Large\Project" --full
-
-# Performance: Can scan 442K files in ~14 seconds
+python scripts/analyze_disk.py --sample
+# OR
+python scripts/analyze_progressive.py --sample
 ```
 
-### Workflow 4: One-Time Deep Clean
-
-For thorough cleanup:
-
-```bash
-# Preview all cleaning
-python skills/disk-cleaner/scripts/clean_disk.py --dry-run
-
-# If satisfied, execute
-python skills/disk-cleaner/scripts/clean_disk.py --force
-
-# Analyze results
-python skills/disk-cleaner/scripts/analyze_disk.py
+**Output**:
+```json
+{
+  "sample_file_count": 7591,
+  "sample_size_gb": 17.62,
+  "files_per_second": 7501.0,
+  "estimated_time_seconds": 2.0
+}
 ```
 
-## Output Formats
-
-### Interactive Mode (Default)
-Human-readable console output with:
-- Visual progress bars
-- Emoji indicators for status
-- Formatted tables
-
-### JSON Mode
-Machine-readable output for:
-- Automation pipelines
-- Log aggregation
-- Further processing
-
-Use `--json` flag with any script.
-
-### Report Files
-Save detailed reports with `--output report.json` for:
-- Historical tracking
-- Comparison over time
-- Audit trails
-
-## Advanced Usage
-
-### Python API
-
-For integration with other tools:
-
+**Agent Decision Logic**:
 ```python
-from diskcleaner.core import DirectoryScanner, SmartCleanupEngine
-
-# Scan directory
-scanner = DirectoryScanner("/path/to/scan")
-files = scanner.scan()
-
-# Analyze and get recommendations
-engine = SmartCleanupEngine("/path/to/scan")
-report = engine.analyze()
-
-# Clean with safety checks
-results = engine.clean(
-    categories=["temp", "cache", "logs"],
-    dry_run=True  # Set False to actually delete
+# ALWAYS run quick sample first for unknown disk sizes
+result = subprocess.run(
+    ['python', 'scripts/analyze_disk.py', '--sample', '--json'],
+    capture_output=True,
+    text=True,
+    timeout=10,
+    cwd=skill_path
 )
+
+import json
+sample = json.loads(result.stdout)
+estimated_time = sample.get('estimated_time_seconds', 0)
+
+# Choose next action based on estimate
+if estimated_time < 30:
+    mode = 'full'  # Full scan is fine
+elif estimated_time < 120:
+    mode = 'time_limited'  # Use time limit
+else:
+    mode = 'progressive'  # MUST use progressive mode
 ```
 
-### Performance Optimization
+#### Mode 2: Progressive Scan (🎯 RECOMMENDED FOR LARGE DISKS)
 
-For maximum performance on large directories:
+**When to use**: Get partial results in 30 seconds for large disks
+
+```bash
+python scripts/analyze_progressive.py --max-seconds 30
+```
+
+**Features**:
+- ✅ Real-time progress updates every 2 seconds
+- ✅ Shows partial results as they're discovered
+- ✅ Can interrupt with Ctrl+C and keep results
+- ✅ Smart file count limit (50,000 by default)
+
+**Agent Usage**:
+```python
+def analyze_large_disk_safely(path, max_seconds=30):
+    """Safely analyze large disk with time limit"""
+    result = subprocess.run(
+        ['python', 'scripts/analyze_progressive.py',
+         '--max-seconds', str(max_seconds),
+         '--path', str(path)],
+        capture_output=True,
+        text=True,
+        timeout=max_seconds + 10,
+        cwd=skill_path
+    )
+    return result.stdout
+```
+
+#### Mode 3: Limited Scan (📊 FAST RESULTS)
+
+**When to use**: Get results quickly with file/time limits
+
+```bash
+# Limit by file count (fast)
+python scripts/analyze_disk.py --file-limit 10000
+
+# Limit by time (safe)
+python scripts/analyze_disk.py --time-limit 30
+
+# Both limits (very fast)
+python scripts/analyze_disk.py --file-limit 10000 --time-limit 30
+```
+
+### 🎯 AGENT DECISION TREE (CRITICAL - FOLLOW THIS)
+
+```
+USER REQUEST: "Analyze my disk"
+    ↓
+┌─────────────────────────────────────────┐
+│ STEP 1: Quick Sample (MANDATORY)          │
+│ python scripts/analyze_disk.py --sample │
+└─────────────────────────────────────────┘
+    ↓
+    Get estimated_time from sample
+    ↓
+    ├─ estimated_time < 30 seconds
+    │   ↓
+    │   ✅ Use FULL SCAN
+    │   python scripts/analyze_disk.py
+    │
+    ├─ estimated_time 30-120 seconds
+    │   ↓
+    │   ⚠️ Use TIME LIMIT
+    │   python scripts/analyze_disk.py --time-limit 60
+    │   Tell user: "This will take ~X minutes"
+    │
+    └─ estimated_time > 120 seconds
+        ↓
+        🚨 MUST USE PROGRESSIVE MODE
+        python scripts/analyze_progressive.py --max-seconds 30
+        Tell user: "Large disk detected - using progressive scan (30 seconds)"
+```
+
+### 📝 Required Response Templates
+
+#### When Quick Sample Shows < 30 Seconds
+```
+✅ Disk analysis will take approximately 2 seconds
+Starting full scan...
+```
+
+#### When Quick Sample Shows 30-120 Seconds
+```
+⚠️ Disk analysis will take approximately 3 minutes
+Using time-limited scan for faster results...
+```
+
+#### When Quick Sample Shows > 120 Seconds
+```
+🚨 Large disk detected! Full scan would take approximately 5 minutes
+Using progressive scan mode to get results in 30 seconds...
+(This gives you partial results quickly - you can always do a full scan later)
+```
+
+### 💡 COPY-PASTE CODE (USE THIS)
 
 ```python
-from diskcleaner.optimization.scan import ConcurrentScanner, QuickProfiler
+import subprocess
+import json
+from pathlib import Path
 
-# Quick profiling first
-profiler = QuickProfiler(sample_time=1.0)
-profile = profiler.profile(large_path)
+def smart_disk_analysis(disk_path, python_cmd='python'):
+    """
+    SMART disk analysis - automatically chooses best method
 
-print(f"Estimated: {profile.file_count:,} files")
-print(f"Estimated time: {profile.estimated_time:.1f}s")
+    THIS IS THE RECOMMENDED WAY for all agents
+    """
+    # Find skill package
+    skill_path = find_skill_package()  # Use your find function
+    if not skill_path:
+        return False, "Skill package not found"
 
-# Full concurrent scan if needed
-if profile.file_count < 100000:
-    scanner = ConcurrentScanner()
-    result = scanner.scan(large_path)
+    # STEP 1: Quick sample (MANDATORY - do this first!)
+    print("🔍 Quick sampling disk...")
+    sample_result = subprocess.run(
+        [python_cmd, 'scripts/analyze_disk.py', '--sample',
+         '--path', str(disk_path), '--json'],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        cwd=str(skill_path)
+    )
+
+    if sample_result.returncode != 0:
+        return False, "Sample failed"
+
+    try:
+        sample = json.loads(sample_result.stdout)
+        estimated_time = sample.get('estimated_time_seconds', 0)
+    except:
+        estimated_time = 0
+
+    print(f"   Estimated scan time: {estimated_time:.0f} seconds")
+
+    # STEP 2: Choose scanning method based on estimate
+    if estimated_time < 30:
+        # Small disk - full scan
+        print("✅ Using full scan (small disk)")
+        result = subprocess.run(
+            [python_cmd, 'scripts/analyze_disk.py',
+             '--path', str(disk_path)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=str(skill_path)
+        )
+
+    elif estimated_time < 120:
+        # Medium disk - time limited
+        minutes = estimated_time / 60
+        print(f"⚠️  Using time-limited scan (~{minutes:.1f} minutes)")
+        result = subprocess.run(
+            [python_cmd, 'scripts/analyze_disk.py',
+             '--path', str(disk_path),
+             '--time-limit', '60'],  # 1 minute max
+            capture_output=True,
+            text=True,
+            timeout=70,
+            cwd=str(skill_path)
+        )
+
+    else:
+        # Large disk - PROGRESSIVE MODE (MANDATORY)
+        print(f"🚨 Large disk detected! Using progressive scan (30 seconds)")
+        result = subprocess.run(
+            [python_cmd, 'scripts/analyze_progressive.py',
+             '--path', str(disk_path),
+             '--max-seconds', '30',
+             '--json'],
+            capture_output=True,
+            text=True,
+            timeout=40,
+            cwd=str(skill_path)
+        )
+
+    if result.returncode != 0:
+        return False, result.stderr
+
+    print(result.stdout)
+    return True, result.stdout
+
+# USAGE - Just call this function:
+success, output = smart_disk_analysis("C:\\")
+success, output = smart_disk_analysis("/home/user")
+success, output = smart_disk_analysis("D:\\Projects")
 ```
 
-## Testing
+### ⚠️ COMMON MISTAKES TO AVOID
 
-Comprehensive test suite ensures reliability:
+❌ **DON'T**: Always run full scan without checking disk size first
+✅ **DO**: Always run `--sample` first to estimate
 
-- **244 tests** covering all functionality
-- **Cross-platform**: Windows, macOS, Linux
-- **All Python versions**: 3.8, 3.9, 3.10, 3.11, 3.12
-- **Performance benchmarks**: Validate optimization improvements
-- **Integration tests**: End-to-end workflows
+❌ **DON'T**: Let users wait hours for large disk scan
+✅ **DO**: Use `--max-seconds 30` for large disks
 
-Run tests:
+❌ **DON'T**: Ignore estimated time from sample
+✅ **DO**: Use estimate to choose appropriate scan mode
+
+❌ **DON'T**: Run analyze_disk.py on 1TB disk without limits
+✅ **DO**: Use analyze_progressive.py with --max-seconds
+
+### 📊 Command Reference Card
+
+| Situation | Command | Time | Result |
+|-----------|---------|------|--------|
+| Unknown size | `--sample` | 1s | Estimate + recommendation |
+| < 30 seconds | `analyze_disk.py` | <30s | Full results |
+| 30-120 seconds | `--time-limit 60` | 60s | Most results |
+| > 120 seconds | `analyze_progressive.py --max-seconds 30` | 30s | Partial results |
+| Very large disk | `analyze_progressive.py --max-seconds 60` | 60s | More results |
+
+### 🔍 How Progressive Scan Works
+
+1. **Quick Sample (1 second)**
+   - Scans as many files as possible in 1 second
+   - Calculates scan rate (files/second)
+   - Estimates total scan time
+   - Gives immediate feedback
+
+2. **Progressive Scan (N seconds)**
+   - Scans continuously for N seconds
+   - Shows progress every 2 seconds
+   - Collects results as it goes
+   - Returns whatever it found when time is up
+   - User can interrupt and keep partial results
+
+3. **Smart Stopping**
+   - Stops automatically when time/file limit reached
+   - Graceful handling of interruption
+   - Partial results are still useful
+
+### 🎯 BEST PRACTICE FOR AGENTS
+
+1. **ALWAYS** run `--sample` first
+2. **ALWAYS** check estimated_time before choosing mode
+3. **ALWAYS** inform user about expected scan time
+4. **ALWAYS** use progressive mode for large disks (>2 minutes)
+5. **NEVER** let users wait more than 2 minutes without feedback
+
+---
+
+---
+
+## 🎯 UNIVERSAL AGENT WORKFLOW
+
+This workflow works on ANY platform, in ANY AI IDE, at ANY location.
+
+### STEP 1: Verify Python
+
+```python
+import subprocess
+import sys
+
+def verify_python():
+    """Check if Python 3.7+ is available - PLATFORM AGNOSTIC"""
+    try:
+        # Try 'python' first (Windows, some Unix)
+        result = subprocess.run(
+            ['python', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0:
+            return True, result.stderr.strip() or result.stdout.strip()
+    except FileNotFoundError:
+        pass
+
+    try:
+        # Try 'python3' (macOS, Linux)
+        result = subprocess.run(
+            ['python3', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0:
+            return True, result.stderr.strip() or result.stdout.strip()
+    except FileNotFoundError:
+        pass
+
+    return False, "Python not found"
+
+# EXECUTE
+python_available, version_info = verify_python()
+if not python_available:
+    print("❌ Python 3.7+ required but not found")
+    print("Install from: https://www.python.org/downloads/")
+    print("See: NO_PYTHON_GUIDE.md for platform-specific instructions")
+    sys.exit(1)
+
+print(f"✅ Python available: {version_info}")
+```
+
+### STEP 2: Locate Skill Package
+
+```python
+from pathlib import Path
+import os
+
+def find_skill_package():
+    """
+    Find disk-cleaner skill package - LOCATION INDEPENDENT
+
+    Searches in order of priority:
+    1. Current working directory
+    2. Project-level: ./skills/, ./.skills/, ./agent-skills/
+    3. User-level: ~/.skills/, ~/.agent-skills/, ~/skill-packages/
+    4. Common AI IDE locations
+    5. Parent directories
+    """
+
+    # Get python command (python or python3)
+    python_cmd = 'python' if os.name == 'nt' else 'python3'
+
+    # Search locations - PLATFORM & IDE AGNOSTIC
+    search_locations = []
+
+    # 1. Current directory
+    cwd = Path.cwd()
+    search_locations.extend([
+        cwd / 'disk-cleaner',
+        cwd / 'skills' / 'disk-cleaner',
+        cwd / '.skills' / 'disk-cleaner',
+        cwd / 'agent-skills' / 'disk-cleaner',
+        cwd / '.agent-skills' / 'disk-cleaner',
+    ])
+
+    # 2. Parent directories (project root)
+    for parent in [cwd, *cwd.parents]:
+        search_locations.extend([
+            parent / 'skills' / 'disk-cleaner',
+            parent / '.skills' / 'disk-cleaner',
+            parent / 'agent-skills' / 'disk-cleaner',
+        ])
+        # Limit search depth
+        if len(parent.parts) <= 3:
+            break
+
+    # 3. User home directory
+    home = Path.home()
+    search_locations.extend([
+        home / 'skills' / 'disk-cleaner',
+        home / '.skills' / 'disk-cleaner',
+        home / 'agent-skills' / 'disk-cleaner',
+        home / '.agent-skills' / 'disk-cleaner',
+        home / 'skill-packages' / 'disk-cleaner',
+    ])
+
+    # 4. Platform-specific user directories
+    if os.name == 'nt':  # Windows
+        appdata = os.environ.get('APPDATA', '')
+        if appdata:
+            search_locations.append(Path(appdata) / 'skills' / 'disk-cleaner')
+        localappdata = os.environ.get('LOCALAPPDATA', '')
+        if localappdata:
+            search_locations.append(Path(localappdata) / 'skills' / 'disk-cleaner')
+    else:  # Unix-like (macOS, Linux)
+        search_locations.extend([
+            home / '.local' / 'share' / 'skills' / 'disk-cleaner',
+            home / '.config' / 'skills' / 'disk-cleaner',
+            Path('/usr/local/share/skills/disk-cleaner'),
+        ])
+
+    # 5. AI IDE specific directories (IDE-AGNOSTIC)
+    # Note: These are examples - actual locations vary
+    ide_specific = [
+        # Cursor
+        home / '.cursor' / 'skills' / 'disk-cleaner',
+        home / '.cursor' / 'user' / 'skills' / 'disk-cleaner',
+        # Windsurf
+        home / '.windsurf' / 'skills' / 'disk-cleaner',
+        # Continue
+        home / '.continue' / 'skills' / 'disk-cleaner',
+        # Generic
+        home / '.ai-ide' / 'skills' / 'disk-cleaner',
+    ]
+    search_locations.extend(ide_specific)
+
+    # 6. sys.path entries (Python module style)
+    for path_entry in sys.path:
+        if path_entry and path_entry not in ['', '.']:
+            test_path = Path(path_entry) / 'disk-cleaner'
+            search_locations.append(test_path)
+
+    # Remove duplicates and non-existent
+    search_locations = list(set(search_locations))
+
+    # Search for valid skill package
+    for location in search_locations:
+        if not location:
+            continue
+        try:
+            # Check for key indicator files
+            if (location / 'scripts' / 'analyze_disk.py').exists():
+                return location, f"Found at: {location}"
+            if (location / 'SKILL.md').exists():
+                return location, f"Found at: {location}"
+        except PermissionError:
+            continue
+        except Exception:
+            continue
+
+    # Not found - provide helpful message
+    print("❌ Skill package not found")
+    print("\nSearched locations:")
+    for loc in search_locations[:10]:  # Show first 10
+        print(f"  - {loc}")
+    print("\nSolutions:")
+    print("1. Extract skill package to one of the locations above")
+    print("2. Or set environment variable: DISK_CLEANER_SKILL_PATH")
+    print("3. Or provide explicit path when calling functions")
+    return None, "Not found"
+
+# EXECUTE
+skill_path, message = find_skill_package()
+if not skill_path:
+    print(message)
+    sys.exit(1)
+
+print(f"✅ {message}")
+```
+
+### STEP 3: Verify Skill Package
+
+```python
+def verify_skill_package(skill_path, python_cmd='python'):
+    """Verify skill package integrity - LOCATION INDEPENDENT"""
+    check_script = skill_path / 'scripts' / 'check_skill.py'
+
+    if not check_script.exists():
+        print(f"❌ Check script not found: {check_script}")
+        return False
+
+    try:
+        result = subprocess.run(
+            [python_cmd, str(check_script)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            cwd=str(skill_path)
+        )
+
+        # Show verification output
+        if result.stdout:
+            print(result.stdout)
+
+        if result.returncode == 0:
+            print("✅ Skill package verified successfully")
+            return True
+        else:
+            print("❌ Skill package verification failed")
+            if result.stderr:
+                print(result.stderr)
+            return False
+
+    except subprocess.TimeoutExpired:
+        print("❌ Verification timed out")
+        return False
+    except Exception as e:
+        print(f"❌ Verification error: {e}")
+        return False
+
+# Determine python command
+python_cmd = 'python' if os.name == 'nt' else 'python3'
+
+# EXECUTE
+if not verify_skill_package(skill_path, python_cmd):
+    sys.exit(1)
+```
+
+### STEP 4: Execute Operation
+
+```python
+def execute_operation(skill_path, operation, python_cmd='python', **kwargs):
+    """
+    Execute disk cleaner operation - PLATFORM & IDE AGNOSTIC
+
+    Args:
+        skill_path: Path to skill package
+        operation: 'analyze', 'clean', 'monitor'
+        python_cmd: 'python' or 'python3'
+        **kwargs: Operation-specific arguments
+    """
+
+    operation_map = {
+        'analyze': 'analyze_disk.py',
+        'clean': 'clean_disk.py',
+        'monitor': 'monitor_disk.py',
+    }
+
+    if operation not in operation_map:
+        print(f"❌ Unknown operation: {operation}")
+        print(f"Valid operations: {list(operation_map.keys())}")
+        return False, None
+
+    script = skill_path / 'scripts' / operation_map[operation]
+    cmd = [python_cmd, str(script)]
+
+    # Add operation-specific arguments
+    if operation == 'analyze':
+        if kwargs.get('path'):
+            cmd.extend(['--path', str(kwargs['path'])])
+        if kwargs.get('top'):
+            cmd.extend(['--top', str(kwargs['top'])])
+        if kwargs.get('json'):
+            cmd.append('--json')
+
+    elif operation == 'clean':
+        # ALWAYS use dry-run for safety
+        if not kwargs.get('force'):
+            cmd.append('--dry-run')
+        else:
+            cmd.append('--force')
+
+        if kwargs.get('temp'):
+            cmd.append('--temp')
+        if kwargs.get('cache'):
+            cmd.append('--cache')
+        if kwargs.get('logs'):
+            cmd.append('--logs')
+
+    elif operation == 'monitor':
+        if kwargs.get('watch'):
+            cmd.append('--watch')
+        if kwargs.get('json'):
+            cmd.append('--json')
+
+    try:
+        print(f"🔧 Executing: {' '.join(cmd)}")
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=kwargs.get('timeout', 300),
+            cwd=str(skill_path)
+        )
+
+        # Show output
+        if result.stdout:
+            print(result.stdout)
+
+        if result.returncode != 0:
+            if result.stderr:
+                print(f"❌ Error: {result.stderr}")
+            return False, None
+
+        return True, result.stdout
+
+    except subprocess.TimeoutExpired:
+        print("⚠️ Operation timed out")
+        return False, None
+    except Exception as e:
+        print(f"❌ Execution error: {e}")
+        return False, None
+
+# EXECUTE
+success, output = execute_operation(
+    skill_path,
+    operation='analyze',
+    python_cmd=python_cmd,
+    path='C:\\Users' if os.name == 'nt' else '/home',
+    json=True
+)
+
+if success:
+    print("✅ Operation completed successfully")
+```
+
+---
+
+## 📋 QUICK REFERENCE (All IDEs)
+
+### ⚠️ CRITICAL: Use Progressive Scanning for Large Disks!
+
+**BEFORE ANY DISK ANALYSIS**:
+1. Run `--sample` first to estimate scan time
+2. If > 2 minutes estimated, use progressive mode
+3. NEVER let users wait more than 2 minutes without feedback
+
+**Quick Reference**:
 ```bash
-# Run all tests
-pytest tests/
+# STEP 1: ALWAYS DO THIS FIRST (1 second)
+python scripts/analyze_disk.py --sample
 
-# Run specific test category
-pytest tests/test_optimization.py
-pytest tests/benchmarks/
-
-# With coverage
-pytest tests/ --cov=diskcleaner --cov-report=html
+# STEP 2: Choose based on estimate
+# < 30s: python scripts/analyze_disk.py
+# 30-120s: python scripts/analyze_disk.py --time-limit 60
+# > 120s: python scripts/analyze_progressive.py --max-seconds 30
 ```
 
-## Troubleshooting
+### User Intent → Operation Mapping
 
-### Permission Errors
-The scanner handles permission errors gracefully. Protected directories are automatically skipped on each platform:
-- **Windows**: C:\Windows, C:\Program Files
-- **macOS**: /System, /Library, /private/var/vm
-- **Linux**: /proc, /sys, /dev
+### User Intent → Operation Mapping
 
-### Performance Issues
-If scanning seems slow:
-1. Check if path is network drive (slower than local)
-2. Verify anti-virus isn't scanning every file access
-3. Use `--sample` flag for quick estimates on large directories
+| User Says | Operation | Command Template |
+|-----------|-----------|------------------|
+| "analyze disk" | analyze | `python scripts/analyze_disk.py` |
+| "check disk space" | analyze | `python scripts/analyze_disk.py --top 50` |
+| "quick scan" | analyze | `python scripts/analyze_disk.py --sample` |
+| "large disk analysis" | analyze | `python scripts/analyze_progressive.py --max-seconds 30` |
+| "clean temp files" | clean | `python scripts/clean_disk.py --temp --dry-run` |
+| "preview cleanup" | clean | `python scripts/clean_disk.py --dry-run` |
+| "monitor disk" | monitor | `python scripts/monitor_disk.py` |
+| "disk usage" | monitor | `python scripts/monitor_disk.py --json` |
 
-### Empty Results
-If no files found:
-1. Check path exists and is accessible
-2. Verify files aren't all protected (system directories)
-3. Run with higher verbosity to see what's being scanned
+### Progressive Scanning (For Large Disks)
 
-## Contributing
+**Problem**: Full disk scan can take hours on large disks (1TB+)
 
-To modify or extend the toolkit:
+**Solution**: Use progressive scanning with time/file limits
 
-1. **Optimization modules**: `diskcleaner/optimization/`
-   - `scan.py`: ConcurrentScanner, QuickProfiler
-   - `hash.py`: AdaptiveHasher, DuplicateFinder
-   - `delete.py`: BatchDeleter, AsyncDeleter
-   - `memory.py`: MemoryMonitor
-   - `profiler.py`: PerformanceProfiler
+```python
+# Quick sample (1 second) - Get instant estimate
+subprocess.run(['python', 'scripts/analyze_disk.py', '--sample'])
 
-2. **Core modules**: `diskcleaner/core/`
-   - `scanner.py`: DirectoryScanner with os.scandir()
-   - `smart_cleanup.py`: SmartCleanupEngine
-   - Other core components
+# Progressive scan (30 seconds) - Get partial results quickly
+subprocess.run(['python', 'scripts/analyze_progressive.py',
+                 '--max-seconds', '30'])
 
-3. **Platform-specific**: `diskcleaner/platforms/`
-   - Windows, macOS, Linux implementations
+# Limited file count (fast)
+subprocess.run(['python', 'scripts/analyze_disk.py',
+                 '--file-limit', '10000'])
 
-4. **Tests**: `tests/`
-   - Unit tests for all components
-   - Performance benchmarks
-   - Cross-platform tests
+# Full scan with time limit
+subprocess.run(['python', 'scripts/analyze_disk.py',
+                 '--time-limit', '120'])
+```
 
-5. **Scripts**: `scripts/`
-   - User-facing CLI tools
+**Recommended workflow for large disks**:
 
-Always run tests after changes:
+1. First, run `--sample` to get estimate (1 second)
+2. If estimate is too long, use `--max-seconds` or `--file-limit`
+3. Or use `analyze_progressive.py` for real-time feedback
+
+### Cross-Platform Python Commands
+
+| Platform | Python Command | Check Command |
+|----------|---------------|---------------|
+| Windows | `python` | `python --version` |
+| macOS | `python3` | `python3 --version` |
+| Linux | `python3` | `python3 --version` |
+
+### Universal Command Template
+
+```python
+# Works on ALL platforms
+import os
+import subprocess
+
+python_cmd = 'python' if os.name == 'nt' else 'python3'
+result = subprocess.run([python_cmd, '--version'], capture_output=True, text=True)
+```
+
+---
+
+## 🌐 Multi-IDE Compatibility
+
+This skill package works with ALL AI IDEs that support:
+
+### Supported AI IDEs
+- ✅ **Cursor** - Works as project or user-level skill
+- ✅ **Windsurf** - Works at any location
+- ✅ **Continue** - Works as global or project skill
+- ✅ **Aider** - Works as agent tool
+- ✅ **Claude Code** - Works as skill
+- ✅ **Any AI IDE** - Works via subprocess
+
+### Installation by IDE Type
+
+#### Project-Level Installation
+```
+your-project/
+├── skills/
+│   └── disk-cleaner/    ← Extract here
+├── src/
+└── README.md
+```
+
+#### User-Level Installation
+```
+~/.skills/disk-cleaner/      ← Unix-like
+~/agent-skills/disk-cleaner/ ← Alternative
+C:\Users\You\skills\disk-cleaner\ ← Windows
+```
+
+#### Global Installation
+```
+/usr/local/share/skills/disk-cleaner/  ← Linux (system-wide)
+C:\ProgramData\skills\disk-cleaner\   ← Windows (system-wide)
+```
+
+---
+
+## 🔧 IDE-Specific Notes
+
+### Cursor
+```python
+# Cursor automatically searches for skills in:
+# - .cursor/skills/
+# - project/skills/
+# - ~/.skills/
+
+# No special configuration needed
+```
+
+### Windsurf
+```python
+# Windsurf supports skills at:
+# - .windsurf/skills/
+# - project/skills/
+
+# Skill works via subprocess, no special setup
+```
+
+### Continue
+```python
+# Continue configuration (if needed):
+# {
+#   "skills": ["./skills/disk-cleaner"]
+# }
+# But auto-detection works in most cases
+```
+
+### Aider
+```python
+# Use as a tool via subprocess:
+# !python skills/disk-cleaner/scripts/analyze_disk.py
+```
+
+### Generic/Other IDEs
+```python
+# The skill includes intelligent auto-detection
+# Just extract and use - no configuration needed
+```
+
+---
+
+## 🎯 Complete Copy-Paste Template
+
+```python
+"""
+Universal Disk Cleaner Skill Usage
+Works with ALL AI IDEs, on ALL platforms, at ANY location
+"""
+
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+
+def use_disk_cleaner(operation='analyze', **kwargs):
+    """
+    Use disk cleaner skill - UNIVERSAL FUNCTION
+
+    Works on:
+    - All platforms (Windows, macOS, Linux)
+    - All AI IDEs (Cursor, Windsurf, Continue, etc.)
+    - All installation levels (global, project, user)
+
+    Args:
+        operation: 'analyze', 'clean', 'monitor'
+        **kwargs: Operation-specific arguments
+
+    Returns:
+        (success: bool, output: str)
+    """
+
+    # 1. Determine Python command
+    python_cmd = 'python' if os.name == 'nt' else 'python3'
+
+    # 2. Verify Python
+    try:
+        result = subprocess.run(
+            [python_cmd, '--version'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode != 0:
+            print("❌ Python not found")
+            return False, "Python 3.7+ required"
+    except Exception as e:
+        print(f"❌ Python check failed: {e}")
+        return False, str(e)
+
+    # 3. Find skill package (intelligent search)
+    def find_skill():
+        search_paths = [
+            # Current directory
+            Path.cwd() / 'disk-cleaner',
+            Path.cwd() / 'skills' / 'disk-cleaner',
+            Path.cwd() / '.skills' / 'disk-cleaner',
+            # Project root
+            *[(p / 'skills' / 'disk-cleaner') for p in [Path.cwd(), *Path.cwd().parents][:3]],
+            # User home
+            Path.home() / 'skills' / 'disk-cleaner',
+            Path.home() / '.skills' / 'disk-cleaner',
+        ]
+
+        for path in search_paths:
+            if (path / 'scripts' / 'analyze_disk.py').exists():
+                return path
+        return None
+
+    skill_path = find_skill()
+    if not skill_path:
+        print("❌ Skill package not found")
+        print("Extract to: skills/disk-cleaner/ or ~/.skills/disk-cleaner/")
+        return False, "Skill package not found"
+
+    # 4. Execute operation
+    scripts = {
+        'analyze': 'analyze_disk.py',
+        'clean': 'clean_disk.py',
+        'monitor': 'monitor_disk.py',
+    }
+
+    if operation not in scripts:
+        return False, f"Unknown operation: {operation}"
+
+    script = skill_path / 'scripts' / scripts[operation]
+    cmd = [python_cmd, str(script)]
+
+    # Add arguments
+    if operation == 'analyze':
+        if kwargs.get('path'):
+            cmd.extend(['--path', str(kwargs['path'])])
+    elif operation == 'clean':
+        cmd.append('--dry-run')  # Always safe
+    elif operation == 'monitor':
+        if kwargs.get('json'):
+            cmd.append('--json')
+
+    # Run
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            cwd=str(skill_path)
+        )
+
+        return result.returncode == 0, result.stdout
+
+    except Exception as e:
+        return False, str(e)
+
+
+# USAGE EXAMPLES:
+# success, output = use_disk_cleaner('analyze', path='.')
+# success, output = use_disk_cleaner('clean')
+# success, output = use_disk_cleaner('monitor', json=True)
+
+if __name__ == "__main__":
+    # Quick test
+    success, output = use_disk_cleaner('analyze')
+    print(output)
+```
+
+---
+
+## ⚡ PROGRESSIVE SCANNING CHECKLIST (CRITICAL)
+
+### Agent MUST Follow This for All Disk Analysis Requests:
+
+```
+[ ] Did you run --sample FIRST to estimate scan time?
+[ ] Did you inform user about expected scan time?
+[ ] Did you choose appropriate mode based on estimate?
+[ ] Did you use progressive mode for >2 minute estimates?
+[ ] Did you provide feedback during long scans?
+```
+
+### Required Behavior by Disk Size:
+
+**Small Disk (< 30 seconds estimated)**:
+- ✅ Run full scan
+- ✅ No special handling needed
+
+**Medium Disk (30-120 seconds estimated)**:
+- ✅ Use --time-limit
+- ✅ Inform user of expected time
+- ⚠️ Consider progressive mode if user seems impatient
+
+**Large Disk (> 120 seconds estimated)**:
+- 🚨 MUST USE PROGRESSIVE MODE
+- 🚨 MUST Inform user about time limit
+- ✅ Explain partial results
+- ✅ Offer full scan as option
+
+### REQUIRED Code Pattern:
+
+```python
+# THIS IS THE REQUIRED PATTERN for all disk analysis:
+
+def safe_disk_analysis(disk_path):
+    # Step 1: ALWAYS sample first
+    sample = subprocess.run(
+        ['python', 'scripts/analyze_disk.py', '--sample', '--json'],
+        capture_output=True,
+        text=True,
+        cwd=skill_path
+    )
+    import json
+    data = json.loads(sample.stdout)
+    estimate = data.get('estimated_time_seconds', 0)
+
+    # Step 2: Inform user
+    if estimate > 120:
+        print(f"Large disk detected! Estimated: {estimate/60:.1f} minutes")
+        print("Using progressive scan (30 seconds) for quick results...")
+
+    # Step 3: Choose mode
+    if estimate < 30:
+        # Full scan
+        return subprocess.run(['python', 'scripts/analyze_disk.py'])
+    elif estimate < 120:
+        # Time limited
+        return subprocess.run(['python', 'scripts/analyze_disk.py', '--time-limit', '60'])
+    else:
+        # Progressive (MANDATORY for large disks)
+        return subprocess.run(['python', 'scripts/analyze_progressive.py', '--max-seconds', '30'])
+```
+
+---
+
+## 🚨 Error Handling (Universal)
+
+### Error: Python not found
+```python
+# SOLUTION - Platform-independent guidance
+import platform
+
+system = platform.system()
+if system == "Windows":
+    print("Install from: https://www.python.org/downloads/")
+    print("Check 'Add Python to PATH' during installation")
+elif system == "Darwin":  # macOS
+    print("Install: brew install python@3.11")
+    print("Or: https://www.python.org/downloads/macos/")
+else:  # Linux
+    print("Install: sudo apt install python3  # Debian/Ubuntu")
+    print("Or: sudo dnf install python3      # Fedora")
+```
+
+### Error: Skill not found
+```python
+# SOLUTION - Show all searched locations
+print("Skill package not found.")
+print("Extract to ONE of these locations:")
+print("  - ./skills/disk-cleaner/")
+print("  - ./disk-cleaner/")
+print("  - ~/.skills/disk-cleaner/")
+print("  - project/skills/disk-cleaner/")
+print("\nOr set: DISK_CLEANER_SKILL_PATH=/path/to/skill")
+```
+
+### Error: Permission denied
+```python
+# SOLUTION - Platform-specific advice
+if os.name == 'nt':
+    print("Run as Administrator if needed")
+else:
+    print("Some directories may require: sudo")
+    print("Or adjust: chmod +x scripts/*.py")
+```
+
+---
+
+## 📝 Environment Variables (Optional)
+
+You can optionally set these to help with auto-detection:
+
 ```bash
-pytest tests/ -v
-pre-commit run --all-files
+# Set skill package location (overrides auto-detection)
+export DISK_CLEANER_SKILL_PATH=/path/to/skills/disk-cleaner
+
+# Set Python command (overrides auto-detection)
+export DISK_CLEANER_PYTHON_CMD=python3
+
+# Enable debug output
+export DISK_CLEANER_DEBUG=true
 ```
 
-## License
+---
 
-MIT License - See LICENSE file for details.
+## 🎓 Best Practices for All Agents
+
+1. **ALWAYS check Python first** - Don't assume it's installed
+2. **Use 'python3' on Unix** - Use 'python' on Windows
+3. **Search multiple locations** - Don't assume single installation path
+4. **Use subprocess with timeout** - Prevent hanging
+5. **Capture both stdout and stderr** - Complete error information
+6. **Prefer --dry-run for clean** - Safety first
+7. **Handle all exceptions** - Graceful degradation
+8. **Show helpful error messages** - Guide users to solutions
+
+---
+
+## 🔍 Troubleshooting (Universal)
+
+### Problem: Skill works in one IDE but not another
+
+**Solution**: The skill is IDE-agnostic. Check:
+1. Python is accessible from that IDE
+2. Skill package is in a searchable location
+3. File permissions allow execution
+
+### Problem: Different behavior on different platforms
+
+**Solution**: The skill handles platform differences. Check:
+1. Python command (`python` vs `python3`)
+2. Path separators (auto-handled by pathlib)
+3. File permissions (Unix may need `chmod +x`)
+
+### Problem: Can't find skill package
+
+**Solution**: Run diagnostic:
+```bash
+python skills/disk-cleaner/scripts/check_skill.py
+# Or
+python3 skills/disk-cleaner/scripts/check_skill.py
+```
+
+---
+
+## 📦 Package Contents (Universal)
+
+```
+disk-cleaner/
+├── SKILL.md              # This file
+├── AGENT_QUICK_REF.txt   # Quick reference
+├── NO_PYTHON_GUIDE.md    # Help for users without Python
+├── INSTALL.md            # Installation guide
+├── FIXES.md              # What's fixed in v2.0
+├── scripts/              # All scripts (universal)
+├── diskcleaner/          # Core modules (self-contained)
+└── references/           # Platform information
+```
+
+---
+
+## ✅ Universal Checklist
+
+Before using this skill in ANY AI IDE:
+
+- [ ] Python 3.7+ installed
+- [ ] Skill package extracted to accessible location
+- [ ] Can run: `python --version` (or `python3 --version`)
+- [ ] Skill package location known (or let it auto-detect)
+
+---
+
+**This skill package works EVERYWHERE - just Python 3.7+ required!**
+
+No IDE-specific configuration needed. No platform-specific setup. No installation level restrictions.
+
+Just extract and use!

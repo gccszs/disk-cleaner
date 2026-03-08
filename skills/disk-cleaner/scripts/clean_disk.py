@@ -15,14 +15,34 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Set
 
-# Import progress bar from diskcleaner core
+# 使用智能引导模块导入 diskcleaner
 try:
-    from diskcleaner.core.progress import ProgressBar
+    # 添加当前脚本的父目录到路径，以便导入 skill_bootstrap
+    script_dir = Path(__file__).parent.resolve()
+    if str(script_dir) not in sys.path:
+        sys.path.insert(0, str(script_dir))
 
-    PROGRESS_AVAILABLE = True
-except ImportError:
-    # Fallback if diskcleaner is not installed
-    PROGRESS_AVAILABLE = False
+    from skill_bootstrap import setup_skill_environment, import_diskcleaner_modules
+
+    # 设置技能环境并导入模块
+    IMPORT_SUCCESS, MODULES = import_diskcleaner_modules()
+    PROGRESS_AVAILABLE = IMPORT_SUCCESS
+
+    if IMPORT_SUCCESS:
+        ProgressBar = MODULES['ProgressBar']
+    else:
+        ProgressBar = None
+
+except Exception as e:
+    # 如果引导模块也失败，尝试直接导入（可能已安装）
+    try:
+        from diskcleaner.core.progress import ProgressBar
+        PROGRESS_AVAILABLE = True
+        print(f"[Warning] 技能包引导失败，使用已安装版本: {e}", file=sys.stderr)
+    except ImportError:
+        PROGRESS_AVAILABLE = False
+        ProgressBar = None
+        print(f"[Warning] 无法导入 diskcleaner 模块，部分功能将不可用: {e}", file=sys.stderr)
 
 
 class DiskCleaner:
@@ -521,47 +541,38 @@ def print_report(results: Dict):
     print("=" * 60)
 
     for category in results["categories"]:
-        print(f"\n🗑️  {category['category'].upper().replace('_', ' ')}:")
+        print(f"\n[x] {category['category'].upper().replace('_', ' ')}:")
 
         # Safely handle categories with no locations
         if not category.get("locations"):
-            print("  ℹ️  No locations found for this category")
+            print("  [i] No locations found for this category")
             continue
 
         for location in category["locations"]:
             if location.get("files_deleted", 0) > 0:
                 space_mb = location.get("space_freed_mb", 0)
                 space_str = f"{space_mb:.2f} MB" if space_mb < 1024 else f"{space_mb/1024:.2f} GB"
-                print(f"  ✅ {location.get('path', 'Unknown')}")
+                print(f"  [OK] {location.get('path', 'Unknown')}")
                 print(f"     Files: {location.get('files_deleted', 0)}, Space: {space_str}")
             elif location.get("errors"):
-                print(f"  ⚠️  {location.get('path', 'Unknown')}: {len(location['errors'])} errors")
+                print(f"  [!] {location.get('path', 'Unknown')}: {len(location['errors'])} errors")
 
     summary = results["summary"]
-    print("\n📊 SUMMARY:")
+    print("\n[i] SUMMARY:")
     print(f"  Total files: {summary['total_files_deleted']}")
     print(f"  Space freed: {summary['total_space_freed_gb']:.2f} GB")
 
     if summary["total_errors"] > 0:
-        print(f"  ⚠️  Errors: {summary['total_errors']}")
+        print(f"  [!] Errors: {summary['total_errors']}")
 
     if results["dry_run"]:
-        print("\n💡 This was a DRY RUN. No files were actually deleted.")
+        print("\n[i] This was a DRY RUN. No files were actually deleted.")
         print("   Run without --dry-run to perform actual cleaning.")
 
     print("=" * 60)
 
 
 def main():
-    # Fix Windows console encoding for emoji support
-    import sys
-
-    if sys.platform == "win32":
-        import codecs
-
-        sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
-        sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
-
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -628,7 +639,7 @@ Examples:
 
         custom_path = PathLib(args.path)
         if not custom_path.exists():
-            print(f"❌ Error: Path does not exist: {args.path}", file=sys.stderr)
+            print(f"[X] Error: Path does not exist: {args.path}", file=sys.stderr)
             sys.exit(1)
 
         result = cleaner.clean_directory(str(custom_path), show_progress=show_progress)
@@ -707,7 +718,7 @@ Examples:
     if args.output:
         with open(args.output, "w") as f:
             json.dump(results, f, indent=2)
-        print(f"\n✅ Report saved to {args.output}")
+        print(f"\n[OK] Report saved to {args.output}")
 
 
 if __name__ == "__main__":

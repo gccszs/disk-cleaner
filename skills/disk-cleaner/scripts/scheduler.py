@@ -113,7 +113,7 @@ class CleanupScheduler:
         print(summary)
 
         if not dry_run:
-            print("\n⚠️  Actual cleanup not yet implemented in scheduler mode")
+            print("\n[!] Actual cleanup not yet implemented in scheduler mode")
             print("   Use --force to enable (coming soon)")
 
         # Update last run time
@@ -251,7 +251,7 @@ def main():
         scheduler.add_task(
             name=args.name, path=args.path, schedule=args.schedule, cleanup_type=args.type
         )
-        print(f"✅ Task '{args.name}' added successfully")
+        print(f"[OK] Task '{args.name}' added successfully")
         print(f"   Schedule: {args.schedule}")
         print(f"   Next run: {scheduler.tasks[-1]['next_run']}")
 
@@ -261,7 +261,7 @@ def main():
 
     elif args.command == "remove":
         scheduler.remove_task(args.name)
-        print(f"✅ Task '{args.name}' removed")
+        print(f"[OK] Task '{args.name}' removed")
 
     elif args.command == "run":
         dry_run = not args.force
