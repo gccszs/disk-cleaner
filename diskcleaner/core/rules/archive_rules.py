@@ -407,9 +407,7 @@ class DownloadsStrategy(ArchiveStrategy):
                 rule_type=RuleType.EXTENSION,
                 destination="Archives",
                 priority=60,
-                condition=lambda f: f.name.lower().endswith(
-                    (".zip", ".tar", ".gz", ".rar", ".7z")
-                ),
+                condition=lambda f: f.name.lower().endswith((".zip", ".tar", ".gz", ".rar", ".7z")),
                 transform=add_date_prefix,
             )
         )
@@ -675,9 +673,7 @@ class GeneralStrategy(ArchiveStrategy):
                 rule_type=RuleType.EXTENSION,
                 destination="Archives",
                 priority=40,
-                condition=lambda f: f.name.lower().endswith(
-                    (".zip", ".tar", ".gz", ".rar", ".7z")
-                ),
+                condition=lambda f: f.name.lower().endswith((".zip", ".tar", ".gz", ".rar", ".7z")),
             )
         )
 
@@ -738,9 +734,7 @@ class RuleEngine:
         """
         return list(self.strategies.keys())
 
-    def organize_file(
-        self, file: FileInfo, strategy_name: str
-    ) -> Optional[str]:
+    def organize_file(self, file: FileInfo, strategy_name: str) -> Optional[str]:
         """
         Organize a file using specified strategy.
 
@@ -805,9 +799,7 @@ class RuleEngine:
         # Re-sort by priority
         strategy.rules.sort(key=lambda r: r.priority, reverse=True)
 
-    def create_rule_from_dict(
-        self, rule_dict: Dict
-    ) -> ArchiveRule:
+    def create_rule_from_dict(self, rule_dict: Dict) -> ArchiveRule:
         """
         Create ArchiveRule from dictionary.
 
@@ -838,9 +830,7 @@ class RuleEngine:
             condition = lambda f, ext=extensions: f.name.lower().endswith(ext)
 
         elif rule_type == RuleType.PATTERN and patterns:
-            condition = lambda f, pats=patterns: any(
-                fnmatch.fnmatch(f.name, pat) for pat in pats
-            )
+            condition = lambda f, pats=patterns: any(fnmatch.fnmatch(f.name, pat) for pat in pats)
 
         return ArchiveRule(
             name=rule_dict["name"],

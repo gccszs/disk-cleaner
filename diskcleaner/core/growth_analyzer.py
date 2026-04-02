@@ -95,6 +95,7 @@ class GrowthAnalyzer:
             if self.data_file.exists():
                 backup_file = self.data_file.with_suffix(".bak")
                 import shutil
+
                 shutil.copy2(self.data_file, backup_file)
 
             # Save new data
@@ -182,8 +183,7 @@ class GrowthAnalyzer:
         if days:
             cutoff_time = datetime.now() - timedelta(days=days)
             snapshots = [
-                s for s in snapshots
-                if datetime.fromisoformat(s["timestamp"]) >= cutoff_time
+                s for s in snapshots if datetime.fromisoformat(s["timestamp"]) >= cutoff_time
             ]
 
         # Limit results
@@ -238,12 +238,14 @@ class GrowthAnalyzer:
             if time_diff > 0:
                 # Growth rate in bytes per second
                 growth_rate = used_diff / time_diff
-                growth_data.append({
-                    "timestamp": current["timestamp"],
-                    "time_diff_seconds": time_diff,
-                    "used_diff_bytes": used_diff,
-                    "growth_rate_per_second": growth_rate,
-                })
+                growth_data.append(
+                    {
+                        "timestamp": current["timestamp"],
+                        "time_diff_seconds": time_diff,
+                        "used_diff_bytes": used_diff,
+                        "growth_rate_per_second": growth_rate,
+                    }
+                )
 
         if not growth_data:
             return {
@@ -252,7 +254,9 @@ class GrowthAnalyzer:
             }
 
         # Calculate average growth rate for the period
-        avg_growth_per_second = sum(g["growth_rate_per_second"] for g in growth_data) / len(growth_data)
+        avg_growth_per_second = sum(g["growth_rate_per_second"] for g in growth_data) / len(
+            growth_data
+        )
 
         # Convert to requested period
         seconds_per_period = {
@@ -290,7 +294,11 @@ class GrowthAnalyzer:
             "min_growth_bytes_per_period": round(min_growth * period_seconds, 2),
             "max_growth_bytes_per_period": round(max_growth * period_seconds, 2),
             "acceleration_bytes_per_second_sq": round(acceleration, 2),
-            "trend": "accelerating" if acceleration > 0 else "decelerating" if acceleration < 0 else "stable",
+            "trend": (
+                "accelerating"
+                if acceleration > 0
+                else "decelerating" if acceleration < 0 else "stable"
+            ),
         }
 
     def predict_full_date(self, path: str = None) -> Dict:
@@ -416,7 +424,8 @@ class GrowthAnalyzer:
 
         original_count = len(self.history["snapshots"])
         self.history["snapshots"] = [
-            s for s in self.history["snapshots"]
+            s
+            for s in self.history["snapshots"]
             if datetime.fromisoformat(s["timestamp"]) >= cutoff_time
         ]
 
@@ -438,7 +447,7 @@ def format_size(bytes_size: int) -> str:
     Returns:
         Formatted string (e.g., "1.5 GB", "500 MB")
     """
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
