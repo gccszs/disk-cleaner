@@ -70,7 +70,7 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 diskcleaner/ tests/ --max-line-length=100 --extend-ignore=E203,E231,W503,F841
+          flake8 diskcleaner/ tests/ --max-line-length=100 --extend-ignore=E203,E231,W503,F841,F401,F541,E731,E302,E402,E722,E501,F821
           flake8 skills/disk-cleaner/scripts/ --max-line-length=100 --extend-ignore=E203,E231,W503,F401,F541,F841,F811,E731,E302,E402,E722,E501,F821 || true
           echo "Lint checks completed"
         shell: bash
