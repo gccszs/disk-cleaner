@@ -14,11 +14,7 @@ import pytest
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from diskcleaner.core.organizer import (
-    FileOrganizer,
-    OrganizationAction,
-    OrganizationPlan,
-)
+from diskcleaner.core.organizer import FileOrganizer, OrganizationAction, OrganizationPlan
 from diskcleaner.core.scanner import FileInfo
 
 

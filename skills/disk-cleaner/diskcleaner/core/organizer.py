@@ -15,8 +15,8 @@ from typing import Callable, Dict, List, Optional, Tuple
 from diskcleaner.config import Config
 from diskcleaner.core.classifier import FileClassifier
 from diskcleaner.core.rules.archive_rules import RuleEngine
-from diskcleaner.core.scanner import DirectoryScanner, FileInfo
 from diskcleaner.core.safety import SafetyChecker
+from diskcleaner.core.scanner import DirectoryScanner, FileInfo
 
 
 @dataclass

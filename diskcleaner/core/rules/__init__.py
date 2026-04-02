@@ -10,8 +10,8 @@ from .archive_rules import (
     ArchiveStrategy,
     DesktopStrategy,
     DownloadsStrategy,
-    ProjectStrategy,
     GeneralStrategy,
+    ProjectStrategy,
     RuleEngine,
 )
 
