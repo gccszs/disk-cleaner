@@ -5,8 +5,8 @@ Tests CLI argument parsing and basic functionality.
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
