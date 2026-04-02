@@ -64,12 +64,13 @@ PLATFORM_EXCLUDES = {
 }
 
 
-def should_exclude_path(path: Path) -> bool:
+def should_exclude_path(path: Path, include_windows: bool = False) -> bool:
     """
     Check if a path should be excluded from scanning.
 
     Args:
         path: Path to check.
+        include_windows: If True, include Windows system directories.
 
     Returns:
         True if path should be excluded, False otherwise.
@@ -80,6 +81,18 @@ def should_exclude_path(path: Path) -> bool:
     # Check against platform-specific excludes
     for exclude_prefix in PLATFORM_EXCLUDES.get(system, []):
         if path_str.startswith(exclude_prefix):
+            # Special handling for Windows directories when include_windows is True
+            if include_windows and system == "windows":
+                # Still exclude truly critical system paths
+                critical_paths = [
+                    "C:\\System Volume Information",
+                    "C:\\$Recycle.Bin",
+                    "C:\\Boot",
+                    "C:\\EFI",
+                    "C:\\Recovery",
+                ]
+                if not any(path_str.startswith(cp) for cp in critical_paths):
+                    continue
             return True
 
     return False
@@ -129,6 +142,7 @@ class DirectoryScanner:
         cache_enabled: bool = True,
         max_files: Optional[int] = None,
         max_seconds: Optional[int] = None,
+        include_windows: bool = False,
     ):
         """
         Initialize scanner.
@@ -139,6 +153,7 @@ class DirectoryScanner:
             cache_enabled: Enable incremental scanning with cache.
             max_files: Maximum number of files to scan (None = unlimited).
             max_seconds: Maximum time to spend scanning (None = unlimited).
+            include_windows: Include Windows system directories in scan.
         """
         self.target_path = Path(target_path).expanduser().resolve()
         self.config = config or Config.load()
@@ -157,6 +172,7 @@ class DirectoryScanner:
         # Early stopping settings
         self.max_files = max_files or self.config.get("scan.max_files", 1000000)
         self.max_seconds = max_seconds or self.config.get("scan.max_seconds", 25)
+        self.include_windows = include_windows
 
         # Scan statistics
         self.files_scanned = 0
@@ -271,7 +287,7 @@ class DirectoryScanner:
             raise NotADirectoryError(f"Not a directory: {self.target_path}")
 
         # Check if path should be excluded
-        if should_exclude_path(self.target_path):
+        if should_exclude_path(self.target_path, self.include_windows):
             raise PermissionError(f"Path is excluded from scanning: {self.target_path}")
 
         # Initialize scan timing
@@ -367,7 +383,7 @@ class DirectoryScanner:
                         if is_dir and not is_link:
                             # Check if subdirectory should be excluded
                             subpath = Path(entry.path)
-                            if not should_exclude_path(subpath):
+                            if not should_exclude_path(subpath, self.include_windows):
                                 yield from self._scan_directory_scandir(subpath, depth + 1, visited)
 
                     except (PermissionError, OSError):

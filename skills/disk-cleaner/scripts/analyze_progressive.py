@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-渐进式磁盘分析工具 - Progressive Disk Analyzer
+Progressive Disk Analyzer
 
-针对大磁盘优化的分析工具：
-1. 快速采样估算（0.5-1秒）
-2. 显示预计扫描时间
-3. 渐进式显示结果
-4. 可随时中断查看部分结果
+Analysis tool optimized for large disks:
+1. Quick sampling estimation (0.5-1 second)
+2. Display estimated scan time
+3. Progressive result display
+4. Can interrupt anytime to view partial results
 """
 
 import argparse
@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# 使用智能引导模块导入
+# Use smart bootstrap module import
 try:
     script_dir = Path(__file__).parent.resolve()
     if str(script_dir) not in sys.path:
@@ -26,7 +26,7 @@ try:
 
     from skill_bootstrap import init_console, safe_print, setup_skill_environment
 
-    # 初始化控制台编码
+    # Initialize console encoding
     init_console()
     _, bootstrap = setup_skill_environment(require_modules=False)
     IMPORT_SUCCESS, MODULES = bootstrap.import_diskcleaner_modules()
@@ -45,7 +45,7 @@ except Exception as e:
 
 
 class ProgressiveDiskAnalyzer:
-    """渐进式磁盘分析器 - 提供实时反馈和早期结果"""
+    """Progressive disk analyzer - provides real-time feedback and early results"""
 
     def __init__(self, target_path: str = None):
         self.target_path = Path(target_path or self._get_default_path()).resolve()
@@ -55,7 +55,7 @@ class ProgressiveDiskAnalyzer:
         self.last_update_time = 0
 
     def _get_default_path(self) -> str:
-        """获取默认扫描路径"""
+        """Get default scan path"""
         if sys.platform == "Windows":
             return "C:\\"
         else:
@@ -63,12 +63,12 @@ class ProgressiveDiskAnalyzer:
 
     def quick_sample(self, sample_time: float = 1.0) -> Dict:
         """
-        快速采样分析 - 1秒内估算目录特征
+        Quick sampling analysis - estimate directory characteristics within 1 second
 
         Returns:
-            包含估算信息的字典
+            Dictionary containing estimation information
         """
-        safe_print(f"\n[*] 快速采样分析中... ({sample_time}秒)")
+        safe_print(f"\n[*] Quick sampling analysis... ({sample_time}s)")
 
         file_count = 0
         total_size = 0
@@ -76,7 +76,7 @@ class ProgressiveDiskAnalyzer:
         start = time.time()
 
         try:
-            # 使用 os.scandir 进行快速采样
+            # Use os.scandir for quick sampling
             for root, dirs, files in os.walk(str(self.target_path)):
                 if time.time() - start > sample_time:
                     break
@@ -84,7 +84,7 @@ class ProgressiveDiskAnalyzer:
                 sample_dirs += len(dirs)
                 file_count += len(files)
 
-                # 采样文件大小（最多100个）
+                # Sample file sizes (max 100)
                 for i, f in enumerate(files[:100]):
                     try:
                         file_path = Path(root) / f
@@ -94,17 +94,17 @@ class ProgressiveDiskAnalyzer:
                         pass
 
         except Exception as e:
-            safe_print(f"采样出错: {e}")
+            safe_print(f"Sampling error: {e}")
 
         elapsed = time.time() - start
 
-        # 计算估算值
+        # Calculate estimates
         if elapsed > 0:
             files_per_second = file_count / elapsed
         else:
             files_per_second = 0
 
-        # 估算总时间（2倍安全边际）
+        # Estimate total time (2x safety margin)
         if files_per_second > 0:
             estimated_seconds = (file_count / files_per_second) * 2
         else:
@@ -118,17 +118,17 @@ class ProgressiveDiskAnalyzer:
             "estimated_time_seconds": round(estimated_seconds, 1),
         }
 
-        # 显示采样结果
-        safe_print("\n[i] 采样结果:")
-        safe_print(f"   发现文件: {file_count:,} 个")
-        safe_print(f"   目录数: {sample_dirs:,} 个")
-        safe_print(f"   扫描速度: {result['files_per_second']:,} 文件/秒")
+        # Display sampling results
+        safe_print("\n[i] Sampling results:")
+        safe_print(f"   Files found: {file_count:,}")
+        safe_print(f"   Directories: {sample_dirs:,}")
+        safe_print(f"   Scan speed: {result['files_per_second']:,} files/sec")
 
         if estimated_seconds > 0:
             if estimated_seconds < 60:
-                safe_print(f"   预计完整扫描: {estimated_seconds:.0f} 秒")
+                safe_print(f"   Estimated full scan: {estimated_seconds:.0f} seconds")
             else:
-                safe_print(f"   预计完整扫描: {estimated_seconds/60:.1f} 分钟")
+                safe_print(f"   Estimated full scan: {estimated_seconds/60:.1f} minutes")
 
         return result
 
@@ -136,29 +136,29 @@ class ProgressiveDiskAnalyzer:
         self, max_files: int = None, max_seconds: int = None, show_progress: bool = True
     ) -> Dict:
         """
-        渐进式扫描 - 实时显示结果
+        Progressive scan - display results in real-time
 
         Args:
-            max_files: 最大文件数限制
-            max_seconds: 最大时间限制（秒）
-            show_progress: 是否显示进度
+            max_files: Maximum file count limit
+            max_seconds: Maximum time limit (seconds)
+            show_progress: Whether to show progress
 
         Returns:
-            扫描结果字典
+            Scan result dictionary
         """
         if DirectoryScanner is None:
-            safe_print("[X] 高级扫描功能不可用，使用基础方法")
+            safe_print("[X] Advanced scanning not available, using basic method")
             return self._basic_scan()
 
-        # 设置限制
+        # Set limits
         if max_files is None:
-            max_files = 50000  # 默认5万文件
+            max_files = 50000  # Default 50k files
         if max_seconds is None:
-            max_seconds = 30  # 默认30秒
+            max_seconds = 30  # Default 30 seconds
 
-        safe_print("\n[*] 渐进式扫描启动")
-        safe_print(f"   限制: {max_files:,} 文件或 {max_seconds} 秒")
-        safe_print("   按 Ctrl+C 随时中断查看部分结果\n")
+        safe_print("\n[*] Progressive scan started")
+        safe_print(f"   Limits: {max_files:,} files or {max_seconds} seconds")
+        safe_print("   Press Ctrl+C anytime to interrupt and view partial results\n")
 
         self.start_time = time.time()
         results = {"directories": [], "files": [], "scanned": 0}
@@ -171,21 +171,21 @@ class ProgressiveDiskAnalyzer:
                 cache_enabled=False,
             )
 
-            # 使用生成器进行渐进式处理
+            # Use generator for progressive processing
             file_count = 0
             last_display_time = 0
-            display_interval = 2.0  # 每2秒显示一次进度
+            display_interval = 2.0  # Display progress every 2 seconds
 
             for file_info in scanner.scan_generator():
                 file_count += 1
                 elapsed = time.time() - self.start_time
 
-                # 渐进式显示进度
+                # Progressive progress display
                 if show_progress and elapsed - last_display_time > display_interval:
                     self._show_progress(file_count, elapsed, scanner.stopped_early)
                     last_display_time = elapsed
 
-                # 收集大文件（>10MB）
+                # Collect large files (>10MB)
                 if not file_info.is_dir and file_info.size > 10 * 1024 * 1024:
                     results["files"].append(
                         {
@@ -196,7 +196,7 @@ class ProgressiveDiskAnalyzer:
                         }
                     )
 
-                # 收集目录（仅顶层）
+                # Collect directories (top-level only)
                 if file_info.is_dir and Path(file_info.path).parent == self.target_path:
                     results["directories"].append(
                         {
@@ -205,21 +205,21 @@ class ProgressiveDiskAnalyzer:
                         }
                     )
 
-            # 扫描完成
+            # Scan complete
             elapsed = time.time() - self.start_time
             self._show_progress(file_count, elapsed, True)
 
-            # 计算目录大小
+            # Calculate directory sizes
             results["directories"] = self._calculate_dir_sizes(results["directories"][:20])
 
-            # 排序并限制结果数量
+            # Sort and limit result count
             results["files"].sort(key=lambda x: x["size_gb"], reverse=True)
             results["directories"].sort(key=lambda x: x["size_gb"], reverse=True)
 
             results["files"] = results["files"][:50]
             results["directories"] = results["directories"][:50]
 
-            # 添加扫描信息
+            # Add scan information
             results["scan_info"] = {
                 "files_scanned": file_count,
                 "scan_time_seconds": round(elapsed, 1),
@@ -228,26 +228,26 @@ class ProgressiveDiskAnalyzer:
             }
 
         except KeyboardInterrupt:
-            safe_print("\n\n[!] 扫描被用户中断")
+            safe_print("\n\n[!] Scan interrupted by user")
             elapsed = time.time() - self.start_time
-            safe_print(f"   已扫描: {results.get('scanned', 0):,} 文件")
-            safe_print(f"   用时: {elapsed:.1f} 秒")
+            safe_print(f"   Scanned: {results.get('scanned', 0):,} files")
+            safe_print(f"   Time: {elapsed:.1f} seconds")
 
         except Exception as e:
-            safe_print(f"\n[X] 扫描出错: {e}")
+            safe_print(f"\n[X] Scan error: {e}")
             return self._basic_scan()
 
         return results
 
     def _show_progress(self, file_count: int, elapsed: float, complete: bool = False):
-        """显示扫描进度"""
+        """Display scan progress"""
         if complete:
-            safe_print(f"\n[OK] 扫描完成: {file_count:,} 文件, {elapsed:.1f} 秒")
+            safe_print(f"\n[OK] Scan complete: {file_count:,} files, {elapsed:.1f} seconds")
         else:
-            safe_print(f"   正在扫描: {file_count:,} 文件, {elapsed:.1f} 秒... (继续)")
+            safe_print(f"   Scanning: {file_count:,} files, {elapsed:.1f} seconds... (continuing)")
 
     def _calculate_dir_sizes(self, dirs: List[Dict], max_depth: int = 1) -> List[Dict]:
-        """计算目录大小"""
+        """Calculate directory sizes"""
         results = []
 
         for dir_info in dirs:
@@ -268,7 +268,7 @@ class ProgressiveDiskAnalyzer:
         return results
 
     def _get_dir_size_fast(self, path: Path, max_depth: int = 1) -> int:
-        """快速计算目录大小"""
+        """Fast directory size calculation"""
         total_size = 0
         try:
             with os.scandir(path) as it:
@@ -285,14 +285,14 @@ class ProgressiveDiskAnalyzer:
         return total_size
 
     def _basic_scan(self) -> Dict:
-        """基础扫描方法（当高级功能不可用时）"""
-        safe_print("\n使用基础扫描方法...")
+        """Basic scan method (when advanced features unavailable)"""
+        safe_print("\nUsing basic scan method...")
 
         results = {"directories": [], "files": []}
         file_count = 0
 
         try:
-            # 只扫描顶层
+            # Only scan top level
             for item in self.target_path.iterdir():
                 if item.is_dir() and not item.is_symlink():
                     try:
@@ -326,7 +326,7 @@ class ProgressiveDiskAnalyzer:
                     file_count += 1
 
         except Exception as e:
-            safe_print(f"基础扫描也失败了: {e}")
+            safe_print(f"Basic scan also failed: {e}")
 
         results["directories"].sort(key=lambda x: x["size_gb"], reverse=True)
         results["files"].sort(key=lambda x: x["size_gb"], reverse=True)
@@ -341,13 +341,13 @@ class ProgressiveDiskAnalyzer:
         return results
 
     def format_report(self, results: Dict) -> str:
-        """格式化报告"""
+        """Format report"""
         lines = []
         lines.append("\n" + "=" * 60)
         lines.append(f"DISK ANALYSIS REPORT - {self.target_path}")
         lines.append("=" * 60)
 
-        # 扫描信息
+        # Scan info
         if "scan_info" in results:
             info = results["scan_info"]
             lines.append("\n[i] Scan Info:")
@@ -356,19 +356,19 @@ class ProgressiveDiskAnalyzer:
             if info.get("stopped_early"):
                 lines.append(f"   Stopped early: {info.get('stop_reason', 'Unknown')}")
 
-        # 大目录
+        # Large directories
         if results.get("directories"):
             lines.append("\n[DIR] Largest Directories:")
             for i, d in enumerate(results["directories"][:20], 1):
                 size_str = f"{d['size_gb']} GB" if d["size_gb"] > 0 else f"{d['size_mb']} MB"
                 lines.append(f"   {i}. {d['name']}: {size_str}")
 
-        # 大文件
+        # Large files
         if results.get("files"):
             lines.append("\n[FILE] Largest Files:")
             for i, f in enumerate(results["files"][:20], 1):
                 size_str = f"{f['size_gb']} GB" if f["size_gb"] > 0 else f"{f['size_mb']} MB"
-                # 缩短路径
+                # Shorten path
                 path_str = f"...{f['path'][-50:]}" if len(f["path"]) > 50 else f["path"]
                 lines.append(f"   {i}. {f['name']}: {size_str}")
                 lines.append(f"      {path_str}")
@@ -381,41 +381,41 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="渐进式磁盘分析工具 - 适合大磁盘",
+        description="Progressive disk analyzer - suitable for large disks",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
-  # 快速采样（1秒）
+Examples:
+  # Quick sampling (1 second)
   python scripts/analyze_progressive.py --sample
 
-  # 渐进式扫描（30秒限制）
+  # Progressive scan (30 second limit)
   python scripts/analyze_progressive.py --max-seconds 30
 
-  # 限制文件数（快速）
+  # Limit file count (fast)
   python scripts/analyze_progressive.py --max-files 10000
 
-  # 完整扫描（长时间）
+  # Full scan (long time)
   python scripts/analyze_progressive.py --max-seconds 300
 
-  # 自定义路径
+  # Custom path
   python scripts/analyze_progressive.py --path "D:\\Projects" --sample
         """,
     )
 
-    parser.add_argument("--path", "-p", help="扫描路径")
-    parser.add_argument("--sample", action="store_true", help="仅快速采样（1秒）")
+    parser.add_argument("--path", "-p", help="Scan path")
+    parser.add_argument("--sample", action="store_true", help="Quick sample only (1 second)")
     parser.add_argument(
-        "--max-files", type=int, default=50000, help="最大文件数限制（默认: 50000）"
+        "--max-files", type=int, default=50000, help="Maximum file count limit (default: 50000)"
     )
-    parser.add_argument("--max-seconds", type=int, default=30, help="最大时间限制-秒（默认: 30）")
-    parser.add_argument("--json", action="store_true", help="JSON输出")
-    parser.add_argument("--no-progress", action="store_true", help="不显示进度")
+    parser.add_argument("--max-seconds", type=int, default=30, help="Maximum time limit-seconds (default: 30)")
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    parser.add_argument("--no-progress", action="store_true", help="Disable progress")
 
     args = parser.parse_args()
 
     analyzer = ProgressiveDiskAnalyzer(args.path)
 
-    # 快速采样模式
+    # Quick sample mode
     if args.sample:
         sample_result = analyzer.quick_sample(sample_time=1.0)
 
@@ -423,24 +423,24 @@ def main():
             print(json.dumps(sample_result, indent=2))
         return 0
 
-    # 先进行快速采样
+    # Perform quick sampling first
     sample_result = analyzer.quick_sample(sample_time=1.0)
 
-    # 询问是否继续
+    # Ask whether to continue
     estimated_time = sample_result.get("estimated_time_seconds", 0)
-    if estimated_time > 60:  # 超过1分钟
-        safe_print(f"\n[!] 预计扫描需要 {estimated_time/60:.1f} 分钟")
-        safe_print("建议:")
-        safe_print("   1. 使用 --sample 快速采样模式")
-        safe_print("   2. 使用 --max-seconds 降低时间限制")
-        safe_print("   3. 使用 --max-files 限制文件数量")
+    if estimated_time > 60:  # Over 1 minute
+        safe_print(f"\n[!] Estimated scan time: {estimated_time/60:.1f} minutes")
+        safe_print("Recommendations:")
+        safe_print("   1. Use --sample for quick sample mode")
+        safe_print("   2. Use --max-seconds to reduce time limit")
+        safe_print("   3. Use --max-files to limit file count")
 
-        # 非交互模式，直接返回
+        # Non-interactive mode, return directly
         if args.json:
             print(json.dumps({"sample": sample_result}, indent=2))
         return 0
 
-    # 渐进式扫描
+    # Progressive scan
     results = analyzer.progressive_scan(
         max_files=args.max_files, max_seconds=args.max_seconds, show_progress=not args.no_progress
     )
@@ -457,5 +457,5 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        safe_print("\n\n[*] 用户中断")
+        safe_print("\n\n[*] User interrupted")
         sys.exit(0)

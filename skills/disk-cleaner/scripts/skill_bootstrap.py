@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Skill Bootstrap Module - 智能引导模块
+Skill Bootstrap Module - Intelligent Bootstrap Module
 
-这个模块确保 disk-cleaner 技能包能够在任何环境下正确运行，
-无需预先安装 diskcleaner 包。
+This module ensures disk-cleaner skill package runs correctly in any environment,
+without requiring pre-installed diskcleaner package.
 
-功能：
-- 自动检测技能包位置
-- 动态添加模块路径到 sys.path
-- 跨平台兼容性处理
-- 优雅的错误处理和降级方案
-- 环境检测和诊断信息
+Features:
+- Auto-detect skill package location
+- Dynamically add module paths to sys.path
+- Cross-platform compatibility handling
+- Graceful error handling and fallback options
+- Environment detection and diagnostic information
 """
 
 import os
@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-# emoji 的安全替代字符（用于不支持 emoji 的环境）
+# Safe fallback characters for emoji (for environments that don't support emoji)
 EMOJI_FALLBACKS = {
     "✅": "[OK]",
     "❌": "[X]",
@@ -38,9 +38,10 @@ EMOJI_FALLBACKS = {
 
 def safe_print(message: str, file=None):
     """
-    安全打印函数，自动处理编码问题
+    Safe print function, automatically handles encoding issues
 
-    在 Windows GBK 等不支持 emoji 的环境下，自动替换为 ASCII 字符
+    Automatically replaces emoji with ASCII characters in environments like Windows GBK
+    that don't support emoji
     """
     if file is None:
         file = sys.stdout
@@ -49,17 +50,17 @@ def safe_print(message: str, file=None):
         print(message, file=file)
         file.flush()
     except UnicodeEncodeError:
-        # 编码错误，替换 emoji 和中文
+        # Encoding error, replace emoji and Chinese characters
         safe_message = message
         for emoji, fallback in EMOJI_FALLBACKS.items():
             safe_message = safe_message.replace(emoji, fallback)
 
-        # 如果还有编码问题，尝试替换所有非 ASCII 字符
+        # If still has encoding issues, try replacing all non-ASCII characters
         try:
             print(safe_message, file=file)
             file.flush()
         except UnicodeEncodeError:
-            # 最后的回退：只保留 ASCII
+            # Last resort: keep only ASCII
             safe_message = safe_message.encode("ascii", "replace").decode("ascii")
             print(safe_message, file=file)
             file.flush()
@@ -67,21 +68,21 @@ def safe_print(message: str, file=None):
 
 def init_windows_console():
     """
-    初始化 Windows 控制台，尝试设置 UTF-8 编码
+    Initialize Windows console, try setting UTF-8 encoding
 
-    这需要在导入任何模块之前调用
+    This needs to be called before importing any modules
     """
     if platform.system().lower() == "windows":
         try:
-            # 尝试设置控制台代码页为 UTF-8
+            # Try setting console code page to UTF-8
             import ctypes
             import ctypes.wintypes
 
-            # 设置控制台输出为 UTF-8
+            # Set console output to UTF-8
             kernel32 = ctypes.windll.kernel32
             kernel32.SetConsoleOutputCP(65001)  # CP_UTF8
 
-            # 重新设置 stdout/stderr
+            # Reset stdout/stderr
             if hasattr(sys.stdout, "buffer"):
                 import io
 
@@ -93,12 +94,12 @@ def init_windows_console():
                     sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
                 )
         except Exception:
-            # 失败时使用默认设置
+            # Use default settings on failure
             pass
 
 
 class SkillBootstrap:
-    """技能包引导器 - 确保技能包能够独立运行"""
+    """Skill package bootstrap - ensures skill package can run independently"""
 
     def __init__(self):
         self.skill_root: Optional[Path] = None
@@ -107,41 +108,41 @@ class SkillBootstrap:
         self.debug = os.environ.get("DISK_CLEANER_DEBUG", "").lower() == "true"
 
     def log(self, message: str) -> None:
-        """调试日志输出"""
+        """Debug log output"""
         if self.debug:
             safe_print(f"[Bootstrap] {message}", file=sys.stderr)
 
     def print(self, message: str):
-        """安全的打印方法"""
+        """Safe print method"""
         safe_print(message)
 
     def detect_skill_root(self) -> Optional[Path]:
         """
-        智能检测技能包根目录 - 通用/平台/IDE 无关
+        Intelligently detect skill package root directory - Universal/Platform/IDE agnostic
 
-        搜索策略（优先级顺序）：
-        1. 环境变量 DISK_CLEANER_SKILL_PATH（手动指定）
-        2. 脚本所在目录的父目录
-        3. 当前工作目录及其父目录
-        4. 用户主目录的通用技能目录
-        5. 平台特定目录
-        6. sys.path 中的路径
+        Search strategy (priority order):
+        1. Environment variable DISK_CLEANER_SKILL_PATH (manually specified)
+        2. Parent directory of script location
+        3. Current working directory and its parents
+        4. Universal skill directory in user home
+        5. Platform-specific directories
+        6. Paths in sys.path
         """
         if self.skill_root:
             return self.skill_root
 
-        # 方法0: 检查环境变量（最高优先级）
+        # Method 0: Check environment variable (highest priority)
         env_path = os.environ.get("DISK_CLEANER_SKILL_PATH")
         if env_path:
             candidate = Path(env_path)
             if self._is_valid_skill_root(candidate):
                 self.skill_root = candidate
-                self.log(f"从环境变量检测到技能根目录: {candidate}")
+                self.log(f"Detected skill root from environment variable: {candidate}")
                 return candidate
             else:
-                self.log(f"环境变量路径无效: {env_path}")
+                self.log(f"Environment variable path invalid: {env_path}")
 
-        # 方法1: 从脚本位置推断
+        # Method 1: Infer from script location
         try:
             import inspect
 
@@ -150,17 +151,17 @@ class SkillBootstrap:
                 caller_file = frame.f_back.f_globals.get("__file__")
                 if caller_file:
                     script_path = Path(caller_file).resolve()
-                    # scripts/ 目录的父目录就是技能根目录
+                    # Parent of scripts/ directory is skill root
                     if script_path.parent.name == "scripts":
                         candidate = script_path.parent.parent
                         if self._is_valid_skill_root(candidate):
                             self.skill_root = candidate
-                            self.log(f"从脚本位置检测到技能根目录: {candidate}")
+                            self.log(f"Detected skill root from script location: {candidate}")
                             return candidate
         except Exception as e:
-            self.log(f"脚本位置检测失败: {e}")
+            self.log(f"Script location detection failed: {e}")
 
-        # 方法2: 从当前工作目录及其父目录检测
+        # Method 2: Detect from current working directory and its parents
         cwd = Path.cwd()
         search_in_cwd = [
             cwd / "disk-cleaner",
@@ -170,7 +171,7 @@ class SkillBootstrap:
             cwd / ".agent-skills" / "disk-cleaner",
         ]
 
-        # 添加父目录（最多3级）
+        # Add parent directories (max 3 levels)
         for level, parent in enumerate([cwd, *cwd.parents][:3]):
             search_in_cwd.extend(
                 [
@@ -183,10 +184,10 @@ class SkillBootstrap:
         for candidate in search_in_cwd:
             if self._is_valid_skill_root(candidate):
                 self.skill_root = candidate
-                self.log(f"从工作目录检测到技能根目录: {candidate}")
+                self.log(f"Detected skill root from working directory: {candidate}")
                 return candidate
 
-        # 方法3: 用户主目录的通用技能位置
+        # Method 3: Universal skill locations in user home
         home = Path.home()
         user_skill_dirs = [
             home / "skills" / "disk-cleaner",
@@ -199,14 +200,14 @@ class SkillBootstrap:
         for candidate in user_skill_dirs:
             if self._is_valid_skill_root(candidate):
                 self.skill_root = candidate
-                self.log(f"从用户技能目录检测到技能根目录: {candidate}")
+                self.log(f"Detected skill root from user skill directory: {candidate}")
                 return candidate
 
-        # 方法4: 平台和IDE特定目录
+        # Method 4: Platform and IDE specific directories
         platform_specific = []
 
         if self.platform == "windows":
-            # Windows 特定
+            # Windows specific
             appdata = os.environ.get("APPDATA", "")
             localappdata = os.environ.get("LOCALAPPDATA", "")
             if appdata:
@@ -214,7 +215,7 @@ class SkillBootstrap:
             if localappdata:
                 platform_specific.append(Path(localappdata) / "skills" / "disk-cleaner")
         else:
-            # Unix-like (macOS, Linux) 特定
+            # Unix-like (macOS, Linux) specific
             platform_specific.extend(
                 [
                     home / ".local" / "share" / "skills" / "disk-cleaner",
@@ -224,7 +225,7 @@ class SkillBootstrap:
                 ]
             )
 
-        # IDE特定目录（通用）
+        # IDE specific directories (universal)
         ide_specific = [
             home / ".cursor" / "skills" / "disk-cleaner",
             home / ".windsurf" / "skills" / "disk-cleaner",
@@ -236,34 +237,34 @@ class SkillBootstrap:
         for candidate in platform_specific:
             if self._is_valid_skill_root(candidate):
                 self.skill_root = candidate
-                self.log(f"从平台/IDE目录检测到技能根目录: {candidate}")
+                self.log(f"Detected skill root from platform/IDE directory: {candidate}")
                 return candidate
 
-        # 方法5: 检查 sys.path 中已有的路径
+        # Method 5: Check existing paths in sys.path
         for path_entry in sys.path:
             if path_entry and path_entry not in ["", "."]:
                 test_path = Path(path_entry)
-                # 检查是否直接在技能根目录中
+                # Check if directly in skill root
                 if self._is_valid_skill_root(test_path):
                     self.skill_root = test_path
-                    self.log(f"从sys.path检测到技能根目录: {test_path}")
+                    self.log(f"Detected skill root from sys.path: {test_path}")
                     return test_path
-                # 检查父目录
+                # Check parent
                 if self._is_valid_skill_root(test_path.parent):
                     self.skill_root = test_path.parent
-                    self.log(f"从sys.path父目录检测到技能根目录: {test_path.parent}")
+                    self.log(f"Detected skill root from sys.path parent: {test_path.parent}")
                     return test_path.parent
 
-        self.log("未能自动检测到技能根目录")
-        self.log("请设置环境变量 DISK_CLEANER_SKILL_PATH=/path/to/skill")
+        self.log("Could not auto-detect skill root directory")
+        self.log("Please set environment variable DISK_CLEANER_SKILL_PATH=/path/to/skill")
         return None
 
     def _is_valid_skill_root(self, path: Path) -> bool:
-        """检查路径是否是有效的技能根目录"""
+        """Check if path is a valid skill root directory"""
         if not path or not path.exists():
             return False
 
-        # 检查关键文件和目录
+        # Check key files and directories
         indicators = [
             path / "SKILL.md",
             path / "scripts",
@@ -276,7 +277,7 @@ class SkillBootstrap:
 
     def setup_import_path(self) -> bool:
         """
-        设置模块导入路径
+        Setup module import path
 
         Returns:
             True if setup successful, False otherwise
@@ -284,44 +285,44 @@ class SkillBootstrap:
         skill_root = self.detect_skill_root()
 
         if not skill_root:
-            self.log("无法找到技能根目录，尝试使用已安装的 diskcleaner")
-            # 尝试直接导入（如果已安装）
+            self.log("Cannot find skill root, trying installed diskcleaner")
+            # Try direct import (if already installed)
             return self._try_import_installed()
 
-        # 将技能根目录添加到 sys.path
+        # Add skill root to sys.path
         skill_root_str = str(skill_root)
         if skill_root_str not in sys.path:
             sys.path.insert(0, skill_root_str)
-            self.log(f"添加到 sys.path: {skill_root_str}")
+            self.log(f"Added to sys.path: {skill_root_str}")
 
-        # 验证导入
+        # Verify import
         return self._verify_import()
 
     def _try_import_installed(self) -> bool:
-        """尝试使用已安装的 diskcleaner 包"""
+        """Try using installed diskcleaner package"""
         try:
             import diskcleaner
 
-            self.log(f"使用已安装的 diskcleaner: {diskcleaner.__version__}")
+            self.log(f"Using installed diskcleaner: {diskcleaner.__version__}")
             return True
         except (ImportError, AttributeError):
             return False
 
     def _verify_import(self) -> bool:
-        """验证 diskcleaner 模块是否可以正确导入"""
+        """Verify diskcleaner module can be imported correctly"""
         try:
-            # 尝试导入关键模块
+            # Try importing key modules
             from diskcleaner.core.progress import ProgressBar
             from diskcleaner.core.scanner import DirectoryScanner
 
-            self.log("成功导入 diskcleaner 模块")
+            self.log("Successfully imported diskcleaner module")
             return True
         except ImportError as e:
-            self.log(f"导入失败: {e}")
+            self.log(f"Import failed: {e}")
             return False
 
     def get_environment_info(self) -> dict:
-        """获取环境诊断信息"""
+        """Get environment diagnostic information"""
         info = {
             "platform": self.platform,
             "python_version": (
@@ -330,10 +331,10 @@ class SkillBootstrap:
             ),
             "python_executable": sys.executable,
             "skill_root": str(self.skill_root) if self.skill_root else None,
-            "sys_path": sys.path[:5],  # 前5个路径
+            "sys_path": sys.path[:5],  # First 5 paths
         }
 
-        # 检查关键模块
+        # Check key modules
         info["modules"] = {}
         for module_name in ["diskcleaner", "diskcleaner.core.progress", "diskcleaner.core.scanner"]:
             try:
@@ -345,58 +346,58 @@ class SkillBootstrap:
         return info
 
     def diagnose_import_failure(self) -> str:
-        """诊断导入失败的原因并提供修复建议"""
+        """Diagnose import failure reason and provide fix suggestions"""
         lines = [
             "=" * 60,
-            "DISK CLEANER 技能包诊断报告",
+            "DISK CLEANER SKILL PACKAGE DIAGNOSTIC REPORT",
             "=" * 60,
         ]
 
         info = self.get_environment_info()
 
-        # 基本信息
+        # Basic info
         lines.extend(
             [
                 "",
-                "📋 环境信息:",
-                f"  平台: {info['platform']}",
+                "[i] Environment Info:",
+                f"  Platform: {info['platform']}",
                 f"  Python: {info['python_version']}",
-                f"  Python路径: {info['python_executable']}",
+                f"  Python path: {info['python_executable']}",
             ]
         )
 
-        # 技能根目录
+        # Skill root
         if info["skill_root"]:
-            lines.append(f"  技能根目录: {info['skill_root']}")
+            lines.append(f"  Skill root: {info['skill_root']}")
         else:
-            lines.append("  技能根目录: 未找到 ⚠️")
+            lines.append("  Skill root: Not found [!]")
 
-        # 模块状态
+        # Module status
         lines.append("")
-        lines.append("📦 模块状态:")
+        lines.append("[PKG] Module Status:")
         for module, status in info["modules"].items():
-            icon = "✅" if status == "available" else "❌"
+            icon = "[OK]" if status == "available" else "[X]"
             lines.append(f"  {icon} {module}: {status}")
 
-        # 诊断建议
+        # Diagnostic suggestions
         lines.append("")
-        lines.append("💡 修复建议:")
+        lines.append("[i] Fix Suggestions:")
 
         if not info["skill_root"]:
             lines.extend(
                 [
                     "",
-                    "技能根目录未找到。请尝试以下方法：",
+                    "Skill root not found. Please try the following methods:",
                     "",
-                    "方法1: 确保从正确的目录运行脚本",
+                    "Method 1: Ensure running script from correct directory",
                     "  cd skills/disk-cleaner/scripts",
                     "  python analyze_disk.py",
                     "",
-                    "方法2: 将 skills/disk-cleaner 添加到 PYTHONPATH",
+                    "Method 2: Add skills/disk-cleaner to PYTHONPATH",
                     "  export PYTHONPATH=/path/to/skills/disk-cleaner:$PYTHONPATH",
                     "",
-                    "方法3: 重新安装技能包",
-                    "  确保解压到正确的目录",
+                    "Method 3: Reinstall skill package",
+                    "  Ensure extracted to correct directory",
                 ]
             )
 
@@ -404,10 +405,10 @@ class SkillBootstrap:
             lines.extend(
                 [
                     "",
-                    "diskcleaner 模块缺失。请检查：",
-                    "  1. 技能包是否完整解压",
-                    f"  2. diskcleaner 目录是否存在于: {info['skill_root']}",
-                    "  3. 目录中是否包含 __init__.py 文件",
+                    "diskcleaner module missing. Please check:",
+                    "  1. Whether skill package completely extracted",
+                    f"  2. Whether diskcleaner directory exists at: {info['skill_root']}",
+                    "  3. Whether directory contains __init__.py file",
                 ]
             )
 
@@ -418,61 +419,61 @@ class SkillBootstrap:
 
     def setup_stdout_encoding(self) -> None:
         """
-        智能设置标准输出编码
+        Intelligently set stdout encoding
 
-        跨平台处理：
-        - Windows: 尝试使用 UTF-8，失败则使用系统默认
-        - Unix: 默认使用 UTF-8
-        - 处理非 TTY 环境（重定向、管道）
+        Cross-platform handling:
+        - Windows: Try UTF-8, fallback to system default
+        - Unix: Default to UTF-8
+        - Handle non-TTY environments (redirection, pipes)
         """
         if not sys.stdout.isatty():
-            # 非交互环境，使用默认编码
+            # Non-interactive environment, use default encoding
             return
 
         if self.platform == "windows":
             try:
-                # Windows: 尝试设置为 UTF-8
+                # Windows: Try setting to UTF-8
                 if hasattr(sys.stdout, "buffer"):
                     import io
 
-                    # 先尝试使用 UTF-8
+                    # First try using UTF-8
                     try:
-                        # 测试 UTF-8 是否可用
+                        # Test if UTF-8 is available
                         test_writer = io.TextIOWrapper(
                             sys.stdout.buffer, encoding="utf-8", errors="strict"
                         )
-                        # 尝试写入一个 emoji 测试
+                        # Try writing an emoji test
                         test_writer.write("\u2705")
                         test_writer.flush()
 
-                        # 如果成功，使用 UTF-8
+                        # If successful, use UTF-8
                         sys.stdout = io.TextIOWrapper(
                             sys.stdout.buffer,
                             encoding="utf-8",
-                            errors="replace",  # 使用 replace 避免后续错误
+                            errors="replace",  # Use replace to avoid subsequent errors
                         )
                         if hasattr(sys.stderr, "buffer"):
                             sys.stderr = io.TextIOWrapper(
                                 sys.stderr.buffer, encoding="utf-8", errors="replace"
                             )
-                        self.log("设置 Windows 控制台为 UTF-8 编码")
+                        self.log("Set Windows console to UTF-8 encoding")
                     except (UnicodeEncodeError, OSError):
-                        # UTF-8 不可用，使用系统默认编码（通常是 GBK）
-                        self.log("UTF-8 不可用，使用系统默认编码")
-                        # 不修改 stdout，保持系统默认
+                        # UTF-8 unavailable, use system default encoding (usually GBK)
+                        self.log("UTF-8 unavailable, using system default encoding")
+                        # Don't modify stdout, keep system default
             except Exception as e:
-                self.log(f"编码设置失败，使用系统默认: {e}")
-                # 失败时不做任何事，使用系统默认
+                self.log(f"Encoding setup failed, using system default: {e}")
+                # On failure, do nothing and use system default
 
-        # Unix 系统通常默认就是 UTF-8，无需特殊处理
+        # Unix systems usually default to UTF-8, no special handling needed
 
 
-# 全局引导器实例
+# Global bootstrap instance
 _bootstrap_instance: Optional[SkillBootstrap] = None
 
 
 def get_bootstrap() -> SkillBootstrap:
-    """获取引导器实例（单例模式）"""
+    """Get bootstrap instance (singleton pattern)"""
     global _bootstrap_instance
     if _bootstrap_instance is None:
         _bootstrap_instance = SkillBootstrap()
@@ -483,14 +484,14 @@ def setup_skill_environment(
     require_modules: bool = True, fix_encoding: bool = True
 ) -> Tuple[bool, Optional[SkillBootstrap]]:
     """
-    设置技能运行环境
+    Setup skill runtime environment
 
     Args:
-        require_modules: 如果为 True，模块导入失败时显示诊断并退出
-        fix_encoding: 如果为 True，自动修复标准输出编码
+        require_modules: If True, display diagnostics and exit when module import fails
+        fix_encoding: If True, automatically fix stdout encoding
 
     Returns:
-        (成功标志, 引导器实例)
+        (Success flag, bootstrap instance)
 
     Example:
         >>> success, bootstrap = setup_skill_environment()
@@ -499,11 +500,11 @@ def setup_skill_environment(
     """
     bootstrap = get_bootstrap()
 
-    # 修复编码
+    # Fix encoding
     if fix_encoding:
         bootstrap.setup_stdout_encoding()
 
-    # 设置导入路径
+    # Setup import path
     success = bootstrap.setup_import_path()
 
     if require_modules and not success:
@@ -515,10 +516,10 @@ def setup_skill_environment(
 
 def import_diskcleaner_modules():
     """
-    导入 diskcleaner 模块的便捷函数
+    Convenience function to import diskcleaner modules
 
     Returns:
-        (成功标志, 模块字典)
+        (Success flag, modules dictionary)
 
     Example:
         >>> success, modules = import_diskcleaner_modules()
@@ -540,6 +541,7 @@ def import_diskcleaner_modules():
         from diskcleaner.core.progress import ProgressBar
         from diskcleaner.core.safety import SafetyChecker
         from diskcleaner.core.scanner import DirectoryScanner
+        from diskcleaner.core.duplicate_finder import DuplicateFinder
 
         modules.update(
             {
@@ -549,25 +551,26 @@ def import_diskcleaner_modules():
                 "CacheManager": CacheManager,
                 "FileClassifier": FileClassifier,
                 "SafetyChecker": SafetyChecker,
+                "DuplicateFinder": DuplicateFinder,
             }
         )
 
         return True, modules
     except ImportError as e:
-        bootstrap.log(f"模块导入失败: {e}")
+        bootstrap.log(f"Module import failed: {e}")
         return False, modules
 
 
-# 当作为脚本直接运行时，显示诊断信息
+# When running as script directly, display diagnostic information
 if __name__ == "__main__":
-    # 在 Windows 上初始化控制台编码
+    # Initialize console encoding on Windows
     init_windows_console()
 
     import argparse
 
-    parser = argparse.ArgumentParser(description="Disk Cleaner 技能包诊断工具")
-    parser.add_argument("--debug", action="store_true", help="显示调试信息")
-    parser.add_argument("--test-import", action="store_true", help="测试模块导入")
+    parser = argparse.ArgumentParser(description="Disk Cleaner skill package diagnostic tool")
+    parser.add_argument("--debug", action="store_true", help="Show debug information")
+    parser.add_argument("--test-import", action="store_true", help="Test module import")
 
     args = parser.parse_args()
 
@@ -577,14 +580,14 @@ if __name__ == "__main__":
     bootstrap = get_bootstrap()
 
     if args.test_import:
-        safe_print("测试模块导入...")
+        safe_print("Testing module import...")
         success, modules = import_diskcleaner_modules()
         if success:
-            safe_print("✅ 模块导入成功!")
+            safe_print("[OK] Module import successful!")
             for name in modules.keys():
                 safe_print(f"  - {name}")
         else:
-            safe_print("❌ 模块导入失败!")
+            safe_print("[X] Module import failed!")
             safe_print(bootstrap.diagnose_import_failure())
             sys.exit(1)
     else:

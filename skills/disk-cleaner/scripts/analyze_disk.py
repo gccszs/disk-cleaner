@@ -14,39 +14,41 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# 使用智能引导模块导入 diskcleaner
+# Use smart bootstrap module to import diskcleaner
 try:
-    # 添加当前脚本的父目录到路径，以便导入 skill_bootstrap
+    # Add parent directory of current script to path for importing skill_bootstrap
     script_dir = Path(__file__).parent.resolve()
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
 
     from skill_bootstrap import import_diskcleaner_modules, setup_skill_environment
 
-    # 设置技能环境并导入模块
+    # Setup skill environment and import modules
     IMPORT_SUCCESS, MODULES = import_diskcleaner_modules()
     PROGRESS_AVAILABLE = IMPORT_SUCCESS
 
     if IMPORT_SUCCESS:
         ProgressBar = MODULES["ProgressBar"]
         DirectoryScanner = MODULES["DirectoryScanner"]
+        DuplicateFinder = MODULES["DuplicateFinder"]
     else:
         ProgressBar = None
         DirectoryScanner = None
+        DuplicateFinder = None
 
 except Exception as e:
-    # 如果引导模块也失败，尝试直接导入（可能已安装）
+    # If bootstrap module also fails, try direct import (may be installed)
     try:
         from diskcleaner.core.progress import ProgressBar
         from diskcleaner.core.scanner import DirectoryScanner
 
         PROGRESS_AVAILABLE = True
-        print(f"[Warning] 技能包引导失败，使用已安装版本: {e}", file=sys.stderr)
+        print(f"[Warning] Skill bootstrap failed, using installed version: {e}", file=sys.stderr)
     except ImportError:
         PROGRESS_AVAILABLE = False
         ProgressBar = None
         DirectoryScanner = None
-        print(f"[Warning] 无法导入 diskcleaner 模块，部分功能将不可用: {e}", file=sys.stderr)
+        print(f"[Warning] Cannot import diskcleaner module, some features unavailable: {e}", file=sys.stderr)
 
 
 class DiskAnalyzer:
@@ -57,15 +59,17 @@ class DiskAnalyzer:
         show_progress: bool = True,
         max_files: int = None,
         max_seconds: int = None,
+        include_windows: bool = False,
     ):
         self.path = path or self._get_default_path()
         self.top_n = top_n
         self.platform = platform.system()
         self.system = platform.system().lower()
         self.show_progress = show_progress and PROGRESS_AVAILABLE and sys.stdout.isatty()
-        # 更合理的默认值，适合大磁盘
-        self.max_files = max_files if max_files is not None else 50000
-        self.max_seconds = max_seconds if max_seconds is not None else 30
+        # More reasonable defaults for large disks
+        self.max_files = max_files if max_files is not None else 500000
+        self.max_seconds = max_seconds if max_seconds is not None else 120
+        self.include_windows = include_windows
 
     def _get_default_path(self) -> str:
         """Get default path based on platform"""
@@ -79,17 +83,17 @@ class DiskAnalyzer:
 
     def quick_sample(self, sample_time: float = 1.0) -> Dict:
         """
-        快速采样分析 - 在1秒内估算目录特征
+        Quick sampling analysis - estimate directory characteristics within 1 second
 
         Args:
-            sample_time: 采样时间（秒）
+            sample_time: Sampling time (seconds)
 
         Returns:
-            包含估算信息的字典
+            Dictionary containing estimation information
         """
         import time
 
-        print(f"\n[*] 快速采样分析中... ({sample_time}秒)")
+        print(f"\n[*] Quick sampling analysis... ({sample_time}s)")
 
         file_count = 0
         total_size = 0
@@ -99,7 +103,7 @@ class DiskAnalyzer:
         scan_path = Path(self.path)
 
         try:
-            # 使用 os.scandir 进行快速采样
+            # Use os.scandir for quick sampling
             for root, dirs, files in os.walk(str(scan_path)):
                 if time.time() - start > sample_time:
                     break
@@ -107,7 +111,7 @@ class DiskAnalyzer:
                 sample_dirs += len(dirs)
                 file_count += len(files)
 
-                # 采样文件大小（最多100个）
+                # Sample file sizes (max 100)
                 for i, f in enumerate(files[:100]):
                     try:
                         file_path = Path(root) / f
@@ -117,17 +121,17 @@ class DiskAnalyzer:
                         pass
 
         except Exception as e:
-            print(f"采样出错: {e}")
+            print(f"Sampling error: {e}")
 
         elapsed = time.time() - start
 
-        # 计算估算值
+        # Calculate estimates
         if elapsed > 0:
             files_per_second = file_count / elapsed
         else:
             files_per_second = 0
 
-        # 估算总时间（2倍安全边际）
+        # Estimate total time (2x safety margin)
         if files_per_second > 0:
             estimated_seconds = (file_count / files_per_second) * 2
         else:
@@ -141,23 +145,23 @@ class DiskAnalyzer:
             "estimated_time_seconds": round(estimated_seconds, 1),
         }
 
-        # 显示采样结果
-        print("\n[i] 采样结果:")
-        print(f"   发现文件: {file_count:,} 个")
-        print(f"   目录数: {sample_dirs:,} 个")
-        print(f"   扫描速度: {result['files_per_second']:,} 文件/秒")
+        # Display sampling results
+        print("\n[i] Sampling results:")
+        print(f"   Files found: {file_count:,}")
+        print(f"   Directories: {sample_dirs:,}")
+        print(f"   Scan speed: {result['files_per_second']:,} files/sec")
 
         if estimated_seconds > 0:
             if estimated_seconds < 60:
-                print(f"   预计完整扫描: {estimated_seconds:.0f} 秒")
+                print(f"   Estimated full scan: {estimated_seconds:.0f} seconds")
             else:
-                print(f"   预计完整扫描: {estimated_seconds/60:.1f} 分钟")
+                print(f"   Estimated full scan: {estimated_seconds/60:.1f} minutes")
 
-            if estimated_seconds > 120:  # 超过2分钟
-                print("\n[i] 建议:")
-                print("   使用 --file-limit 限制文件数")
-                print("   使用 --time-limit 限制时间")
-                print("   或者使用 --sample 仅查看采样结果")
+            if estimated_seconds > 120:  # Over 2 minutes
+                print("\n[i] Recommendations:")
+                print("   Use --file-limit to limit file count")
+                print("   Use --time-limit to limit time")
+                print("   Or use --sample to view sampling results only")
 
         return result
 
@@ -216,6 +220,7 @@ class DiskAnalyzer:
                         max_files=max_files,
                         max_seconds=max_seconds,
                         cache_enabled=False,  # Disable cache for one-time scan
+                        include_windows=getattr(self, 'include_windows', False),
                     )
 
                     print(f"\n[*] Scanning {scan_path}...")
@@ -446,7 +451,90 @@ class DiskAnalyzer:
 
         return {"temp_directories": results}
 
-    def generate_report(self) -> Dict:
+    def find_duplicate_files(self, strategy: str = "adaptive") -> Dict:
+        """
+        Find duplicate files in the scanned directory.
+
+        Args:
+            strategy: Detection strategy ('adaptive', 'fast', 'accurate')
+
+        Returns:
+            Dictionary with duplicate file statistics and details
+        """
+        if not PROGRESS_AVAILABLE or not DuplicateFinder:
+            return {
+                "error": "Duplicate finding not available - required modules not loaded",
+                "duplicates_found": 0,
+            }
+
+        scan_path = Path(self.path)
+
+        if not scan_path.exists() or not scan_path.is_dir():
+            return {
+                "error": f"Invalid path for duplicate finding: {self.path}",
+                "duplicates_found": 0,
+            }
+
+        print(f"\n[*] Finding duplicate files in {scan_path}...")
+
+        try:
+            # Collect all files using DirectoryScanner
+            scanner = DirectoryScanner(
+                str(scan_path),
+                max_files=self.max_files,
+                max_seconds=self.max_seconds,
+                cache_enabled=False,
+            )
+
+            all_files = []
+            for file_info in scanner.scan_generator():
+                if not file_info.is_dir:
+                    all_files.append(file_info)
+
+            if not all_files:
+                return {
+                    "duplicates_found": 0,
+                    "message": "No files found in directory",
+                }
+
+            print(f"[*] Analyzing {len(all_files)} files for duplicates...")
+
+            # Find duplicates
+            finder = DuplicateFinder(strategy=strategy)
+            duplicates = finder.find_duplicates(all_files)
+            stats = finder.get_duplicate_stats(duplicates)
+
+            # Format results
+            duplicate_details = []
+            for group in duplicates[:20]:  # Limit to top 20 groups
+                group_info = {
+                    "count": group.count,
+                    "size_bytes": group.size,
+                    "size_mb": round(group.size / (1024**2), 2),
+                    "reclaimable_bytes": group.reclaimable_space,
+                    "reclaimable_mb": round(group.reclaimable_space / (1024**2), 2),
+                    "files": [f.path for f in group.files],
+                }
+                duplicate_details.append(group_info)
+
+            return {
+                "duplicates_found": stats["group_count"],
+                "total_duplicate_files": stats["file_count"],
+                "total_size_bytes": stats["total_size"],
+                "total_size_mb": round(stats["total_size"] / (1024**2), 2),
+                "reclaimable_bytes": stats["reclaimable"],
+                "reclaimable_mb": round(stats["reclaimable"] / (1024**2), 2),
+                "duplicate_groups": duplicate_details,
+                "strategy_used": strategy,
+            }
+
+        except Exception as e:
+            return {
+                "error": f"Error finding duplicates: {str(e)}",
+                "duplicates_found": 0,
+            }
+
+    def generate_report(self, find_duplicates: bool = False, duplicate_strategy: str = "adaptive") -> Dict:
         """Generate comprehensive analysis report"""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -457,6 +545,10 @@ class DiskAnalyzer:
 
         if os.path.isdir(self.path):
             report["scan_results"] = self.scan_directory()
+
+        # Add duplicate file analysis if requested
+        if find_duplicates:
+            report["duplicate_analysis"] = self.find_duplicate_files(strategy=duplicate_strategy)
 
         return report
 
@@ -498,6 +590,33 @@ def print_report(report: Dict):
             size_str = f"{f['size_gb']} GB" if f["size_gb"] > 0 else f"{f['size_mb']} MB"
             print(f"  {i}. {f['name']}: {size_str}")
 
+    # Duplicate files analysis
+    if "duplicate_analysis" in report:
+        dup_analysis = report["duplicate_analysis"]
+        if "error" in dup_analysis:
+            print(f"\n[!] Duplicate analysis error: {dup_analysis['error']}")
+        elif dup_analysis.get("duplicates_found", 0) > 0:
+            print(f"\n[DUPE] Duplicate Files Found:")
+            print(f"  Groups: {dup_analysis['duplicates_found']}")
+            print(f"  Total files: {dup_analysis['total_duplicate_files']}")
+            print(f"  Total size: {dup_analysis['total_size_mb']:.2f} MB")
+            print(f"  Reclaimable: {dup_analysis['reclaimable_mb']:.2f} MB")
+            print(f"  Strategy: {dup_analysis.get('strategy_used', 'adaptive')}")
+
+            # Show top 5 duplicate groups
+            if "duplicate_groups" in dup_analysis:
+                print(f"\n  Top {min(5, len(dup_analysis['duplicate_groups']))} duplicate groups:")
+                for i, group in enumerate(dup_analysis["duplicate_groups"][:5], 1):
+                    print(f"    {i}. {group['count']} files x {group['size_mb']:.2f} MB")
+                    print(f"       Reclaimable: {group['reclaimable_mb']:.2f} MB")
+                    # Show first 2 file paths
+                    for j, path in enumerate(group['files'][:2], 1):
+                        print(f"       {j}. {path}")
+                    if len(group['files']) > 2:
+                        print(f"       ... and {len(group['files']) - 2} more")
+        else:
+            print(f"\n[OK] No duplicate files found")
+
     print("\n" + "=" * 60)
 
 
@@ -531,13 +650,13 @@ Examples:
         "--file-limit",
         type=int,
         default=None,
-        help="Maximum number of files to scan (default: 50000 for large disks)",
+        help="Maximum number of files to scan (default: 500000 for large disks)",
     )
     parser.add_argument(
         "--time-limit",
         type=int,
         default=None,
-        help="Maximum scan time in seconds (default: 30 for large disks)",
+        help="Maximum scan time in seconds (default: 120 for large disks)",
     )
     parser.add_argument(
         "--sample",
@@ -552,44 +671,78 @@ Examples:
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--output", "-o", help="Save report to file")
     parser.add_argument(
+        "--deep-scan",
+        action="store_true",
+        help="Deep scan mode: removes all file and time limits for complete disk analysis",
+    )
+    parser.add_argument(
+        "--include-windows",
+        action="store_true",
+        help="Include Windows system directories (C:\\Windows, Program Files, etc.) in scan",
+    )
+    parser.add_argument(
         "--no-progress", action="store_true", help="Disable progress bars (useful for scripting)"
+    )
+    parser.add_argument(
+        "--find-duplicates",
+        action="store_true",
+        help="Find duplicate files during analysis",
+    )
+    parser.add_argument(
+        "--duplicate-strategy",
+        choices=["adaptive", "fast", "accurate"],
+        default="adaptive",
+        help="Duplicate detection strategy (default: adaptive)",
     )
 
     args = parser.parse_args()
+
+    # Handle deep scan parameters
+    if args.deep_scan:
+        file_limit = None  # No limit
+        time_limit = None  # No limit
+        print("[i] Deep scan mode: All limits removed")
+    else:
+        file_limit = args.file_limit
+        time_limit = args.time_limit
 
     show_progress = not args.no_progress and not args.json
     analyzer = DiskAnalyzer(
         path=args.path,
         top_n=args.top,
         show_progress=show_progress,
-        max_files=args.file_limit,
-        max_seconds=args.time_limit,
+        max_files=file_limit,
+        max_seconds=time_limit,
+        include_windows=args.include_windows,
     )
 
-    # 快速采样模式
+    # Quick sample mode
     if args.sample:
         sample_result = analyzer.quick_sample(sample_time=1.0)
         if args.json:
             print(json.dumps(sample_result, indent=2))
         sys.exit(0)
 
-    # 对于可能的大磁盘，先进行采样并询问
+    # For potentially large disks, sample first and ask
     if not args.json and not args.sample and not args.progressive:
-        # 自动进行1秒采样
+        # Automatically perform 1-second sampling
         sample_result = analyzer.quick_sample(sample_time=1.0)
         estimated_time = sample_result.get("estimated_time_seconds", 0)
 
-        # 如果预计超过2分钟，建议使用限制
+        # If estimated over 2 minutes, recommend using limits
         if estimated_time > 120:
-            print(f"\n[!] 预计完整扫描需要 {estimated_time/60:.1f} 分钟")
-            print("\n[i] 建议使用以下选项之一:")
-            print("   --sample         快速采样模式（1秒）")
-            print("   --file-limit 10000  限制文件数")
-            print("   --time-limit 30   限制时间（秒）")
-            print("   --progressive    渐进式扫描")
-            print("\n如需继续完整扫描，请按 Ctrl+C 并重新运行时添加相应参数")
+            print(f"\n[!] Estimated full scan time: {estimated_time/60:.1f} minutes")
+            print("\n[i] Recommended options:")
+            print("   --sample         Quick sample mode (1 second)")
+            print("   --file-limit 10000  Limit file count")
+            print("   --time-limit 30   Limit time (seconds)")
+            print("   --progressive    Progressive scanning")
+            print("\nTo continue full scan, press Ctrl+C and re-run with appropriate parameters")
 
-    report = analyzer.generate_report()
+    report = analyzer.generate_report(
+        find_duplicates=args.find_duplicates,
+        duplicate_strategy=args.duplicate_strategy,
+    )
 
     if args.json:
         print(json.dumps(report, indent=2))

@@ -15,16 +15,16 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Set
 
-# 使用智能引导模块导入 diskcleaner
+# Use smart bootstrap module to import diskcleaner
 try:
-    # 添加当前脚本的父目录到路径，以便导入 skill_bootstrap
+    # Add parent directory of current script to path for importing skill_bootstrap
     script_dir = Path(__file__).parent.resolve()
     if str(script_dir) not in sys.path:
         sys.path.insert(0, str(script_dir))
 
     from skill_bootstrap import import_diskcleaner_modules, setup_skill_environment
 
-    # 设置技能环境并导入模块
+    # Setup skill environment and import modules
     IMPORT_SUCCESS, MODULES = import_diskcleaner_modules()
     PROGRESS_AVAILABLE = IMPORT_SUCCESS
 
@@ -34,16 +34,16 @@ try:
         ProgressBar = None
 
 except Exception as e:
-    # 如果引导模块也失败，尝试直接导入（可能已安装）
+    # If bootstrap module also fails, try direct import (may be installed)
     try:
         from diskcleaner.core.progress import ProgressBar
 
         PROGRESS_AVAILABLE = True
-        print(f"[Warning] 技能包引导失败，使用已安装版本: {e}", file=sys.stderr)
+        print(f"[Warning] Skill bootstrap failed, using installed version: {e}", file=sys.stderr)
     except ImportError:
         PROGRESS_AVAILABLE = False
         ProgressBar = None
-        print(f"[Warning] 无法导入 diskcleaner 模块，部分功能将不可用: {e}", file=sys.stderr)
+        print(f"[Warning] Cannot import diskcleaner module, some features unavailable: {e}", file=sys.stderr)
 
 
 class DiskCleaner:

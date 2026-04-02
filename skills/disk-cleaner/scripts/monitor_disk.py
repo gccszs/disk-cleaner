@@ -14,8 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
-# monitor_disk.py 不依赖 diskcleaner 核心模块
-# 但为了保持一致性，我们仍然包含引导模块以便未来扩展
+# monitor_disk.py does not depend on diskcleaner core modules
+# But for consistency, we still include bootstrap module for future expansion
 try:
     script_dir = Path(__file__).parent.resolve()
     if str(script_dir) not in sys.path:
@@ -23,11 +23,11 @@ try:
 
     from skill_bootstrap import setup_skill_environment
 
-    # 设置技能环境（主要是为了编码处理）
+    # Setup skill environment (mainly for encoding handling)
     _, _ = setup_skill_environment(require_modules=False)
 
 except Exception as e:
-    # 如果引导模块失败，使用基础编码处理
+    # If bootstrap module fails, use basic encoding handling
     if platform.system().lower() == "windows" and sys.stdout.isatty():
         try:
             import io
@@ -37,7 +37,7 @@ except Exception as e:
             if hasattr(sys.stderr, "buffer"):
                 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
         except Exception:
-            pass  # 使用系统默认
+            pass  # Use system default
 
 
 class DiskMonitor:
